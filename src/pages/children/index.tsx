@@ -11,6 +11,14 @@ import {format} from "date-fns"
 import {cn} from "@/lib/utils"
 import {Calendar} from "@/components/ui/calendar"
 import {Calendar as CalendarIcon} from "lucide-react"
+import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
+import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
+import {Label} from "@/components/ui/label";
+
+interface Disease {
+    name: string,
+    date: string
+}
 
 function Children() {
     const nameSchema = z.string().min(2, 'Name must be at least 2 characters.');
@@ -35,7 +43,6 @@ function Children() {
             }
         ).optional(),
     })
-
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -51,12 +58,25 @@ function Children() {
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values)
+        console.log("asfdsad")
     }
+
+    const handleAddDisease = () => {
+        const newDisease = {name: diseaseName, date: diseaseDate};
+        setDiseases([...diseases, newDisease]);
+        setShowDisease2Form(false);
+    };
 
     const methods = useForm()
     const [date, setDate] = React.useState<Date>()
     const [showDiseaseForm, setShowDiseaseForm] = useState(false);
+    const [showDisease2Form, setShowDisease2Form] = useState(false);
     const [showMedicineForm, setShowMedicineForm] = useState(false);
+
+    const [diseases, setDiseases] = useState<Disease[]>([{name: "sds", date: "asd"}]);
+    const [diseaseName, setDiseaseName] = useState("");
+    const [diseaseDate, setDiseaseDate] = useState("");
+
 
     return (<div className={"container w-4/6 "}>
             <FormProvider {...methods}>
@@ -107,11 +127,12 @@ function Children() {
                                         </PopoverTrigger>
                                         <PopoverContent className="w-auto p-0">
                                             <Calendar
-                                                mode="single"
+                                                mode={"single"}
+                                                initialFocus
                                                 selected={date}
                                                 onSelect={setDate}
-                                                initialFocus
                                                 defaultMonth={new Date(2010, 1)}
+                                                toMonth={new Date()}
                                             />
                                         </PopoverContent>
                                     </Popover>
@@ -150,13 +171,11 @@ function Children() {
                             <FormItem>
                                 <FormLabel>Diseases</FormLabel>
                                 <FormControl>
-                                    <Button onClick={() => setShowDiseaseForm(true)}>Edit</Button>
+                                    <Input onClick={() => setShowDiseaseForm(true)}/>
                                 </FormControl>
                             </FormItem>
                         )}
                     />
-
-                    {/* Medicines Form Pop-up */}
                     <FormField
                         control={form.control}
                         name="medicines.name"
@@ -164,19 +183,69 @@ function Children() {
                             <FormItem>
                                 <FormLabel>Medicines</FormLabel>
                                 <FormControl>
-                                    <Button onClick={() => setShowMedicineForm(true)}>Edit</Button>
+                                    <Input onClick={() => setShowMedicineForm(true)}/>
                                 </FormControl>
                             </FormItem>
                         )}
                     />
+
                     <Button type="submit">Submit</Button>
                 </form>
             </FormProvider>
             {showDiseaseForm && (
-                <div>
+                <div
+                    className={"fixed bg-amber-100 rounded p-4 w-1/3 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"}>
+                    <Table>
+                        <TableCaption>A list of added diseases.</TableCaption>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-1/2">Name</TableHead>
+                                <TableHead>Date</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {diseases?.map((disease) => (
+                                <TableRow key={0}>
+                                    <TableCell className="w-1/2">{disease.name}</TableCell>
+                                    <TableCell className="w-1/2">{disease.date}</TableCell>
+                                </TableRow>
+                            ))}
+
+                        </TableBody>
+                    </Table>
+                    <div className="flex justify-between">
+                        <Button variant="outline" onClick={() => setShowDiseaseForm(false)}>Cancel</Button>
+                        <Button onClick={() => setShowDisease2Form(true)}>Add</Button>
+                    </div>
                 </div>
             )}
-
+            {showDisease2Form &&
+                <Card className="w-[350px] fixed  top-1/2 z-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <CardHeader>
+                        <CardTitle>Add disease</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <form>
+                            <div className="grid w-full items-center gap-4">
+                                <div className="flex flex-col space-y-1.5">
+                                    <Label htmlFor="name">Name</Label>
+                                    <Input id="name" placeholder="Name" value={diseaseName}
+                                           onChange={(event) => setDiseaseName(event.target.value)}/>
+                                </div>
+                                <div className="flex flex-col space-y-1.5">
+                                    <Label htmlFor="date">Name</Label>
+                                    <Input id="date" placeholder="Date" value={diseaseDate}
+                                           onChange={(event) => setDiseaseDate(event.target.value)}/>
+                                </div>
+                            </div>
+                        </form>
+                    </CardContent>
+                    <CardFooter className="flex justify-between">
+                        <Button variant="outline" onClick={() => setShowDisease2Form(false)}>Cancel</Button>
+                        <Button onClick={handleAddDisease}>Add</Button>
+                    </CardFooter>
+                </Card>
+            }
             {showMedicineForm && (
                 <div>
                 </div>
