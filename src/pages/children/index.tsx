@@ -11,7 +11,7 @@ import {Popover, PopoverContent, PopoverTrigger,} from "@/components/ui/popover"
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import React, {useState} from "react";
-import {ControllerRenderProps, useForm} from "react-hook-form"
+import {ControllerRenderProps, useForm, UseFormReturn} from "react-hook-form"
 import * as z from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
 import {format} from "date-fns"
@@ -50,9 +50,15 @@ interface InputHandlerProps {
     setShowDiseaseForm: React.Dispatch<boolean>,
     diseases: Disease
     setDiseases: React.Dispatch<Disease>
+    form: UseFormReturn<{
+        familyName: string; givenName: string; birthPlace: string; address: string; diseases: {
+            name: string;
+            date?: string | undefined;
+        };
+    }, any, undefined>
 }
 
-function InputHandler({field, showDiseaseForm, setShowDiseaseForm, diseases, setDiseases}: InputHandlerProps) {
+function InputHandler({field, showDiseaseForm, setShowDiseaseForm, diseases, setDiseases, form}: InputHandlerProps) {
     const [showDisease2Form, setShowDisease2Form] = useState(false);
     const [diseaseName, setDiseaseName] = useState("");
     const [diseaseDate, setDiseaseDate] = useState("");
@@ -64,7 +70,7 @@ function InputHandler({field, showDiseaseForm, setShowDiseaseForm, diseases, set
     //TODO How to add object to the field handler
     return (
         <>
-            <Input onClick={() => setShowDiseaseForm(true)}/>)
+            <Input onClick={() => setShowDiseaseForm(true)} readOnly placeholder={diseases.name + " " + diseases.date}/>)
 
             {showDiseaseForm && (
                 <div
@@ -103,16 +109,44 @@ function InputHandler({field, showDiseaseForm, setShowDiseaseForm, diseases, set
                     <CardContent>
                         <form>
                             <div className="grid w-full items-center gap-4">
-                                <div className="flex flex-col space-y-1.5">
+                                <FormField
+                                    control={form.control}
+                                    name="diseases.name"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Name</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Name" {...field}/>
+                                                {//onChange={(event) => setDiseaseName(event.target.value)}/>
+                                                }
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="diseases.date"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Date</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Date" {...field}/>
+                                                {//onChange={(event) => setDiseaseDate(event.target.value)}/>
+                                                }
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+                                {/*<div className="flex flex-col space-y-1.5">
                                     <Label htmlFor="name">Name</Label>
-                                    <Input id="name" placeholder="Name" value={diseaseName}
+                                    <Input id="name" placeholder="Name" {...field}
                                            onChange={(event) => setDiseaseName(event.target.value)}/>
                                 </div>
                                 <div className="flex flex-col space-y-1.5">
                                     <Label htmlFor="date">Name</Label>
-                                    <Input id="date" placeholder="Date" value={diseaseDate}
+                                    <Input id="date" placeholder="Date" {...field}
                                            onChange={(event) => setDiseaseDate(event.target.value)}/>
-                                </div>
+                                </div>*/}
                             </div>
                         </form>
                     </CardContent>
@@ -145,6 +179,7 @@ function Children() {
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values)
+        console.log(diseases)
         /*client
         .query({
             query: gql`
@@ -263,11 +298,11 @@ function Children() {
                         name="diseases"
                         render={({field}) => (
                             <FormItem>
-                                <FormLabel>Diseases</FormLabel>
+                                <FormLabel>Diseases </FormLabel>
                                 <FormControl>
                                     <InputHandler field={field} diseases={diseases}
                                                   setDiseases={setDiseases} setShowDiseaseForm={setShowDiseaseForm}
-                                                  showDiseaseForm={showDiseaseForm}/>
+                                                  showDiseaseForm={showDiseaseForm} form={form}/>
                                     {///<Input onClick={() => setShowDiseaseForm(true)} />
                                     }
                                 </FormControl>
