@@ -17,34 +17,15 @@ export interface Medicines {
     takenSince: string
 }
 
-const client = new ApolloClient({
-    uri: '/graphql',
-    cache: new InMemoryCache(),
-});
+
 
 interface InputHandlerProps {
-    field: ControllerRenderProps<{
-        diseases: {
-            name: string;
-            date?: string | undefined;
-        };
-        medicines?: {
-            name: string;
-            dose: string;
-            takenSince?: string | undefined;
-        };
-        familyName: string;
-        givenName: string;
-        birthPlace: string;
-        birthDate: string;
-        address: string;
-    }, "diseases">
     showDiseaseForm: boolean,
     setShowDiseaseForm: React.Dispatch<boolean>,
     diseases: Disease
     setDiseases: React.Dispatch<Disease>
     form: UseFormReturn<{
-        familyName: string; givenName: string; birthDate: string, birthPlace: string; address: string; diseases: {
+        familyName: string; givenName: string; birthDate?: any, birthPlace: string; address: string; diseases: {
             name: string;
             date?: string | undefined;
         };
@@ -57,7 +38,6 @@ interface InputHandlerProps {
 }
 
 export function InputDiseaseHandler({
-                                        field,
                                         showDiseaseForm,
                                         setShowDiseaseForm,
                                         diseases,

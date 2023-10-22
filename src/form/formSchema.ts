@@ -18,7 +18,7 @@ export const formSchema = z.object({
     medicines: z.object({
             name: nameSchema,
             dose: doseSchema,
-            takenSince: z.any().optional(),
+            takenSince: z.string().optional(),
         }
     ).optional(),
 })

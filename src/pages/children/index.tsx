@@ -18,9 +18,6 @@ import {format} from "date-fns"
 import {cn} from "@/lib/utils"
 import {Calendar} from "@/components/ui/calendar"
 import {Calendar as CalendarIcon} from "lucide-react"
-import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
-import {Label} from "@/components/ui/label";
 import {formSchema} from "@/form/formSchema";
 import {ApolloClient, gql, InMemoryCache} from "@apollo/client";
 import {ChildData} from "@/model/child-data";
@@ -38,19 +35,23 @@ function Children() {
             birthDate: "",
             birthPlace: "",
             address: "",
-            /*diseases: {name: "", date: ""},
-            medicines: {name: "", dose: "", takenSince: ""}*/
+            diseases: {name: undefined, date: undefined},
+            medicines: {name: undefined, dose: undefined, takenSince: undefined}
         },
     })
 
     const [children, setChildren] = useState<ChildData[]>()
+    const client = new ApolloClient({
+        uri: '/graphql',
+        cache: new InMemoryCache(),
+    });
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values)
         /*client
         .query({
             query: gql`
-                query GetLocations {
+                query GetChild {
                     children {
                         givenName
                     }
@@ -59,7 +60,58 @@ function Children() {
         })
         .then((result) => console.log(result.data.children));
     */
+        client
+            .mutate({
+                mutation: gql(`
+                mutation AddChild($child: ChildInput!) {
+                    addChild(child: $child) {
+                        id
+                        familyName
+                        givenName
+                        birthDate
+                        birthPlace
+                        address
+                        diseases {
+                            name
+                            date
+                        }
+                        medicines {
+                            name
+                            dose
+                            takenSince
+                        }
+                        createdDate
+                        modifiedDate
+                    }
+                }
+            `),
+                variables: {
+                    child: {
+                        familyName: values.familyName,
+                        givenName: values.givenName,
+                        birthDate: values.birthDate,
+                        birthPlace: values.birthPlace,
+                        address: values.address,
+                        diseases:
+                            {
+                                name: values.diseases.name,
+                                date: values.diseases.date
+                            },
+                        medicines:
+                            {
+                                name: values.medicines?.name,
+                                dose: values.medicines?.dose,
+                                takenSince: values.medicines?.takenSince,
+                            },
+                    },
+                },
+            })
+            .then((result) => {
+                const addedChild = result.data.addChild;
+                console.log(addedChild);
+            });
     }
+
 
     const [date, setDate] = useState<Date>()
     const [showDiseaseForm, setShowDiseaseForm] = useState(false);
@@ -168,7 +220,7 @@ function Children() {
                             <FormItem>
                                 <FormLabel>Diseases </FormLabel>
                                 <FormControl>
-                                    <InputDiseaseHandler field={field} diseases={diseases}
+                                    <InputDiseaseHandler diseases={diseases}
                                                          setDiseases={setDiseases}
                                                          setShowDiseaseForm={setShowDiseaseForm}
                                                          showDiseaseForm={showDiseaseForm} form={form}/>
@@ -183,8 +235,9 @@ function Children() {
                             <FormItem>
                                 <FormLabel>Medicines </FormLabel>
                                 <FormControl>
-                                    <InputMedicinesHandler field={field} medicines={medicines}
-                                                           setMedicines={setMedicines} setShowMedicinesForm={setShowMedicineForm}
+                                    <InputMedicinesHandler medicines={medicines}
+                                                           setMedicines={setMedicines}
+                                                           setShowMedicinesForm={setShowMedicineForm}
                                                            showMedicinesForm={showMedicineForm} form={form}/>
                                 </FormControl>
                             </FormItem>

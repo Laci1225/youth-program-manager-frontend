@@ -1,4 +1,3 @@
-import {ApolloClient, InMemoryCache} from "@apollo/client";
 import {ControllerRenderProps, UseFormReturn} from "react-hook-form";
 import React, {useState} from "react";
 import {Input} from "@/components/ui/input";
@@ -9,28 +8,12 @@ import {FormControl, FormField, FormItem, FormLabel} from "@/components/ui/form"
 import {Medicines} from "@/form/InputDiseaseHandler";
 
 interface InputHandlerProps {
-    field: ControllerRenderProps<{
-        diseases: {
-            name: string;
-            date?: string | undefined;
-        };
-        medicines?: {
-            name: string;
-            dose: string;
-            takenSince?: string | undefined;
-        };
-        familyName: string;
-        givenName: string;
-        birthPlace: string;
-        birthDate: string;
-        address: string;
-    }, "medicines">
     showMedicinesForm: boolean,
     setShowMedicinesForm: React.Dispatch<boolean>,
     medicines: Medicines
     setMedicines: React.Dispatch<Medicines>
     form: UseFormReturn<{
-        familyName: string; givenName: string; birthDate: string, birthPlace: string; address: string;
+        familyName: string; givenName: string; birthDate?: any, birthPlace: string; address: string;
         diseases: {
             name: string;
             date?: string | undefined;
@@ -44,7 +27,6 @@ interface InputHandlerProps {
 }
 
 export function InputMedicinesHandler({
-                                        field,
                                         showMedicinesForm,
                                         setShowMedicinesForm,
                                         medicines,
@@ -103,7 +85,7 @@ export function InputMedicinesHandler({
                             <div className="grid w-full items-center gap-4">
                                 <FormField
                                     control={form.control}
-                                    name="diseases.name"
+                                    name="medicines.name"
                                     render={({field}) => (
                                         <FormItem>
                                             <FormLabel>Name</FormLabel>
@@ -117,12 +99,12 @@ export function InputMedicinesHandler({
                                 />
                                 <FormField
                                     control={form.control}
-                                    name="diseases.date"
+                                    name="medicines.dose"
                                     render={({field}) => (
                                         <FormItem>
-                                            <FormLabel>Date</FormLabel>
+                                            <FormLabel>Dose</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Date" {...field}/>
+                                                <Input placeholder="Dose" {...field}/>
                                                 {//onChange={(event) => setDiseaseDate(event.target.value)}/>
                                                 }
                                             </FormControl>
