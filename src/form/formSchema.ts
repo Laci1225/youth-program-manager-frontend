@@ -10,15 +10,20 @@ export const formSchema = z.object({
     birthPlace: z.string().min(2, 'Birth Place must be at least 2 characters.'),
     address: z.string().min(2, 'Address must be at least 2 characters.'),
     diseases:
-        z.object({
-                name: nameSchema,
-                date: nameSchema.optional(),
-            }
+        z.array(
+            z.object({
+                    name: nameSchema,
+                    date: nameSchema.optional(),
+                }
+            ),
         ),
-    medicines: z.object({
-            name: nameSchema,
-            dose: doseSchema,
-            takenSince: z.string().optional(),
-        }
-    ).optional(),
+    medicines:
+        z.array(
+            z.object({
+                    name: nameSchema,
+                    dose: doseSchema,
+                    takenSince: z.string().optional(),
+                }
+            )
+        ).optional()
 })

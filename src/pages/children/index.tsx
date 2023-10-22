@@ -11,7 +11,7 @@ import {Popover, PopoverContent, PopoverTrigger,} from "@/components/ui/popover"
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import React, {useState} from "react";
-import {ControllerRenderProps, useForm, UseFormReturn} from "react-hook-form"
+import {useForm} from "react-hook-form"
 import * as z from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
 import {format} from "date-fns"
@@ -21,7 +21,7 @@ import {Calendar as CalendarIcon} from "lucide-react"
 import {formSchema} from "@/form/formSchema";
 import {ApolloClient, gql, InMemoryCache} from "@apollo/client";
 import {ChildData} from "@/model/child-data";
-import {Disease, InputDiseaseHandler, Medicines} from "@/form/InputDiseaseHandler";
+import {Disease, InputDiseaseHandler, Medicine} from "@/form/InputDiseaseHandler";
 import {InputMedicinesHandler} from "@/form/InputMedicinesHandler";
 
 
@@ -35,8 +35,8 @@ function Children() {
             birthDate: "",
             birthPlace: "",
             address: "",
-            diseases: {name: undefined, date: undefined},
-            medicines: {name: undefined, dose: undefined, takenSince: undefined}
+            //diseases: [{name: undefined, date: undefined}],
+            //medicines: {name: undefined, dose: undefined, takenSince: undefined}
         },
     })
 
@@ -92,17 +92,15 @@ function Children() {
                         birthDate: values.birthDate,
                         birthPlace: values.birthPlace,
                         address: values.address,
-                        diseases:
-                            {
-                                name: values.diseases.name,
-                                date: values.diseases.date
-                            },
-                        medicines:
-                            {
-                                name: values.medicines?.name,
-                                dose: values.medicines?.dose,
-                                takenSince: values.medicines?.takenSince,
-                            },
+                        diseases: values.diseases.map(disease => ({
+                            name: disease.name,
+                            date: disease.date
+                        })),
+                        medicines: values.medicines?.map(medicine=>({
+                                name: medicine.name,
+                                dose: medicine.dose,
+                                takenSince: medicine.takenSince,
+                            })),
                     },
                 },
             })
@@ -117,8 +115,8 @@ function Children() {
     const [showDiseaseForm, setShowDiseaseForm] = useState(false);
     const [showMedicineForm, setShowMedicineForm] = useState(false);
 
-    const [diseases, setDiseases] = useState<Disease>({name: "sds", date: "asd"});
-    const [medicines, setMedicines] = useState<Medicines>({name: "sds", dose: "asd", takenSince: ""});
+    const [diseases, setDiseases] = useState<Disease[]>([]);
+    const [medicines, setMedicines] = useState<Medicine[]>([]);
 
 
     return (<div className={"container w-4/6 "}>
