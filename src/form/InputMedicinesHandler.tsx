@@ -6,21 +6,7 @@ import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Table
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import {FormControl, FormField, FormItem, FormLabel} from "@/components/ui/form";
-
-export interface Disease {
-    name: string,
-    date: string
-}// TODO not in a good place
-export interface Medicines {
-    name: string,
-    dose: string
-    takenSince: string
-}
-
-const client = new ApolloClient({
-    uri: '/graphql',
-    cache: new InMemoryCache(),
-});
+import {Medicines} from "@/form/InputDiseaseHandler";
 
 interface InputHandlerProps {
     field: ControllerRenderProps<{
@@ -38,13 +24,14 @@ interface InputHandlerProps {
         birthPlace: string;
         birthDate: string;
         address: string;
-    }, "diseases">
-    showDiseaseForm: boolean,
-    setShowDiseaseForm: React.Dispatch<boolean>,
-    diseases: Disease
-    setDiseases: React.Dispatch<Disease>
+    }, "medicines">
+    showMedicinesForm: boolean,
+    setShowMedicinesForm: React.Dispatch<boolean>,
+    medicines: Medicines
+    setMedicines: React.Dispatch<Medicines>
     form: UseFormReturn<{
-        familyName: string; givenName: string; birthDate: string, birthPlace: string; address: string; diseases: {
+        familyName: string; givenName: string; birthDate: string, birthPlace: string; address: string;
+        diseases: {
             name: string;
             date?: string | undefined;
         };
@@ -56,27 +43,28 @@ interface InputHandlerProps {
     }, any, undefined>
 }
 
-export function InputDiseaseHandler({
+export function InputMedicinesHandler({
                                         field,
-                                        showDiseaseForm,
-                                        setShowDiseaseForm,
-                                        diseases,
-                                        setDiseases,
+                                        showMedicinesForm,
+                                        setShowMedicinesForm,
+                                        medicines,
+                                        setMedicines,
                                         form
                                     }: InputHandlerProps) {
-    const [showDisease2Form, setShowDisease2Form] = useState(false);
-    const [diseaseName, setDiseaseName] = useState("");
-    const [diseaseDate, setDiseaseDate] = useState("");
-    const handleAddDisease = () => {
-        const newDisease = {name: diseaseName, date: diseaseDate};
-        setDiseases(newDisease)//[...diseases, newDisease]);
-        setShowDisease2Form(false);
+    const [showMedicines2Form, setShowMedicines2Form] = useState(false);
+    const [medicinesName, setMedicinesName] = useState("");
+    const [medicinesDose, setMedicinesDose] = useState("");
+    const [medicinesTakenSince, setMedicinesTakenSince] = useState("");
+    const handleAddMedicines = () => {
+        const newMedicine = {name: medicinesName, dose: medicinesDose, takenSince: medicinesTakenSince};
+        setMedicines(newMedicine)
+        setShowMedicines2Form(false);
     };
     return (
         <>
-            <Input onClick={() => setShowDiseaseForm(true)} readOnly placeholder={diseases.name + " " + diseases.date}/>
+            <Input onClick={() => setShowMedicinesForm(true)} readOnly placeholder={medicines.name + " " + medicines.dose}/>
 
-            {showDiseaseForm && (
+            {showMedicinesForm && (
                 <div
                     className={"fixed bg-amber-100 rounded p-4 w-1/3 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"}>
                     <Table>
@@ -90,8 +78,8 @@ export function InputDiseaseHandler({
                         <TableBody>
                             {//diseases?.map((disease) => (
                                 <TableRow key={0}>
-                                    <TableCell className="w-1/2">{diseases.name}</TableCell>
-                                    <TableCell className="w-1/2">{diseases.date}</TableCell>
+                                    <TableCell className="w-1/2">{medicines.name}</TableCell>
+                                    <TableCell className="w-1/2">{medicines.dose }</TableCell>
                                 </TableRow>
                                 //))
                             }
@@ -99,13 +87,13 @@ export function InputDiseaseHandler({
                         </TableBody>
                     </Table>
                     <div className="flex justify-between">
-                        <Button variant="outline" onClick={() => setShowDiseaseForm(false)}>Cancel</Button>
-                        <Button onClick={() => setShowDisease2Form(true)} type={"button"}>Add</Button>
+                        <Button variant="outline" onClick={() => setShowMedicinesForm(false)}>Cancel</Button>
+                        <Button onClick={() => setShowMedicines2Form(true)} type={"button"}>Add</Button>
                     </div>
                 </div>
             )}
 
-            {showDisease2Form &&
+            {showMedicines2Form &&
                 <Card className="w-[350px] fixed  top-1/2 z-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                     <CardHeader>
                         <CardTitle>Add disease</CardTitle>
@@ -141,22 +129,12 @@ export function InputDiseaseHandler({
                                         </FormItem>
                                     )}
                                 />
-                                {/*<div className="flex flex-col space-y-1.5">
-                                    <Label htmlFor="name">Name</Label>
-                                    <Input id="name" placeholder="Name" {...field}
-                                           onChange={(event) => setDiseaseName(event.target.value)}/>
-                                </div>
-                                <div className="flex flex-col space-y-1.5">
-                                    <Label htmlFor="date">Name</Label>
-                                    <Input id="date" placeholder="Date" {...field}
-                                           onChange={(event) => setDiseaseDate(event.target.value)}/>
-                                </div>*/}
                             </div>
                         </form>
                     </CardContent>
                     <CardFooter className="flex justify-between">
-                        <Button variant="outline" onClick={() => setShowDisease2Form(false)}>Cancel</Button>
-                        <Button onClick={handleAddDisease}>Add</Button>
+                        <Button variant="outline" onClick={() => setShowMedicines2Form(false)}>Cancel</Button>
+                        <Button onClick={handleAddMedicines}>Add</Button>
                     </CardFooter>
                 </Card>
             }

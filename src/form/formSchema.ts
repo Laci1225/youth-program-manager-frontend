@@ -6,7 +6,7 @@ const doseSchema = z.string().min(2, 'Dose must be at least 2 characters.');
 export const formSchema = z.object({
     familyName: nameSchema,
     givenName: nameSchema,
-    //birthDate: nameSchema,
+    birthDate: z.any(),
     birthPlace: z.string().min(2, 'Birth Place must be at least 2 characters.'),
     address: z.string().min(2, 'Address must be at least 2 characters.'),
     diseases:
@@ -15,10 +15,10 @@ export const formSchema = z.object({
                 date: nameSchema.optional(),
             }
         ),
-    /*medicines: z.object({
+    medicines: z.object({
             name: nameSchema,
             dose: doseSchema,
-            takenSince: dateSchema.optional(),
+            takenSince: z.any().optional(),
         }
-    ).optional(),*/
+    ).optional(),
 })

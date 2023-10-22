@@ -24,140 +24,8 @@ import {Label} from "@/components/ui/label";
 import {formSchema} from "@/form/formSchema";
 import {ApolloClient, gql, InMemoryCache} from "@apollo/client";
 import {ChildData} from "@/model/child-data";
-
-interface Disease {
-    name: string,
-    date: string
-}
-
-const client = new ApolloClient({
-    uri: '/graphql',
-    cache: new InMemoryCache(),
-});
-
-interface InputHandlerProps {
-    field: ControllerRenderProps<{
-        diseases: {
-            name: string;
-            date?: string | undefined;
-        };
-        familyName: string;
-        givenName: string;
-        birthPlace: string;
-        address: string;
-    }, "diseases">
-    showDiseaseForm: boolean,
-    setShowDiseaseForm: React.Dispatch<boolean>,
-    diseases: Disease
-    setDiseases: React.Dispatch<Disease>
-    form: UseFormReturn<{
-        familyName: string; givenName: string; birthPlace: string; address: string; diseases: {
-            name: string;
-            date?: string | undefined;
-        };
-    }, any, undefined>
-}
-
-function InputHandler({field, showDiseaseForm, setShowDiseaseForm, diseases, setDiseases, form}: InputHandlerProps) {
-    const [showDisease2Form, setShowDisease2Form] = useState(false);
-    const [diseaseName, setDiseaseName] = useState("");
-    const [diseaseDate, setDiseaseDate] = useState("");
-    const handleAddDisease = () => {
-        const newDisease = {name: diseaseName, date: diseaseDate};
-        setDiseases(newDisease)//[...diseases, newDisease]);
-        setShowDisease2Form(false);
-    };
-    //TODO How to add object to the field handler
-    return (
-        <>
-            <Input onClick={() => setShowDiseaseForm(true)} readOnly placeholder={diseases.name + " " + diseases.date}/>)
-
-            {showDiseaseForm && (
-                <div
-                    className={"fixed bg-amber-100 rounded p-4 w-1/3 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"}>
-                    <Table>
-                        <TableCaption>A list of added diseases.</TableCaption>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-1/2">Name</TableHead>
-                                <TableHead>Date</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {//diseases?.map((disease) => (
-                                <TableRow key={0}>
-                                    <TableCell className="w-1/2">{diseases.name}</TableCell>
-                                    <TableCell className="w-1/2">{diseases.date}</TableCell>
-                                </TableRow>
-                                //))
-                            }
-
-                        </TableBody>
-                    </Table>
-                    <div className="flex justify-between">
-                        <Button variant="outline" onClick={() => setShowDiseaseForm(false)}>Cancel</Button>
-                        <Button onClick={() => setShowDisease2Form(true)}>Add</Button>
-                    </div>
-                </div>
-            )}
-
-            {showDisease2Form &&
-                <Card className="w-[350px] fixed  top-1/2 z-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                    <CardHeader>
-                        <CardTitle>Add disease</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <form>
-                            <div className="grid w-full items-center gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name="diseases.name"
-                                    render={({field}) => (
-                                        <FormItem>
-                                            <FormLabel>Name</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Name" {...field}/>
-                                                {//onChange={(event) => setDiseaseName(event.target.value)}/>
-                                                }
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="diseases.date"
-                                    render={({field}) => (
-                                        <FormItem>
-                                            <FormLabel>Date</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Date" {...field}/>
-                                                {//onChange={(event) => setDiseaseDate(event.target.value)}/>
-                                                }
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                                {/*<div className="flex flex-col space-y-1.5">
-                                    <Label htmlFor="name">Name</Label>
-                                    <Input id="name" placeholder="Name" {...field}
-                                           onChange={(event) => setDiseaseName(event.target.value)}/>
-                                </div>
-                                <div className="flex flex-col space-y-1.5">
-                                    <Label htmlFor="date">Name</Label>
-                                    <Input id="date" placeholder="Date" {...field}
-                                           onChange={(event) => setDiseaseDate(event.target.value)}/>
-                                </div>*/}
-                            </div>
-                        </form>
-                    </CardContent>
-                    <CardFooter className="flex justify-between">
-                        <Button variant="outline" onClick={() => setShowDisease2Form(false)}>Cancel</Button>
-                        <Button onClick={handleAddDisease}>Add</Button>
-                    </CardFooter>
-                </Card>
-            }
-        </>)
-}
+import {Disease, InputDiseaseHandler, Medicines} from "@/form/InputDiseaseHandler";
+import {InputMedicinesHandler} from "@/form/InputMedicinesHandler";
 
 
 function Children() {
@@ -167,7 +35,7 @@ function Children() {
         defaultValues: {
             familyName: "",
             givenName: "",
-            //  birthDate: "",
+            birthDate: "",
             birthPlace: "",
             address: "",
             /*diseases: {name: "", date: ""},
@@ -179,7 +47,6 @@ function Children() {
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values)
-        console.log(diseases)
         /*client
         .query({
             query: gql`
@@ -194,12 +61,12 @@ function Children() {
     */
     }
 
-
-    const [date, setDate] = React.useState<Date>()
+    const [date, setDate] = useState<Date>()
     const [showDiseaseForm, setShowDiseaseForm] = useState(false);
-    //const [showMedicineForm, setShowMedicineForm] = useState(false);
+    const [showMedicineForm, setShowMedicineForm] = useState(false);
 
     const [diseases, setDiseases] = useState<Disease>({name: "sds", date: "asd"});
+    const [medicines, setMedicines] = useState<Medicines>({name: "sds", dose: "asd", takenSince: ""});
 
 
     return (<div className={"container w-4/6 "}>
@@ -233,41 +100,42 @@ function Children() {
                     <FormField
                         control={form.control}
                         name="birthDate"
-                        render={({field}) => (
-                            <FormItem>
-                                <FormLabel>Birthdate</FormLabel>
-                                <FormControl>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button
-                                                variant={"outline"}
-                                                className={cn(
-                                                    "w-[280px] justify-start text-left font-normal",
-                                                    !date && "text-muted-foreground"
-                                                )}
-
-                                                value={date?.toTimeString()}
-                                            >
-                                                <CalendarIcon className="mr-2 h-4 w-4"/>
-                                                {date ? format(date, "PPP") : <span>Pick a date</span>}
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0">
-                                            <Calendar
-                                                mode={"single"}
-                                                initialFocus
-                                                selected={date}
-                                                onSelect={setDate}
-                                                defaultMonth={new Date(2010, 1)}
-                                                toMonth={new Date()}
-                                                //TODO How to add object to the field handler
-
-                                            />
-                                        </PopoverContent>
-                                    </Popover>
-                                </FormControl>
-                            </FormItem>
-                        )}
+                        render={({field}) => {
+                            return (
+                                <FormItem>
+                                    <FormLabel>Birthdate</FormLabel>
+                                    <FormControl>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant={"outline"}
+                                                    className={cn(
+                                                        "w-[280px] justify-start text-left font-normal",
+                                                        !date && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    <CalendarIcon className="mr-2 h-4 w-4"/>
+                                                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0">
+                                                <Calendar
+                                                    mode={"single"}
+                                                    initialFocus
+                                                    selected={date}
+                                                    onSelect={(newDate) => {
+                                                        form.setValue("birthDate", newDate);
+                                                        setDate(newDate);
+                                                    }}
+                                                    defaultMonth={new Date(2010, 1)}
+                                                    toMonth={new Date()}
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    </FormControl>
+                                </FormItem>
+                            )
+                        }}
                     />
                     <FormField
                         control={form.control}
@@ -300,27 +168,28 @@ function Children() {
                             <FormItem>
                                 <FormLabel>Diseases </FormLabel>
                                 <FormControl>
-                                    <InputHandler field={field} diseases={diseases}
-                                                  setDiseases={setDiseases} setShowDiseaseForm={setShowDiseaseForm}
-                                                  showDiseaseForm={showDiseaseForm} form={form}/>
-                                    {///<Input onClick={() => setShowDiseaseForm(true)} />
-                                    }
+                                    <InputDiseaseHandler field={field} diseases={diseases}
+                                                         setDiseases={setDiseases}
+                                                         setShowDiseaseForm={setShowDiseaseForm}
+                                                         showDiseaseForm={showDiseaseForm} form={form}/>
                                 </FormControl>
                             </FormItem>
                         )}
-                    />{/*
+                    />
                     <FormField
                         control={form.control}
-                        name="medicines.name"
+                        name="medicines"
                         render={({field}) => (
                             <FormItem>
-                                <FormLabel>Medicines</FormLabel>
+                                <FormLabel>Medicines </FormLabel>
                                 <FormControl>
-                                    <Input onClick={() => setShowMedicineForm(true)}/>
+                                    <InputMedicinesHandler field={field} medicines={medicines}
+                                                           setMedicines={setMedicines} setShowMedicinesForm={setShowMedicineForm}
+                                                           showMedicinesForm={showMedicineForm} form={form}/>
                                 </FormControl>
                             </FormItem>
                         )}
-                    />*/}
+                    />
                     <Button type="submit">Submit</Button>
                 </form>
             </Form>
