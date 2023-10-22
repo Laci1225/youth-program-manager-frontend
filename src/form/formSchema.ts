@@ -12,6 +12,7 @@ export const formSchema = z.object({
     diseases:
         z.array(
             z.object({
+                    id: z.number(),
                     name: nameSchema,
                     date: nameSchema.optional(),
                 }
@@ -22,7 +23,7 @@ export const formSchema = z.object({
             z.object({
                     name: nameSchema,
                     dose: doseSchema,
-                    takenSince: z.string().optional(),
+                    takenSince: z.any().optional(),
                 }
             )
         ).optional()

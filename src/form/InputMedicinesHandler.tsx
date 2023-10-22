@@ -6,13 +6,18 @@ import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import {FormControl, FormField, FormItem, FormLabel} from "@/components/ui/form";
 import {Medicine} from "@/form/InputDiseaseHandler";
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import {cn} from "@/lib/utils";
+import {Calendar as CalendarIcon} from "lucide-react";
+import {format} from "date-fns";
+import {Calendar} from "@/components/ui/calendar";
 
 interface InputHandlerProps {
     showMedicinesForm: boolean,
     setShowMedicinesForm: React.Dispatch<boolean>,
     medicines: Medicine[]
     setMedicines: React.Dispatch<Medicine[]>
-    form: UseFormReturn<{ diseases: { name: string; date?: string | undefined; }[]; address: string; familyName: string; givenName: string; birthPlace: string; birthDate?: any; medicines?: { name: string; dose: string; takenSince?: string | undefined; }[] | undefined; }, any, undefined>
+    form: UseFormReturn<{     diseases: {         name: string;         id: number;         date?: string | undefined;     }[];     address: string;     familyName: string;     givenName: string;     birthPlace: string;     birthDate?: any;     medicines?: {         name: string;         dose: string;         takenSince?: any;     }[] | undefined; }, any, undefined>
 }
 
 export function InputMedicinesHandler({
@@ -25,7 +30,7 @@ export function InputMedicinesHandler({
     const [showMedicines2Form, setShowMedicines2Form] = useState(false);
     const [medicinesName, setMedicinesName] = useState("");
     const [medicinesDose, setMedicinesDose] = useState("");
-    const [medicinesTakenSince, setMedicinesTakenSince] = useState("");
+    const [medicinesTakenSince, setMedicinesTakenSince] = useState<Date>();
     const handleAddMedicines = () => {
         const newMedicine = {name: medicinesName, dose: medicinesDose, takenSince: medicinesTakenSince};
         setMedicines([...medicines, newMedicine])
@@ -42,8 +47,9 @@ export function InputMedicinesHandler({
                         <TableCaption>A list of added diseases.</TableCaption>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-1/2">Name</TableHead>
-                                <TableHead>Date</TableHead>
+                                <TableHead className="w-1/3">Name</TableHead>
+                                <TableHead className="w-1/3">Date</TableHead>
+                                <TableHead className="w-1/3">Taken since</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -51,7 +57,7 @@ export function InputMedicinesHandler({
                                 <TableRow key={0}>
                                     <TableCell className="w-1/2">{medicine.name}</TableCell>
                                     <TableCell className="w-1/2">{medicine.dose}</TableCell>
-                                    <TableCell className="w-1/2">{medicine.takenSince}</TableCell>
+                                    <TableCell className="w-1/2">{format(medicine.takenSince, "yyyy-MM-dd")}</TableCell>
                                 </TableRow>
                             ))
                             }
@@ -71,7 +77,6 @@ export function InputMedicinesHandler({
                         <CardTitle>Add disease</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form>
                             <div className="grid w-full items-center gap-4">
                                 <FormField
                                     control={form.control}
@@ -109,21 +114,44 @@ export function InputMedicinesHandler({
                                 <FormField
                                     control={form.control}
                                     name={`medicines.${medicines.length}.takenSince`}
-                                    render={({field}) => (
-                                        <FormItem>
-                                            <FormLabel>Taken since</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Taken since" onChange={
-                                                    (event) => {
-                                                        setMedicinesTakenSince(event.target.value)
-                                                        form.setValue(`medicines.${medicines.length}.takenSince`, event.target.value)
-                                                    }}/>
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
+                                    render={({field}) => {
+                                        return (
+                                            <FormItem>
+                                                <FormLabel>Taken since</FormLabel>
+                                                <FormControl>
+                                                    <Popover>
+                                                        <PopoverTrigger asChild>
+                                                            <Button
+                                                                variant={"outline"}
+                                                                className={cn(
+                                                                    "w-[280px] justify-start text-left font-normal",
+                                                                    !medicinesTakenSince && "text-muted-foreground"
+                                                                )}
+                                                            >
+                                                                <CalendarIcon className="mr-2 h-4 w-4"/>
+                                                                {medicinesTakenSince ? format(medicinesTakenSince, "PPP") : <span>Pick a date</span>}
+                                                            </Button>
+                                                        </PopoverTrigger>
+                                                        <PopoverContent className="w-auto p-0">
+                                                            <Calendar
+                                                                mode={"single"}
+                                                                initialFocus
+                                                                selected={medicinesTakenSince}
+                                                                onSelect={(newDate) => {
+                                                                    form.setValue(`medicines.${medicines.length}.takenSince`, newDate ? format(newDate, "yyyy-MM-dd") : undefined);
+                                                                    setMedicinesTakenSince(newDate);
+                                                                }}
+                                                                defaultMonth={new Date(2018, 1)}
+                                                                toMonth={new Date()}
+                                                            />
+                                                        </PopoverContent>
+                                                    </Popover>
+                                                </FormControl>
+                                            </FormItem>
+                                        )
+                                    }}
                                 />
                             </div>
-                        </form>
                     </CardContent>
                     <CardFooter className="flex justify-between">
                         <Button variant="outline" onClick={() => setShowMedicines2Form(false)}>Cancel</Button>

@@ -35,7 +35,7 @@ function Children() {
             birthDate: "",
             birthPlace: "",
             address: "",
-            //diseases: [{name: undefined, date: undefined}],
+            //diseases: [{name: undefined, birthDate: undefined}],
             //medicines: {name: undefined, dose: undefined, takenSince: undefined}
         },
     })
@@ -96,11 +96,11 @@ function Children() {
                             name: disease.name,
                             date: disease.date
                         })),
-                        medicines: values.medicines?.map(medicine=>({
-                                name: medicine.name,
-                                dose: medicine.dose,
-                                takenSince: medicine.takenSince,
-                            })),
+                        medicines: values.medicines?.map(medicine => ({
+                            name: medicine.name,
+                            dose: medicine.dose,
+                            takenSince: medicine.takenSince,
+                        })),
                     },
                 },
             })
@@ -111,7 +111,7 @@ function Children() {
     }
 
 
-    const [date, setDate] = useState<Date>()
+    const [birthDate, setBirthDate] = useState<Date>()
     const [showDiseaseForm, setShowDiseaseForm] = useState(false);
     const [showMedicineForm, setShowMedicineForm] = useState(false);
 
@@ -161,21 +161,21 @@ function Children() {
                                                     variant={"outline"}
                                                     className={cn(
                                                         "w-[280px] justify-start text-left font-normal",
-                                                        !date && "text-muted-foreground"
+                                                        !birthDate && "text-muted-foreground"
                                                     )}
                                                 >
                                                     <CalendarIcon className="mr-2 h-4 w-4"/>
-                                                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                                                    {birthDate ? format(birthDate, "yyyy-MM-dd") : <span>Pick a date</span>}
                                                 </Button>
                                             </PopoverTrigger>
                                             <PopoverContent className="w-auto p-0">
                                                 <Calendar
                                                     mode={"single"}
                                                     initialFocus
-                                                    selected={date}
+                                                    selected={birthDate}
                                                     onSelect={(newDate) => {
-                                                        form.setValue("birthDate", newDate);
-                                                        setDate(newDate);
+                                                        form.setValue("birthDate", newDate ? format(newDate, "yyyy-MM-dd") : undefined);
+                                                        setBirthDate(newDate);
                                                     }}
                                                     defaultMonth={new Date(2010, 1)}
                                                     toMonth={new Date()}
