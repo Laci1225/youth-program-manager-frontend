@@ -1,3 +1,5 @@
+import {Disease, Medicine} from "@/form/InputDiseaseHandler";
+
 export interface ChildData{
     id: string,
     familyName: string,
@@ -7,8 +9,8 @@ export interface ChildData{
     birthDate: string,
     birthPlace: string,
     address: string,
-    diseases: string,
-    medicines: string,
+    diseases: Disease[],
+    medicines: Medicine[],
     createdDate: string,
     modifiedDate: string
 }

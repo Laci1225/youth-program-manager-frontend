@@ -1,4 +1,4 @@
-import {httpRequest} from "@/pages/api/common";
+import {httpRequest} from "@/api/common";
 import {ChildData} from "@/model/child-data";
 
 export function getChildren(){

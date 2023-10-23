@@ -17,7 +17,8 @@ interface InputHandlerProps {
     setShowMedicinesForm: React.Dispatch<boolean>,
     medicines: Medicine[]
     setMedicines: React.Dispatch<Medicine[]>
-    form: UseFormReturn<{     diseases: {         name: string;         id: number;         date?: string | undefined;     }[];     address: string;     familyName: string;     givenName: string;     birthPlace: string;     birthDate?: any;     medicines?: {         name: string;         dose: string;         takenSince?: any;     }[] | undefined; }, any, undefined>
+    form:
+        UseFormReturn<{     diseases: {         name: string;         diagnosedAt: string;     }[];     address: string;     familyName: string;     givenName: string;     birthDate: string;     birthPlace: string;     medicines?: {         name: string;         id: number;         dose: string;         takenSince?: any;     }[] | undefined; }, any, undefined>
 }
 
 export function InputMedicinesHandler({
@@ -28,12 +29,14 @@ export function InputMedicinesHandler({
                                           form
                                       }: InputHandlerProps) {
     const [showMedicines2Form, setShowMedicines2Form] = useState(false);
-    const [medicinesName, setMedicinesName] = useState("");
-    const [medicinesDose, setMedicinesDose] = useState("");
-    const [medicinesTakenSince, setMedicinesTakenSince] = useState<Date>();
+    const [medicineName, setMedicineName] = useState("");
+    const [medicineDose, setMedicineDose] = useState("");
+    const [medicineTakenSince, setMedicineTakenSince] = useState<Date>();
+    const [medicineID, setMedicineID] = useState(0);
     const handleAddMedicines = () => {
-        const newMedicine = {name: medicinesName, dose: medicinesDose, takenSince: medicinesTakenSince};
+        const newMedicine = {id: medicineID,name: medicineName, dose: medicineDose, takenSince: medicineTakenSince};
         setMedicines([...medicines, newMedicine])
+        setMedicineID(medicineID + 1)
         setShowMedicines2Form(false);
     };
     return (
@@ -47,17 +50,25 @@ export function InputMedicinesHandler({
                         <TableCaption>A list of added diseases.</TableCaption>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-1/3">Name</TableHead>
-                                <TableHead className="w-1/3">Date</TableHead>
-                                <TableHead className="w-1/3">Taken since</TableHead>
+                                <TableHead className="w-1/4">Name</TableHead>
+                                <TableHead className="w-1/4">Date</TableHead>
+                                <TableHead className="w-1/4">Taken since</TableHead>
+                                <TableHead className="w-1/4">Edit</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {medicines?.map((medicine) => (
                                 <TableRow key={0}>
-                                    <TableCell className="w-1/2">{medicine.name}</TableCell>
-                                    <TableCell className="w-1/2">{medicine.dose}</TableCell>
-                                    <TableCell className="w-1/2">{format(medicine.takenSince, "yyyy-MM-dd")}</TableCell>
+                                    <TableCell className="w-1/4">{medicine.name}</TableCell>
+                                    <TableCell className="w-1/4">{medicine.dose}</TableCell>
+                                    <TableCell className="w-1/4">{format(medicine.takenSince, "yyyy-MM-dd")}</TableCell>
+                                    <TableCell className="w-1/4">
+                                        <Button type={"button"} variant={"destructive"}
+                                                onClick={() => {
+                                                    const updatedMedicines = medicines.filter((m) => m.id !== medicine.id);
+                                                    setMedicines(updatedMedicines);
+                                                }}>Remove</Button>
+                                    </TableCell>
                                 </TableRow>
                             ))
                             }
@@ -87,7 +98,7 @@ export function InputMedicinesHandler({
                                             <FormControl>
                                                 <Input placeholder="Name" onChange={
                                                     (event) => {
-                                                        setMedicinesName(event.target.value)
+                                                        setMedicineName(event.target.value)
                                                         form.setValue(`medicines.${medicines.length}.name`, event.target.value)
                                                     }}/>
                                             </FormControl>
@@ -104,7 +115,7 @@ export function InputMedicinesHandler({
                                                 <Input placeholder="Dose"
                                                        onChange={
                                                            (event) => {
-                                                               setMedicinesDose(event.target.value)
+                                                               setMedicineDose(event.target.value)
                                                                form.setValue(`medicines.${medicines.length}.dose`, event.target.value)
                                                            }}/>
                                             </FormControl>
@@ -125,21 +136,21 @@ export function InputMedicinesHandler({
                                                                 variant={"outline"}
                                                                 className={cn(
                                                                     "w-[280px] justify-start text-left font-normal",
-                                                                    !medicinesTakenSince && "text-muted-foreground"
+                                                                    !medicineTakenSince && "text-muted-foreground"
                                                                 )}
                                                             >
                                                                 <CalendarIcon className="mr-2 h-4 w-4"/>
-                                                                {medicinesTakenSince ? format(medicinesTakenSince, "PPP") : <span>Pick a date</span>}
+                                                                {medicineTakenSince ? format(medicineTakenSince, "PPP") : <span>Pick a date</span>}
                                                             </Button>
                                                         </PopoverTrigger>
                                                         <PopoverContent className="w-auto p-0">
                                                             <Calendar
                                                                 mode={"single"}
                                                                 initialFocus
-                                                                selected={medicinesTakenSince}
+                                                                selected={medicineTakenSince}
                                                                 onSelect={(newDate) => {
                                                                     form.setValue(`medicines.${medicines.length}.takenSince`, newDate ? format(newDate, "yyyy-MM-dd") : undefined);
-                                                                    setMedicinesTakenSince(newDate);
+                                                                    setMedicineTakenSince(newDate);
                                                                 }}
                                                                 defaultMonth={new Date(2018, 1)}
                                                                 toMonth={new Date()}
@@ -159,5 +170,6 @@ export function InputMedicinesHandler({
                     </CardFooter>
                 </Card>
             }
-        </>)
+        </>
+    )
 }

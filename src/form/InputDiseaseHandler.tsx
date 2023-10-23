@@ -5,13 +5,19 @@ import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Table
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import {FormControl, FormField, FormItem, FormLabel} from "@/components/ui/form";
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import {cn} from "@/lib/utils";
+import {Calendar as CalendarIcon} from "lucide-react";
+import {format} from "date-fns";
+import {Calendar} from "@/components/ui/calendar";
 
 export interface Disease {
-    id: number;
+    //id: number;
     name: string;
-    date: string;
+    diagnosedAt: any;//TODO any
 }// TODO not in a good place
 export interface Medicine {
+    id: number;
     name: string;
     dose: string;
     takenSince: any;
@@ -23,7 +29,7 @@ interface InputHandlerProps {
     setShowDiseaseForm: React.Dispatch<boolean>,
     diseases: Disease[]
     setDiseases: React.Dispatch<Disease[]>
-    form: UseFormReturn<{ familyName: string; givenName: string; birthPlace: string; address: string; diseases: { id: number; name: string; date?: string | undefined; }[]; birthDate?: any; medicines?: { name: string; dose: string; takenSince?: any; }[] | undefined; }, any, undefined>
+    form:UseFormReturn<{     familyName: string;     givenName: string;     birthDate: string;     birthPlace: string;     address: string;     diseases: {         name: string;         diagnosedAt: string;     }[];     medicines?: {         name: string;         id: number;         dose: string;         takenSince?: any;     }[] | undefined; }, any, undefined>
 }
 
 export function InputDiseaseHandler({
@@ -36,12 +42,9 @@ export function InputDiseaseHandler({
     const [showDisease2Form, setShowDisease2Form] = useState(false);
     const [diseaseID, setDiseaseID] = useState(0);
     const [diseaseName, setDiseaseName] = useState("");
-    const [diseaseDate, setDiseaseDate] = useState("");
-    useEffect(() => {
-        diseases
-    }, [diseases]);
+    const [diseaseDiagnosedAt, setDiseaseDiagnosedAt] = useState<Date>();
     const handleAddDisease = () => {
-        const newDisease = {id: diseaseID, name: diseaseName, date: diseaseDate};
+        const newDisease = {id: diseaseID, name: diseaseName, diagnosedAt: diseaseDiagnosedAt};
         setDiseases([...diseases, newDisease])
         setDiseaseID(diseaseID + 1)
         setShowDisease2Form(false);
@@ -67,14 +70,14 @@ export function InputDiseaseHandler({
                             {
                                 diseases && diseases.length!== 0 ? (
                                     diseases.map((disease) => (
-                                        <TableRow key={disease.id}>
+                                        <TableRow key={0}>
                                             <TableCell className="w-1/3">{disease.name}</TableCell>
-                                            <TableCell className="w-1/3">{disease.date}</TableCell>
+                                            <TableCell className="w-1/3">{format(disease.diagnosedAt,"yyyy-MM-dd")}</TableCell>
                                             <TableCell className="w-1/3">
                                                 <Button type={"button"} variant={"destructive"}
                                                     onClick={() => {
-                                                        const updatedDiseases = diseases.filter((d) => d.id !== disease.id);
-                                                        setDiseases(updatedDiseases);
+                                                        //const updatedDiseases = diseases.filter((d) => d.id !== disease.id);
+                                                        //setDiseases(updatedDiseases);
                                                     }}>Remove</Button>
                                             </TableCell>
                                         </TableRow>
@@ -105,7 +108,7 @@ export function InputDiseaseHandler({
                         <div className="grid w-full items-center gap-4">
                             <FormField
                                 control={form.control}
-                                name={`diseases.${diseases.length}.name`}
+                                name={`diseases.${0}.name`}
                                 render={({field}) => (
                                     <FormItem>
                                         <FormLabel>Name</FormLabel>
@@ -114,7 +117,7 @@ export function InputDiseaseHandler({
                                                    onChange={
                                                        (event) => {
                                                            setDiseaseName(event.target.value)
-                                                           form.setValue(`diseases.${diseases.length}.name`, event.target.value)
+                                                           form.setValue(`diseases.${0}.name`, event.target.value)
                                                        }}/>
                                         </FormControl>
                                     </FormItem>
@@ -122,19 +125,43 @@ export function InputDiseaseHandler({
                             />
                             <FormField
                                 control={form.control}
-                                name={`diseases.${diseases.length}.date`}
-                                render={({field}) => (
-                                    <FormItem>
-                                        <FormLabel>Date</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Date"
-                                                   onChange={(event) => {
-                                                       setDiseaseDate(event.target.value)
-                                                       form.setValue(`diseases.${diseases.length}.date`, event.target.value)
-                                                   }}/>
-                                        </FormControl>
-                                    </FormItem>
-                                )}
+                                name={`diseases.${0}.diagnosedAt`}
+                                render={({field}) => {
+                                    return (
+                                        <FormItem>
+                                            <FormLabel>Diagnosed at</FormLabel>
+                                            <FormControl>
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <Button
+                                                            variant={"outline"}
+                                                            className={cn(
+                                                                "w-[280px] justify-start text-left font-normal",
+                                                                !diseaseDiagnosedAt && "text-muted-foreground"
+                                                            )}
+                                                        >
+                                                            <CalendarIcon className="mr-2 h-4 w-4"/>
+                                                            {diseaseDiagnosedAt ? format(diseaseDiagnosedAt, "PPP") : <span>Pick a date</span>}
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-auto p-0">
+                                                        <Calendar
+                                                            mode={"single"}
+                                                            initialFocus
+                                                            selected={diseaseDiagnosedAt}
+                                                            onSelect={(newDate) => {
+                                                                form.setValue(`diseases.${diseases.length}.diagnosedAt`, newDate ? format(newDate, "yyyy-MM-dd") : "");
+                                                                setDiseaseDiagnosedAt(newDate);
+                                                            }}
+                                                            defaultMonth={new Date(2018, 1)}
+                                                            toMonth={new Date()}
+                                                        />
+                                                    </PopoverContent>
+                                                </Popover>
+                                            </FormControl>
+                                        </FormItem>
+                                    )
+                                }}
                             />
                         </div>
                     </CardContent>
