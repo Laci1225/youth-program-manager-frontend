@@ -117,7 +117,7 @@ export function InputDiseaseHandler({
                                                    onChange={
                                                        (event) => {
                                                            setDiseaseName(event.target.value)
-                                                           form.setValue(`diseases.${0}.name`, event.target.value)
+                                                           form.setValue(`diseases.${0}.name`, event.target.value,{shouldValidate:true})
                                                        }}/>
                                         </FormControl>
                                     </FormItem>
@@ -150,7 +150,7 @@ export function InputDiseaseHandler({
                                                             initialFocus
                                                             selected={diseaseDiagnosedAt}
                                                             onSelect={(newDate) => {
-                                                                form.setValue(`diseases.${diseases.length}.diagnosedAt`, newDate ? format(newDate, "yyyy-MM-dd") : "");
+                                                                form.setValue(`diseases.${diseases.length}.diagnosedAt`, newDate ? format(newDate, "yyyy-MM-dd") : "",{shouldValidate:true});
                                                                 setDiseaseDiagnosedAt(newDate);
                                                             }}
                                                             defaultMonth={new Date(2018, 1)}

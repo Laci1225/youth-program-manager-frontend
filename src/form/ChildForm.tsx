@@ -1,0 +1,362 @@
+import {
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form"
+import {Popover, PopoverContent, PopoverTrigger,} from "@/components/ui/popover"
+import {Input} from "@/components/ui/input";
+import {Button} from "@/components/ui/button";
+import React, {useState} from "react";
+import {useForm} from "react-hook-form"
+import * as z from "zod"
+import {zodResolver} from "@hookform/resolvers/zod";
+import {format} from "date-fns"
+import {cn} from "@/lib/utils"
+import {Calendar} from "@/components/ui/calendar"
+import {Calendar as CalendarIcon} from "lucide-react"
+import {formSchema} from "@/form/formSchema";
+import {ApolloClient, gql, InMemoryCache} from "@apollo/client";
+import {ChildData} from "@/model/child-data";
+import {Disease, InputDiseaseHandler, Medicine} from "@/form/InputDiseaseHandler";
+import {InputMedicinesHandler} from "@/form/InputMedicinesHandler";
+import {client} from "@/api/client";
+import {redirect} from "next/navigation";
+import {router} from "next/client";
+import {PopoverClose} from "@radix-ui/react-popover";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription, DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from "@/components/ui/dialog";
+import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
+
+
+function ChildForm() {
+
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            familyName: "",
+            givenName: "",
+            birthDate: "",
+            birthPlace: "",
+            address: "",
+            diseases: [{name: undefined, diagnosedAt: undefined}],
+            //medicines: {name: undefined, dose: undefined, takenSince: undefined}
+        },
+    })
+
+
+    function onSubmit(values: z.infer<typeof formSchema>) {
+        console.log(values)
+        client
+            .mutate({
+                mutation: gql(`
+                mutation AddChild($child: ChildInput!) {
+                    addChild(child: $child) {
+                        id
+                        familyName
+                        givenName
+                        birthDate
+                        birthPlace
+                        address
+                        diagnosedDiseases {
+                            name
+                            diagnosedAt
+                        }
+                        regularMedicines {
+                            name
+                            dose
+                            takenSince
+                        }
+                        createdDate
+                        modifiedDate
+                    }
+                }
+            `),
+                variables: {
+                    child: {
+                        familyName: values.familyName,
+                        givenName: values.givenName,
+                        birthDate: values.birthDate,
+                        birthPlace: values.birthPlace,
+                        address: values.address,
+                        diagnosedDiseases: values.diseases.map(disease => ({
+                            name: disease.name,
+                            diagnosedAt: disease.diagnosedAt
+                        })),
+                        regularMedicines: values.medicines?.map(medicine => ({
+                            name: medicine.name,
+                            dose: medicine.dose,
+                            takenSince: medicine.takenSince,
+                        })),
+                    },
+                },
+            })
+            .then((result) => {
+                const addedChild = result.data.addChild;
+                console.log(addedChild);
+            });
+        //router.push("children")
+    }
+
+
+    const [birthDate, setBirthDate] = useState<Date>()
+    const [showDiseaseForm, setShowDiseaseForm] = useState(false);
+    const [showMedicineForm, setShowMedicineForm] = useState(false);
+
+    const [diseases, setDiseases] = useState<Disease[]>([]);
+    const [medicines, setMedicines] = useState<Medicine[]>([]);
+
+
+    return (
+        <div className={"container w-4/6 "}>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit, () => console.log("Valami nem jó"))}
+                      className="flex justify-center flex-col space-y-8">
+                    <FormField
+                        control={form.control}
+                        name="familyName"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>Family name</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Family name" {...field} />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="givenName"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>Given name</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Given name" {...field} />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="birthDate"
+                        render={({field}) => {
+                            return (
+                                <FormItem>
+                                    <FormLabel>Birthdate</FormLabel>
+                                    <FormControl>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant={"outline"}
+                                                    className={cn(
+                                                        "w-[280px] justify-start text-left font-normal",
+                                                        !birthDate && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    <CalendarIcon className="mr-2 h-4 w-4"/>
+                                                    {birthDate ? format(birthDate, "yyyy-MM-dd") :
+                                                        <span>Pick a date</span>}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0">
+                                                <Calendar
+                                                    mode={"single"}
+                                                    initialFocus
+                                                    selected={birthDate}
+                                                    onSelect={(newDate) => {
+                                                        form.setValue("birthDate", newDate ? format(newDate, "yyyy-MM-dd") : "", {shouldValidate: true});
+                                                        setBirthDate(newDate);
+                                                    }}
+                                                    defaultMonth={new Date(2010, 1)}
+                                                    toMonth={new Date()}
+                                                />
+                                                <PopoverClose>
+                                                    X //TODO
+                                                </PopoverClose>
+                                            </PopoverContent>
+
+                                        </Popover>
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )
+                        }}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="birthPlace"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>Birth place</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Birth place" {...field} />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="address"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>Address</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Address" {...field} />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="diseases"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel className={"block"}>Diseases </FormLabel>
+                                <FormControl>
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                            <div className={"w-full pt-8"}>
+                                            <Button className={"w-full"} type={"button"} inputMode={"none"}variant={"ghost"}>
+                                            <Table className={"w-full border border-gray-700"}>
+                                                <TableCaption>A list of added diseases.</TableCaption>
+                                                <TableHeader>
+                                                    <TableRow>
+                                                        <TableHead className="w-1/3">Name</TableHead>
+                                                        <TableHead className="w-1/3">Date</TableHead>
+                                                        <TableHead className="w-1/3">Edit</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+
+                                                    {
+                                                        diseases && diseases.length!== 0 ? (
+                                                            diseases.map((disease) => (
+                                                                <TableRow key={0}>
+                                                                    <TableCell className="w-1/3">{disease.name}</TableCell>
+                                                                    <TableCell className="w-1/3">{format(disease.diagnosedAt,"yyyy-MM-dd")}</TableCell>
+                                                                    <TableCell className="w-1/3">
+                                                                        <Button type={"button"} variant={"destructive"}
+                                                                                onClick={() => {
+                                                                                    //const updatedDiseases = diseases.filter((d) => d.id !== disease.id);
+                                                                                    //setDiseases(updatedDiseases);
+                                                                                }}>Remove</Button>
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            ))) : (
+                                                            <TableRow>
+                                                                <TableCell className="w-1/3">Nothing</TableCell>
+                                                                <TableCell className="w-1/3">added</TableCell>
+                                                                <TableCell className="w-1/3">yet</TableCell>
+
+                                                            </TableRow>
+                                                        )}
+
+                                                </TableBody>
+                                            </Table>
+                                            </Button>
+                                            </div>
+                                        </DialogTrigger>
+                                        <DialogContent className="sm:max-w-[800px] h-full overflow-auto">
+                                            <DialogHeader>
+                                                <DialogTitle>Edit profile</DialogTitle>
+                                                <DialogDescription>
+                                                </DialogDescription>
+                                            </DialogHeader>
+                                            <InputDiseaseHandler diseases={diseases}
+                                                                 setDiseases={setDiseases}
+                                                                 setShowDiseaseForm={setShowDiseaseForm}
+                                                                 showDiseaseForm={showDiseaseForm} form={form}/>
+                                            <DialogFooter>
+                                                <Button type="submit">Save changes</Button>
+                                            </DialogFooter>
+                                        </DialogContent>
+                                    </Dialog>
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="medicines"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>Medicines </FormLabel>
+                                <FormControl>
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                            <div className={"w-full pt-8"}>
+                                                <Button className={"w-full"} type={"button"} inputMode={"none"}variant={"ghost"}>
+                                                    <Table className={"w-full border border-gray-700"}>
+                                                            <TableCaption>A list of added diseases.</TableCaption>
+                                                            <TableHeader>
+                                                                <TableRow>
+                                                                    <TableHead className="w-1/4">Name</TableHead>
+                                                                    <TableHead className="w-1/4">Date</TableHead>
+                                                                    <TableHead className="w-1/4">Taken since</TableHead>
+                                                                    <TableHead className="w-1/4">Edit</TableHead>
+                                                                </TableRow>
+                                                            </TableHeader>
+                                                            <TableBody>
+                                                                {medicines?.map((medicine) => (
+                                                                    <TableRow key={0}>
+                                                                        <TableCell className="w-1/4">{medicine.name}</TableCell>
+                                                                        <TableCell className="w-1/4">{medicine.dose}</TableCell>
+                                                                        <TableCell className="w-1/4">{format(medicine.takenSince, "yyyy-MM-dd")}</TableCell>
+                                                                        <TableCell className="w-1/4">
+                                                                            <Button type={"button"} variant={"destructive"}
+                                                                                    onClick={() => {
+                                                                                        const updatedMedicines = medicines.filter((m) => m.id !== medicine.id);
+                                                                                        setMedicines(updatedMedicines);
+                                                                                    }}>Remove</Button>
+                                                                        </TableCell>
+                                                                    </TableRow>
+                                                                ))
+                                                                }
+
+                                                            </TableBody>
+                                                        </Table>
+                                                </Button>
+                                            </div>
+                                        </DialogTrigger>
+                                        <DialogContent className="sm:max-w-[800px] h-full overflow-auto">
+                                            <DialogHeader>
+                                                <DialogTitle>Edit profile</DialogTitle>
+                                                <DialogDescription>
+                                                </DialogDescription>
+                                            </DialogHeader>
+                                            <InputMedicinesHandler medicines={medicines}
+                                                                   setMedicines={setMedicines}
+                                                                   setShowMedicinesForm={setShowMedicineForm}
+                                                                   showMedicinesForm={showMedicineForm} form={form}/>
+                                            <DialogFooter>
+                                                <Button type="submit">Save changes</Button>
+                                            </DialogFooter>
+                                        </DialogContent>
+                                    </Dialog>
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    <Button type="submit">Submit</Button>
+                </form>
+            </Form>
+        </div>
+    );
+}
+
+export default ChildForm;
