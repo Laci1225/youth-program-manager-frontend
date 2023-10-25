@@ -1,9 +1,7 @@
 import {UseFormReturn} from "react-hook-form";
 import React, {useState} from "react";
 import {Input} from "@/components/ui/input";
-import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {Button} from "@/components/ui/button";
-import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import {FormControl, FormField, FormItem, FormLabel} from "@/components/ui/form";
 import {Medicine} from "@/form/InputDiseaseHandler";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
@@ -11,165 +9,103 @@ import {cn} from "@/lib/utils";
 import {Calendar as CalendarIcon} from "lucide-react";
 import {format} from "date-fns";
 import {Calendar} from "@/components/ui/calendar";
-
 interface InputHandlerProps {
-    showMedicinesForm: boolean,
-    setShowMedicinesForm: React.Dispatch<boolean>,
     medicines: Medicine[]
     setMedicines: React.Dispatch<Medicine[]>
     form:
-        UseFormReturn<{     diseases: {         name: string;         diagnosedAt: string;     }[];     address: string;     familyName: string;     givenName: string;     birthDate: string;     birthPlace: string;     medicines?: {         name: string;         id: number;         dose: string;         takenSince?: any;     }[] | undefined; }, any, undefined>
+        UseFormReturn<{     medicines?: {         name: string;         dose: string;         takenSince?: any;     }[] | undefined; }, any, undefined>
 }
 
 export function InputMedicinesHandler({
-                                          showMedicinesForm,
-                                          setShowMedicinesForm,
                                           medicines,
                                           setMedicines,
                                           form
                                       }: InputHandlerProps) {
-    const [showMedicines2Form, setShowMedicines2Form] = useState(false);
     const [medicineName, setMedicineName] = useState("");
     const [medicineDose, setMedicineDose] = useState("");
     const [medicineTakenSince, setMedicineTakenSince] = useState<Date>();
-    const [medicineID, setMedicineID] = useState(0);
+    //const [medicineID, setMedicineID] = useState(0);
     const handleAddMedicines = () => {
-        const newMedicine = {id: medicineID,name: medicineName, dose: medicineDose, takenSince: medicineTakenSince};
+        const newMedicine = {name: medicineName, dose: medicineDose, takenSince: medicineTakenSince};
         setMedicines([...medicines, newMedicine])
-        setMedicineID(medicineID + 1)
-        setShowMedicines2Form(false);
+        //setMedicineID(medicineID + 1)
     };
     return (
-        <>
-            <Input onClick={() => setShowMedicinesForm(true)} readOnly placeholder={"Medicines: " + medicines.length}/>
-
-            {showMedicinesForm && (
-                <div
-                    className={"fixed bg-amber-100 rounded p-4 w-1/3 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"}>
-                    <Table>
-                        <TableCaption>A list of added diseases.</TableCaption>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-1/4">Name</TableHead>
-                                <TableHead className="w-1/4">Date</TableHead>
-                                <TableHead className="w-1/4">Taken since</TableHead>
-                                <TableHead className="w-1/4">Edit</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {medicines?.map((medicine) => (
-                                <TableRow key={0}>
-                                    <TableCell className="w-1/4">{medicine.name}</TableCell>
-                                    <TableCell className="w-1/4">{medicine.dose}</TableCell>
-                                    <TableCell className="w-1/4">{format(medicine.takenSince, "yyyy-MM-dd")}</TableCell>
-                                    <TableCell className="w-1/4">
-                                        <Button type={"button"} variant={"destructive"}
-                                                onClick={() => {
-                                                    const updatedMedicines = medicines.filter((m) => m.id !== medicine.id);
-                                                    setMedicines(updatedMedicines);
-                                                }}>Remove</Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                            }
-
-                        </TableBody>
-                    </Table>
-                    <div className="flex justify-between">
-                        <Button variant="outline" onClick={() => setShowMedicinesForm(false)}>Cancel</Button>
-                        <Button onClick={() => setShowMedicines2Form(true)} type={"button"}>Add</Button>
-                    </div>
-                </div>
-            )}
-
-            {showMedicines2Form &&
-                <Card className="w-[350px] fixed  top-1/2 z-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                    <CardHeader>
-                        <CardTitle>Add disease</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                            <div className="grid w-full items-center gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name={`medicines.${medicines.length}.name`}
-                                    render={({field}) => (
-                                        <FormItem>
-                                            <FormLabel>Name</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Name" onChange={
-                                                    (event) => {
-                                                        setMedicineName(event.target.value)
-                                                        form.setValue(`medicines.${medicines.length}.name`, event.target.value)
-                                                    }}/>
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name={`medicines.${medicines.length}.dose`}
-                                    render={({field}) => (
-                                        <FormItem>
-                                            <FormLabel>Dose</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Dose"
-                                                       onChange={
-                                                           (event) => {
-                                                               setMedicineDose(event.target.value)
-                                                               form.setValue(`medicines.${medicines.length}.dose`, event.target.value)
-                                                           }}/>
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name={`medicines.${medicines.length}.takenSince`}
-                                    render={({field}) => {
-                                        return (
-                                            <FormItem>
-                                                <FormLabel>Taken since</FormLabel>
-                                                <FormControl>
-                                                    <Popover>
-                                                        <PopoverTrigger asChild>
-                                                            <Button
-                                                                variant={"outline"}
-                                                                className={cn(
-                                                                    "w-[280px] justify-start text-left font-normal",
-                                                                    !medicineTakenSince && "text-muted-foreground"
-                                                                )}
-                                                            >
-                                                                <CalendarIcon className="mr-2 h-4 w-4"/>
-                                                                {medicineTakenSince ? format(medicineTakenSince, "PPP") : <span>Pick a date</span>}
-                                                            </Button>
-                                                        </PopoverTrigger>
-                                                        <PopoverContent className="w-auto p-0">
-                                                            <Calendar
-                                                                mode={"single"}
-                                                                initialFocus
-                                                                selected={medicineTakenSince}
-                                                                onSelect={(newDate) => {
-                                                                    form.setValue(`medicines.${medicines.length}.takenSince`, newDate ? format(newDate, "yyyy-MM-dd") : undefined);
-                                                                    setMedicineTakenSince(newDate);
-                                                                }}
-                                                                defaultMonth={new Date(2018, 1)}
-                                                                toMonth={new Date()}
-                                                            />
-                                                        </PopoverContent>
-                                                    </Popover>
-                                                </FormControl>
-                                            </FormItem>
-                                        )
-                                    }}
-                                />
-                            </div>
-                    </CardContent>
-                    <CardFooter className="flex justify-between">
-                        <Button variant="outline" onClick={() => setShowMedicines2Form(false)}>Cancel</Button>
-                        <Button onClick={handleAddMedicines}>Add</Button>
-                    </CardFooter>
-                </Card>
-            }
-        </>
+        <div className="grid w-full items-center gap-4">
+            <FormField
+                control={form.control}
+                name={`medicines.${medicines.length}.name`}
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                            <Input placeholder="Name" onChange={
+                                (event) => {
+                                    setMedicineName(event.target.value)
+                                    form.setValue(`medicines.${medicines.length}.name`, event.target.value,{shouldValidate: true})
+                                }}/>
+                        </FormControl>
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name={`medicines.${medicines.length}.dose`}
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Dose</FormLabel>
+                        <FormControl>
+                            <Input placeholder="Dose"
+                                   onChange={
+                                       (event) => {
+                                           setMedicineDose(event.target.value)
+                                           form.setValue(`medicines.${medicines.length}.dose`, event.target.value,{shouldValidate: true})
+                                       }}/>
+                        </FormControl>
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name={`medicines.${medicines.length}.takenSince`}
+                render={({field}) => {
+                    return (
+                        <FormItem>
+                            <FormLabel>Taken since</FormLabel>
+                            <FormControl>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant={"outline"}
+                                            className={cn(
+                                                "w-[280px] justify-start text-left font-normal",
+                                                !medicineTakenSince && "text-muted-foreground"
+                                            )}
+                                        >
+                                            <CalendarIcon className="mr-2 h-4 w-4"/>
+                                            {medicineTakenSince ? format(medicineTakenSince, "PPP") : <span>Pick a date</span>}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0">
+                                        <Calendar
+                                            mode={"single"}
+                                            initialFocus
+                                            selected={medicineTakenSince}
+                                            onSelect={(newDate) => {
+                                                form.setValue(`medicines.${medicines.length}.takenSince`, newDate ? format(newDate, "yyyy-MM-dd") : undefined,{shouldValidate: true});
+                                                setMedicineTakenSince(newDate);
+                                            }}
+                                            defaultMonth={new Date(2018, 1)}
+                                            toMonth={new Date()}
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+                            </FormControl>
+                        </FormItem>
+                    )
+                }}
+            />
+            <Button onClick={handleAddMedicines} type={"submit"}>Add</Button>
+        </div>
     )
 }

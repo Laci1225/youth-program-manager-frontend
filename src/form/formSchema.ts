@@ -1,7 +1,7 @@
 import * as z from "zod";
 
 const nameSchema = z.string().min(2, 'Name must be at least 2 characters.');
-const dateSchema = z.string().regex(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/, 'Invalid date format');
+const dateSchema = z.date().max(new Date(),'Invalid date format');
 const doseSchema = z.string().min(2, 'Dose must be at least 2 characters.');
 export const formSchema = z.object({
     familyName: nameSchema,
@@ -21,11 +21,32 @@ export const formSchema = z.object({
     medicines:
         z.array(
             z.object({
-                    id: z.number(),
                     name: nameSchema,
                     dose: doseSchema,
                     takenSince: z.any().optional(),
                 }
             )
         ).optional()
+})
+export const medicineSchema = z.object({
+    medicines:
+        z.array(
+            z.object({
+                    name: nameSchema,
+                    dose: doseSchema,
+                    takenSince: z.any().optional(),
+                }
+            )
+        ).optional()
+})
+export const diseaseSchema = z.object({
+    diseases:
+        z.array(
+            z.object({
+                    //id: z.number(),
+                    name: nameSchema,
+                    diagnosedAt: dateSchema
+                }
+            ),
+        ),
 })
