@@ -32,7 +32,9 @@ import {
     DialogTrigger
 } from "@/components/ui/dialog";
 import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-
+import {toast} from "@/components/ui/use-toast";
+import {ToastAction} from "@/components/ui/toast";
+import {Toaster} from "@/components/ui/toaster";
 
 function ChildForm() {
 
@@ -77,6 +79,7 @@ function ChildForm() {
     }
 
     function onSubmit(values: z.infer<typeof formSchema>) {
+
         console.log(values)
         client
             .mutate({
@@ -385,7 +388,13 @@ function ChildForm() {
                             </FormItem>
                         )}
                     />
-                    <Button type="submit">Submit</Button>
+                    <Button type="submit"
+                    onClick={()=>{
+                        toast({
+                            title: "Child data successfully added",
+                            description: form.getValues("givenName") +" "+ form.getValues("familyName"),
+                        })
+                    }}>Submit</Button>
                 </form>
             </Form>
         </div>

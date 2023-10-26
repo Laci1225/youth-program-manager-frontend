@@ -27,6 +27,7 @@ import {router} from "next/client";
 import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
 import ChildForm from "@/form/ChildForm";
+import {Toaster} from "@/components/ui/toaster";
 
 /*
 export const getServerSideProps = (async () => {
@@ -112,7 +113,6 @@ export default function Children() {
                                     <DialogHeader>
                                         <DialogTitle>Edit profile</DialogTitle>
                                         <DialogDescription>
-                                            Make changes to your profile here. Click save when you're done.
                                         </DialogDescription>
                                     </DialogHeader>
                                     <ChildForm/>
@@ -125,6 +125,7 @@ export default function Children() {
 
                 </TableFooter>
             </Table>
+            <Toaster/>
         </div>
     )
 }

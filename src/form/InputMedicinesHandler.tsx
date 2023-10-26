@@ -5,10 +5,13 @@ import {Button} from "@/components/ui/button";
 import {FormControl, FormField, FormItem, FormLabel} from "@/components/ui/form";
 import {Medicine} from "@/form/InputDiseaseHandler";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import { ToastAction } from "@/components/ui/toast"
+import { useToast } from "@/components/ui/use-toast"
 import {cn} from "@/lib/utils";
 import {Calendar as CalendarIcon} from "lucide-react";
 import {format} from "date-fns";
 import {Calendar} from "@/components/ui/calendar";
+import {Toaster} from "@/components/ui/toaster";
 interface InputHandlerProps {
     medicines: Medicine[]
     setMedicines: React.Dispatch<Medicine[]>
@@ -30,6 +33,7 @@ export function InputMedicinesHandler({
         setMedicines([...medicines, newMedicine])
         //setMedicineID(medicineID + 1)
     };
+    const {toast} = useToast()
     return (
         <div className="grid w-full items-center gap-4">
             <FormField
@@ -105,7 +109,21 @@ export function InputMedicinesHandler({
                     )
                 }}
             />
-            <Button onClick={handleAddMedicines} type={"submit"}>Add</Button>
+
+            <Button onClick={()=> {
+                handleAddMedicines()
+                toast({
+                    title: "Medicine successfully added",
+                    description: medicineName +" "+ medicineDose +" "+ medicineTakenSince,
+                    action: (
+                        //todo
+                        <ToastAction altText="Goto schedule to undo" ></ToastAction>
+                    ),
+                })
+            }
+            }
+
+                    type={"submit"}>Add</Button>
         </div>
     )
 }

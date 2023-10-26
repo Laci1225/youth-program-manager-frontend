@@ -8,6 +8,9 @@ import {cn} from "@/lib/utils";
 import {Calendar as CalendarIcon} from "lucide-react";
 import {format} from "date-fns";
 import {Calendar} from "@/components/ui/calendar";
+import {ToastAction} from "@/components/ui/toast";
+import {toast} from "@/components/ui/use-toast";
+import {Toaster} from "@/components/ui/toaster";
 
 export interface Disease {
     //id: number;
@@ -102,7 +105,16 @@ export function InputDiseaseHandler({
                     )
                 }
             />
-                        <Button onClick={handleAddDisease}>Add</Button>
+                        <Button onClick={()=>{
+                            handleAddDisease()
+                            toast({
+                                title: "Disease successfully added",
+                                description: diseaseName +" "+ diseaseDiagnosedAt,
+                                action: (
+                                    <ToastAction altText="Goto schedule to undo" ></ToastAction>
+                                ),
+                            })}
+                        }>Add</Button>
         </div>)
 }
 
