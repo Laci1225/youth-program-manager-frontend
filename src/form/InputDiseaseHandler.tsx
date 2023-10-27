@@ -10,7 +10,6 @@ import {format} from "date-fns";
 import {Calendar} from "@/components/ui/calendar";
 import {ToastAction} from "@/components/ui/toast";
 import {toast} from "@/components/ui/use-toast";
-import {Toaster} from "@/components/ui/toaster";
 
 export interface Disease {
     //id: number;
@@ -29,13 +28,20 @@ interface InputHandlerProps {
     diseases: Disease[]
     setDiseases: React.Dispatch<Disease[]>
     form:
-        UseFormReturn<{ diseases: { name: string; diagnosedAt: Date; }[]; }, any, undefined>
+        UseFormReturn<{
+            diseases: {
+                name: string;
+                diagnosedAt: Date;
+            }[];
+        }, any, undefined>
+    onDiseasePressed: (diseases: Disease[]) => void;
 }
 
 export function InputDiseaseHandler({
                                         diseases,
                                         setDiseases,
-                                        form
+                                        form,
+                                        onDiseasePressed
                                     }: InputHandlerProps) {
     //const [diseaseID, setDiseaseID] = useState(0);
     const [diseaseName, setDiseaseName] = useState("");
@@ -43,6 +49,7 @@ export function InputDiseaseHandler({
     const handleAddDisease = () => {
         const newDisease = {name: diseaseName, diagnosedAt: diseaseDiagnosedAt};
         setDiseases([...diseases, newDisease])
+        onDiseasePressed(diseases)
         //setDiseaseID(diseaseID + 1)
     };
     //<Button variant="outline" onClick={() => setShowDiseaseForm(false)}>Cancel</Button>
@@ -105,7 +112,7 @@ export function InputDiseaseHandler({
                     )
                 }
             />
-                        <Button onClick={()=>{
+                        <Button type={"button"} onClick={()=>{
                             handleAddDisease()
                             toast({
                                 title: "Disease successfully added",

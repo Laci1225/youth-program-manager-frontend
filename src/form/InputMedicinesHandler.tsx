@@ -11,18 +11,19 @@ import {cn} from "@/lib/utils";
 import {Calendar as CalendarIcon} from "lucide-react";
 import {format} from "date-fns";
 import {Calendar} from "@/components/ui/calendar";
-import {Toaster} from "@/components/ui/toaster";
 interface InputHandlerProps {
     medicines: Medicine[]
     setMedicines: React.Dispatch<Medicine[]>
     form:
         UseFormReturn<{     medicines?: {         name: string;         dose: string;         takenSince?: any;     }[] | undefined; }, any, undefined>
+    onMedicinePressed: (medicines: Medicine[]) => void;
 }
 
 export function InputMedicinesHandler({
                                           medicines,
                                           setMedicines,
-                                          form
+                                          form,
+                                            onMedicinePressed
                                       }: InputHandlerProps) {
     const [medicineName, setMedicineName] = useState("");
     const [medicineDose, setMedicineDose] = useState("");
@@ -31,6 +32,7 @@ export function InputMedicinesHandler({
     const handleAddMedicines = () => {
         const newMedicine = {name: medicineName, dose: medicineDose, takenSince: medicineTakenSince};
         setMedicines([...medicines, newMedicine])
+        onMedicinePressed(medicines)
         //setMedicineID(medicineID + 1)
     };
     const {toast} = useToast()

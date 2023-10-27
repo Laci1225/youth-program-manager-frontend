@@ -33,8 +33,6 @@ import {
 } from "@/components/ui/dialog";
 import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {toast} from "@/components/ui/use-toast";
-import {ToastAction} from "@/components/ui/toast";
-import {Toaster} from "@/components/ui/toaster";
 
 function ChildForm() {
 
@@ -62,19 +60,23 @@ function ChildForm() {
             diseases: [{name: undefined, diagnosedAt: undefined}],
         }
     })
+    const [birthDate, setBirthDate] = useState<Date>()
 
-    function onDiseaseSubmit(values: z.infer<typeof diseaseSchema>) {
+    const [diseases, setDiseases] = useState<Disease[]>([]);
+    const [medicines, setMedicines] = useState<Medicine[]>([]);
 
-        form.setValue("diseases", values.diseases,{shouldValidate: true,shouldTouch: true})
-        const diseases = form.getValues("diseases")
-        let tempDiseases = new Set(diseases)
+    function onDiseasePressed(diseases:Disease[]) {
+
+        form.setValue("diseases", diseases,{shouldValidate: true,shouldTouch: true})
+        const disease = form.getValues("diseases")
+        let tempDiseases = new Set(disease)
         form.setValue("diseases", Array.from(tempDiseases),{shouldValidate: true,shouldTouch: true})
 
     }
-    function onMedicineSubmit(values: z.infer<typeof medicineSchema>) {
-        form.setValue("medicines", values.medicines,{shouldValidate: true})
-        const medicines = form.getValues("medicines")
-        let tempMedicines = new Set(medicines) //todo
+    function onMedicinePressed(medicines:Medicine[]) {
+        form.setValue("medicines", medicines,{shouldValidate: true})
+        const medicine = form.getValues("medicines")
+        let tempMedicines = new Set(medicine) //todo
         form.setValue("medicines", Array.from(tempMedicines),{shouldValidate: true,shouldTouch: true})
     }
 
@@ -133,10 +135,7 @@ function ChildForm() {
     }
 
 
-    const [birthDate, setBirthDate] = useState<Date>()
 
-    const [diseases, setDiseases] = useState<Disease[]>([]);
-    const [medicines, setMedicines] = useState<Medicine[]>([]);
 
     return (
         <div className={"container w-4/6 "}>
@@ -299,10 +298,14 @@ function ChildForm() {
                                                 </DialogDescription>
                                             </DialogHeader>
                                             <Form {...diseaseForm}>
-                                                <form onSubmit={diseaseForm.handleSubmit(onDiseaseSubmit,()=>"Other string")}>
+                                                <form>
+                                                    {// onSubmit={diseaseForm.handleSubmit(onDiseaseSubmit,()=>"Other string")}>
+                                                    }
                                                     <InputDiseaseHandler diseases={diseases}
                                                                          setDiseases={setDiseases}
-                                                                         form={diseaseForm}/>
+                                                                         form={diseaseForm}
+                                                                         onDiseasePressed={onDiseasePressed}
+                                                    />
                                                 </form>
                                             </Form>
                                             <DialogFooter>
@@ -375,10 +378,13 @@ function ChildForm() {
                                                 </DialogDescription>
                                             </DialogHeader>
                                             <Form {...medicineForm}>
-                                                <form onSubmit={medicineForm.handleSubmit(onMedicineSubmit)}>
+                                                <form>
+                                                    {//onSubmit={medicineForm.handleSubmit(onMedicineSubmit)}>
+                                                    }
                                                     <InputMedicinesHandler medicines={medicines}
                                                                            setMedicines={setMedicines}
-                                                                           form={medicineForm}/>
+                                                                           form={medicineForm}
+                                                                            onMedicinePressed={onMedicinePressed}/>
                                                 </form>
                                             </Form>
                                         </DialogContent>
