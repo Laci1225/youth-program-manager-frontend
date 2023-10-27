@@ -28,19 +28,19 @@ export function InputMedicinesHandler({
     const [medicineName, setMedicineName] = useState("");
     const [medicineDose, setMedicineDose] = useState("");
     const [medicineTakenSince, setMedicineTakenSince] = useState<Date>();
-    //const [medicineID, setMedicineID] = useState(0);
+    const [medicineID, setMedicineID] = useState(0);
     const handleAddMedicines = () => {
-        const newMedicine = {name: medicineName, dose: medicineDose, takenSince: medicineTakenSince};
+        const newMedicine = {id: medicineID,name: medicineName, dose: medicineDose, takenSince: medicineTakenSince};
         setMedicines([...medicines, newMedicine])
-        onMedicinePressed(medicines)
-        //setMedicineID(medicineID + 1)
+        onMedicinePressed([...medicines, newMedicine])
+        setMedicineID(medicineID + 1)
     };
     const {toast} = useToast()
     return (
         <div className="grid w-full items-center gap-4">
             <FormField
                 control={form.control}
-                name={`medicines.${medicines.length}.name`}
+                name={`medicines.${medicineID}.name`}
                 render={({field}) => (
                     <FormItem>
                         <FormLabel>Name</FormLabel>
@@ -48,7 +48,7 @@ export function InputMedicinesHandler({
                             <Input placeholder="Name" onChange={
                                 (event) => {
                                     setMedicineName(event.target.value)
-                                    form.setValue(`medicines.${medicines.length}.name`, event.target.value,{shouldValidate: true})
+                                    form.setValue(`medicines.${medicineID}.name`, event.target.value,{shouldValidate: true})
                                 }}/>
                         </FormControl>
                     </FormItem>
@@ -56,7 +56,7 @@ export function InputMedicinesHandler({
             />
             <FormField
                 control={form.control}
-                name={`medicines.${medicines.length}.dose`}
+                name={`medicines.${medicineID}.dose`}
                 render={({field}) => (
                     <FormItem>
                         <FormLabel>Dose</FormLabel>
@@ -65,7 +65,7 @@ export function InputMedicinesHandler({
                                    onChange={
                                        (event) => {
                                            setMedicineDose(event.target.value)
-                                           form.setValue(`medicines.${medicines.length}.dose`, event.target.value,{shouldValidate: true})
+                                           form.setValue(`medicines.${medicineID}.dose`, event.target.value,{shouldValidate: true})
                                        }}/>
                         </FormControl>
                     </FormItem>
@@ -73,7 +73,7 @@ export function InputMedicinesHandler({
             />
             <FormField
                 control={form.control}
-                name={`medicines.${medicines.length}.takenSince`}
+                name={`medicines.${medicineID}.takenSince`}
                 render={({field}) => {
                     return (
                         <FormItem>
@@ -98,7 +98,7 @@ export function InputMedicinesHandler({
                                             initialFocus
                                             selected={medicineTakenSince}
                                             onSelect={(newDate) => {
-                                                form.setValue(`medicines.${medicines.length}.takenSince`, newDate ? format(newDate, "yyyy-MM-dd") : undefined,{shouldValidate: true});
+                                                form.setValue(`medicines.${medicineID}.takenSince`, newDate ? format(newDate, "yyyy-MM-dd") : undefined,{shouldValidate: true});
                                                 setMedicineTakenSince(newDate);
                                             }}
                                             defaultMonth={new Date(2018, 1)}
@@ -125,7 +125,7 @@ export function InputMedicinesHandler({
             }
             }
 
-                    type={"submit"}>Add</Button>
+                    type={"button"}>Add</Button>
         </div>
     )
 }

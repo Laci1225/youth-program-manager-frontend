@@ -12,12 +12,12 @@ import {ToastAction} from "@/components/ui/toast";
 import {toast} from "@/components/ui/use-toast";
 
 export interface Disease {
-    //id: number;
+    id: number;
     name: string;
     diagnosedAt: any;//TODO any
 }// TODO not in a good place
 export interface Medicine {
-    //id: number;
+    id: number;
     name: string;
     dose: string;
     takenSince: any;
@@ -43,21 +43,20 @@ export function InputDiseaseHandler({
                                         form,
                                         onDiseasePressed
                                     }: InputHandlerProps) {
-    //const [diseaseID, setDiseaseID] = useState(0);
+    const [diseaseID, setDiseaseID] = useState(0);
     const [diseaseName, setDiseaseName] = useState("");
     const [diseaseDiagnosedAt, setDiseaseDiagnosedAt] = useState<Date>();
     const handleAddDisease = () => {
-        const newDisease = {name: diseaseName, diagnosedAt: diseaseDiagnosedAt};
+        const newDisease = {id: diseaseID,name: diseaseName, diagnosedAt: diseaseDiagnosedAt};
         setDiseases([...diseases, newDisease])
-        onDiseasePressed(diseases)
-        //setDiseaseID(diseaseID + 1)
+        onDiseasePressed([...diseases, newDisease])//todo it is working with diseases it isn't
+        setDiseaseID(diseaseID + 1)
     };
-    //<Button variant="outline" onClick={() => setShowDiseaseForm(false)}>Cancel</Button>
     return (
         <div className="grid w-full items-center gap-4">
             <FormField
                 control={form.control}
-                name={`diseases.${diseases.length}.name`}
+                name={`diseases.${diseaseID}.name`}
                 render={({field}) => (
                     <FormItem>
                         <FormLabel>Name</FormLabel>
@@ -66,7 +65,7 @@ export function InputDiseaseHandler({
                                    onChange={
                                        (event) => {
                                            setDiseaseName(event.target.value)
-                                           form.setValue(`diseases.${diseases.length}.name`, event.target.value, {shouldValidate: true})
+                                           form.setValue(`diseases.${diseaseID}.name`, event.target.value, {shouldValidate: true})
                                        }}/>
                         </FormControl>
                     </FormItem>
@@ -74,7 +73,7 @@ export function InputDiseaseHandler({
             />
             <FormField
                 control={form.control}
-                name={`diseases.${diseases.length}.diagnosedAt`}
+                name={`diseases.${diseaseID}.diagnosedAt`}
                 render={({field}) => (
                         <FormItem>
                             <FormLabel>Diagnosed at</FormLabel>
@@ -99,7 +98,7 @@ export function InputDiseaseHandler({
                                             initialFocus
                                             selected={diseaseDiagnosedAt}
                                             onSelect={(newDate) => {
-                                                form.setValue(`diseases.${diseases.length}.diagnosedAt`, newDate ? newDate : new Date(), {shouldValidate: true});
+                                                form.setValue(`diseases.${diseaseID}.diagnosedAt`, newDate ? newDate : new Date(), {shouldValidate: true});
                                                 setDiseaseDiagnosedAt(newDate);
                                             }}
                                             defaultMonth={new Date(2018, 1)}

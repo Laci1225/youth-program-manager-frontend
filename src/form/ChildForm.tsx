@@ -61,23 +61,18 @@ function ChildForm() {
         }
     })
     const [birthDate, setBirthDate] = useState<Date>()
-
     const [diseases, setDiseases] = useState<Disease[]>([]);
     const [medicines, setMedicines] = useState<Medicine[]>([]);
 
     function onDiseasePressed(diseases:Disease[]) {
 
-        form.setValue("diseases", diseases,{shouldValidate: true,shouldTouch: true})
-        const disease = form.getValues("diseases")
-        let tempDiseases = new Set(disease)
-        form.setValue("diseases", Array.from(tempDiseases),{shouldValidate: true,shouldTouch: true})
+        form.setValue("diseases", diseases.map(
+            ({ id, ...diseaseWithoutId }) => diseaseWithoutId),{shouldValidate: true})
 
     }
     function onMedicinePressed(medicines:Medicine[]) {
-        form.setValue("medicines", medicines,{shouldValidate: true})
-        const medicine = form.getValues("medicines")
-        let tempMedicines = new Set(medicine) //todo
-        form.setValue("medicines", Array.from(tempMedicines),{shouldValidate: true,shouldTouch: true})
+        form.setValue("medicines", medicines.map(
+            ({ id, ...medicineWithoutId }) => medicineWithoutId),{shouldValidate: true})
     }
 
     function onSubmit(values: z.infer<typeof formSchema>) {
@@ -265,7 +260,7 @@ function ChildForm() {
                                                             {
                                                                 diseases &&  diseases.length !== 0 ? (
                                                                     diseases.map((disease) => (
-                                                                        <TableRow key={0}>
+                                                                        <TableRow key={disease.id}>
                                                                             <TableCell
                                                                                 className="w-1/3">{disease.name}</TableCell>
                                                                             <TableCell
@@ -309,7 +304,8 @@ function ChildForm() {
                                                 </form>
                                             </Form>
                                             <DialogFooter>
-                                                <Button type="submit">Save changes</Button>
+                                                <Button type="submit">Save changes</Button>{//todo
+                                            }
                                             </DialogFooter>
                                         </DialogContent>
                                     </Dialog>
@@ -343,7 +339,7 @@ function ChildForm() {
                                                         <TableBody>
                                                             {medicines && medicines.length !== 0?
                                                                 medicines?.map((medicine) => (
-                                                                <TableRow key={0}>
+                                                                <TableRow key={medicine.id}>
                                                                     <TableCell
                                                                         className="w-1/4">{medicine.name}</TableCell>
                                                                     <TableCell
