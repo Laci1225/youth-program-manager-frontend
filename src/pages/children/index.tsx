@@ -1,9 +1,7 @@
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
-    TableFooter,
     TableHead,
     TableHeader,
     TableRow
@@ -12,7 +10,6 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -22,12 +19,9 @@ import React, {useEffect, useState} from "react";
 import {ChildData} from "@/model/child-data";
 import {client} from "@/api/client";
 import {gql} from "@apollo/client";
-import {redirect} from "next/navigation";
-import {router} from "next/client";
-import {Label} from "@/components/ui/label";
-import {Input} from "@/components/ui/input";
 import ChildForm from "@/form/ChildForm";
 import {Toaster} from "@/components/ui/toaster";
+import {format} from "date-fns";
 
 /*
 export const getServerSideProps = (async () => {
@@ -43,7 +37,6 @@ export default function Seasons({children}: InferGetServerSidePropsType<typeof g
 */
 export default function Children() {
     const [children, setChildren] = useState<ChildData[]>([])
-
     useEffect(() => {
         client
             .query({
@@ -55,6 +48,8 @@ export default function Children() {
                         givenName
                         birthDate
                         address
+                        hasDiagnosedDiseases
+                        hasRegularMedicines
                     }
                 }
             `),
@@ -63,16 +58,30 @@ export default function Children() {
     }, []);
 
     return (
-        <div className={"container w-4/6"}>
-            <Table>
-                <TableCaption>A list of added Children.</TableCaption>
+        <div className={"container w-4/6 p-28"}>
+            <div className={"flex justify-between px-6 pb-6"}>Children
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button>+ Add</Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[800px] h-full overflow-auto">
+                        <DialogHeader>
+                            <DialogTitle>Edit profile</DialogTitle>
+                            <DialogDescription>
+                            </DialogDescription>
+                        </DialogHeader>
+                        <ChildForm/>
+                    </DialogContent>
+                </Dialog>
+            </div>
+            <Table className={"border border-gray-700 rounded"}>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="w-1/5">Family Name</TableHead>
-                        <TableHead className="w-1/5">Given Name</TableHead>
-                        <TableHead className="w-1/5">Birth Date</TableHead>
-                        <TableHead className="w-1/5">Address</TableHead>
-                        <TableHead className="w-1/5 text-right">Edit</TableHead>
+                        <TableHead className="w-1/5 text-center">Name</TableHead>
+                        <TableHead className="w-1/5 text-center">Birth Date</TableHead>
+                        <TableHead className="w-1/5 text-center">Has diagnosed diseases</TableHead>
+                        <TableHead className="w-1/5 text-center">Takes any medicines</TableHead>
+                        <TableHead className="w-1/5 text-right pr-12">Edit</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -80,16 +89,24 @@ export default function Children() {
                         children && children.length !== 0 ? (
                             children.map((child) => (
                                 <TableRow key={child.id}>
-                                    <TableCell className="w-1/5">{child.familyName}</TableCell>
-                                    <TableCell className="w-1/5">{child.givenName}</TableCell>
-                                    <TableCell className="w-1/5">{child.birthDate}</TableCell>
-                                    <TableCell className="w-1/5">{child.address}</TableCell>
+                                    <TableCell
+                                        className="w-1/5 text-center">{child.givenName} {child.familyName}</TableCell>
+                                    <TableCell
+                                        className="w-1/5 text-center">{format(new Date(child.birthDate), "P")}</TableCell>
+                                    <TableCell className="w-1/5 text-center">{child.hasDiagnosedDiseases ?
+                                        <span className="material-icons-outlined">check_box</span> :
+                                        <span className="material-icons-outlined">check_box_outline_blank</span>}
+                                    </TableCell>
+                                    <TableCell className="w-1/5 text-center">{child.hasRegularMedicines ?
+                                        <span className="material-icons-outlined">check_box</span> :
+                                        <span className="material-icons-outlined">check_box_outline_blank</span>}
+                                    </TableCell>
                                     <TableCell className="w-1/5 text-right">
                                         <Button type={"button"} variant={"destructive"}
                                                 onClick={() => {
                                                     const updatedChildren = children.filter((c) => c.id !== child.id);
                                                     setChildren(updatedChildren);
-                                                }}>Remove</Button>
+                                                }}><span className="material-icons-outlined">delete</span></Button>
                                     </TableCell>
                                 </TableRow>
                             ))) : (
@@ -100,30 +117,6 @@ export default function Children() {
                             </TableRow>
                         )}
                 </TableBody>
-                <TableFooter>
-                    <TableRow>
-                        <TableCell colSpan={5}>
-                            <Dialog >
-                                <DialogTrigger asChild>
-                                    <Button type={"button"} className="w-full h-2">
-                                        Add child
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent className="sm:max-w-[800px] h-full overflow-auto">
-                                    <DialogHeader>
-                                        <DialogTitle>Edit profile</DialogTitle>
-                                        <DialogDescription>
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <ChildForm/>
-
-                                </DialogContent>
-                            </Dialog>
-
-                        </TableCell>
-                    </TableRow>
-
-                </TableFooter>
             </Table>
             <Toaster/>
         </div>

@@ -29,7 +29,7 @@ interface InputHandlerProps {
     setDiseases: React.Dispatch<Disease[]>
     form:
         UseFormReturn<{
-            diseases: {
+            diagnosedDiseases: {
                 name: string;
                 diagnosedAt: Date;
             }[];
@@ -47,7 +47,7 @@ export function InputDiseaseHandler({
     const [diseaseName, setDiseaseName] = useState("");
     const [diseaseDiagnosedAt, setDiseaseDiagnosedAt] = useState<Date>();
     const handleAddDisease = () => {
-        const newDisease = {id: diseaseID,name: diseaseName, diagnosedAt: diseaseDiagnosedAt};
+        const newDisease = {id: diseaseID, name: diseaseName, diagnosedAt: diseaseDiagnosedAt};
         setDiseases([...diseases, newDisease])
         onDiseasePressed([...diseases, newDisease])//todo it is working with diseases it isn't
         setDiseaseID(diseaseID + 1)
@@ -56,7 +56,7 @@ export function InputDiseaseHandler({
         <div className="grid w-full items-center gap-4">
             <FormField
                 control={form.control}
-                name={`diseases.${diseaseID}.name`}
+                name={`diagnosedDiseases.${diseaseID}.name`}
                 render={({field}) => (
                     <FormItem>
                         <FormLabel>Name</FormLabel>
@@ -65,7 +65,7 @@ export function InputDiseaseHandler({
                                    onChange={
                                        (event) => {
                                            setDiseaseName(event.target.value)
-                                           form.setValue(`diseases.${diseaseID}.name`, event.target.value, {shouldValidate: true})
+                                           form.setValue(`diagnosedDiseases.${diseaseID}.name`, event.target.value, {shouldValidate: true})
                                        }}/>
                         </FormControl>
                     </FormItem>
@@ -73,54 +73,55 @@ export function InputDiseaseHandler({
             />
             <FormField
                 control={form.control}
-                name={`diseases.${diseaseID}.diagnosedAt`}
+                name={`diagnosedDiseases.${diseaseID}.diagnosedAt`}
                 render={({field}) => (
-                        <FormItem>
-                            <FormLabel>Diagnosed at</FormLabel>
-                            <FormControl>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant={"outline"}
-                                            className={cn(
-                                                "w-[280px] justify-start text-left font-normal",
-                                                !diseaseDiagnosedAt && "text-muted-foreground"
-                                            )}
-                                        >
-                                            <CalendarIcon className="mr-2 h-4 w-4"/>
-                                            {diseaseDiagnosedAt ? format(diseaseDiagnosedAt, "PPP") :
-                                                <span>Pick a date</span>}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0">
-                                        <Calendar
-                                            mode={"single"}
-                                            initialFocus
-                                            selected={diseaseDiagnosedAt}
-                                            onSelect={(newDate) => {
-                                                form.setValue(`diseases.${diseaseID}.diagnosedAt`, newDate ? newDate : new Date(), {shouldValidate: true});
-                                                setDiseaseDiagnosedAt(newDate);
-                                            }}
-                                            defaultMonth={new Date(2018, 1)}
-                                            toMonth={new Date()}
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                            </FormControl>
-                        </FormItem>
-                    )
+                    <FormItem>
+                        <FormLabel>Diagnosed at</FormLabel>
+                        <FormControl>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-[280px] justify-start text-left font-normal",
+                                            !diseaseDiagnosedAt && "text-muted-foreground"
+                                        )}
+                                    >
+                                        <CalendarIcon className="mr-2 h-4 w-4"/>
+                                        {diseaseDiagnosedAt ? format(diseaseDiagnosedAt, "P") :
+                                            <span>Pick a date</span>}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                        mode={"single"}
+                                        initialFocus
+                                        selected={diseaseDiagnosedAt}
+                                        onSelect={(newDate) => {
+                                            form.setValue(`diagnosedDiseases.${diseaseID}.diagnosedAt`, newDate ? newDate : new Date(), {shouldValidate: true});
+                                            setDiseaseDiagnosedAt(newDate);
+                                        }}
+                                        defaultMonth={new Date(2018, 1)}
+                                        toMonth={new Date()}
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                        </FormControl>
+                    </FormItem>
+                )
                 }
             />
-                        <Button type={"button"} onClick={()=>{
-                            handleAddDisease()
-                            toast({
-                                title: "Disease successfully added",
-                                description: diseaseName +" "+ diseaseDiagnosedAt,
-                                action: (
-                                    <ToastAction altText="Goto schedule to undo" ></ToastAction>
-                                ),
-                            })}
-                        }>Add</Button>
+            <Button type={"button"} onClick={() => {
+                handleAddDisease()
+                toast({
+                    title: "Disease successfully added",
+                    description: diseaseName + " " + diseaseDiagnosedAt,
+                    action: (
+                        <ToastAction altText="Goto schedule to undo"></ToastAction>
+                    ),
+                })
+            }
+            }>Add</Button>
         </div>)
 }
 

@@ -41,38 +41,39 @@ function ChildForm() {
         defaultValues: {
             familyName: "",
             givenName: "",
-            birthDate: undefined,
+            birthDate: new Date(),
             birthPlace: "",
             address: "",
-            diseases: [{name: undefined, diagnosedAt: undefined}],
+            diagnosedDiseases: [{name: undefined, diagnosedAt: undefined}],
             //medicines: [{name: "", dose: "", takenSince: undefined}]
         },
     })
     const medicineForm = useForm<z.infer<typeof medicineSchema>>({
         resolver: zodResolver(medicineSchema),
         defaultValues: {
-            medicines: [{name: "", dose: "", takenSince: undefined}]
+            regularMedicines: [{name: "", dose: "", takenSince: undefined}]
         }
     })
     const diseaseForm = useForm<z.infer<typeof diseaseSchema>>({
         resolver: zodResolver(diseaseSchema),
         defaultValues: {
-            diseases: [{name: undefined, diagnosedAt: undefined}],
+            diagnosedDiseases: [{name: undefined, diagnosedAt: undefined}],
         }
     })
     const [birthDate, setBirthDate] = useState<Date>()
     const [diseases, setDiseases] = useState<Disease[]>([]);
     const [medicines, setMedicines] = useState<Medicine[]>([]);
 
-    function onDiseasePressed(diseases:Disease[]) {
+    function onDiseasePressed(diseases: Disease[]) {
 
-        form.setValue("diseases", diseases.map(
-            ({ id, ...diseaseWithoutId }) => diseaseWithoutId),{shouldValidate: true})
+        form.setValue("diagnosedDiseases", diseases.map(
+            ({id, ...diseaseWithoutId}) => diseaseWithoutId), {shouldValidate: true})
 
     }
-    function onMedicinePressed(medicines:Medicine[]) {
-        form.setValue("medicines", medicines.map(
-            ({ id, ...medicineWithoutId }) => medicineWithoutId),{shouldValidate: true})
+
+    function onMedicinePressed(medicines: Medicine[]) {
+        form.setValue("regularMedicines", medicines.map(
+            ({id, ...medicineWithoutId}) => medicineWithoutId), {shouldValidate: true})
     }
 
     function onSubmit(values: z.infer<typeof formSchema>) {
@@ -110,11 +111,11 @@ function ChildForm() {
                         birthDate: values.birthDate,
                         birthPlace: values.birthPlace,
                         address: values.address,
-                        diagnosedDiseases: values.diseases.map(disease => ({
+                        diagnosedDiseases: values.diagnosedDiseases.map(disease => ({
                             name: disease.name,
                             diagnosedAt: disease.diagnosedAt
                         })),
-                        regularMedicines: values.medicines?.map(medicine => ({
+                        regularMedicines: values.regularMedicines?.map(medicine => ({
                             name: medicine.name,
                             dose: medicine.dose,
                             takenSince: medicine?.takenSince,
@@ -128,8 +129,6 @@ function ChildForm() {
             });
         //router.push("children")
     }
-
-
 
 
     return (
@@ -181,7 +180,7 @@ function ChildForm() {
                                                     )}
                                                 >
                                                     <CalendarIcon className="mr-2 h-4 w-4"/>
-                                                    {birthDate ? format(birthDate, "yyyy-MM-dd") :
+                                                    {birthDate ? format(birthDate, "P") :
                                                         <span>Pick a date</span>}
                                                 </Button>
                                             </PopoverTrigger>
@@ -237,7 +236,7 @@ function ChildForm() {
                     />
                     <FormField
                         control={form.control}
-                        name="diseases"
+                        name="diagnosedDiseases"
                         render={({field}) => (
                             <FormItem>
                                 <FormLabel className={"block"}>Diseases </FormLabel>
@@ -258,13 +257,13 @@ function ChildForm() {
                                                         </TableHeader>
                                                         <TableBody>
                                                             {
-                                                                diseases &&  diseases.length !== 0 ? (
+                                                                diseases && diseases.length !== 0 ? (
                                                                     diseases.map((disease) => (
                                                                         <TableRow key={disease.id}>
                                                                             <TableCell
                                                                                 className="w-1/3">{disease.name}</TableCell>
                                                                             <TableCell
-                                                                                className="w-1/3">{format(disease.diagnosedAt, "yyyy-MM-dd")}</TableCell>
+                                                                                className="w-1/3">{format(disease.diagnosedAt, "P")}</TableCell>
                                                                             <TableCell className="w-1/3">
                                                                                 <Button type={"button"}
                                                                                         variant={"destructive"}
@@ -316,7 +315,7 @@ function ChildForm() {
                     />
                     <FormField
                         control={form.control}
-                        name="medicines"
+                        name="regularMedicines"
                         render={({field}) => (
                             <FormItem>
                                 <FormLabel>Medicines</FormLabel>
@@ -337,24 +336,25 @@ function ChildForm() {
                                                             </TableRow>
                                                         </TableHeader>
                                                         <TableBody>
-                                                            {medicines && medicines.length !== 0?
+                                                            {medicines && medicines.length !== 0 ?
                                                                 medicines?.map((medicine) => (
-                                                                <TableRow key={medicine.id}>
-                                                                    <TableCell
-                                                                        className="w-1/4">{medicine.name}</TableCell>
-                                                                    <TableCell
-                                                                        className="w-1/4">{medicine.dose}</TableCell>
-                                                                    <TableCell
-                                                                        className="w-1/4">{format(medicine.takenSince, "yyyy-MM-dd")}</TableCell>
-                                                                    <TableCell className="w-1/4">
-                                                                        <Button type={"button"} variant={"destructive"}
-                                                                                onClick={() => {
-                                                                                    //const updatedMedicines = medicines.filter((m) => m.id !== medicine.id);
-                                                                                    //setMedicines(updatedMedicines);
-                                                                                }}>Remove</Button>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            )): (
+                                                                    <TableRow key={medicine.id}>
+                                                                        <TableCell
+                                                                            className="w-1/4">{medicine.name}</TableCell>
+                                                                        <TableCell
+                                                                            className="w-1/4">{medicine.dose}</TableCell>
+                                                                        <TableCell
+                                                                            className="w-1/4">{format(medicine.takenSince, "P")}</TableCell>
+                                                                        <TableCell className="w-1/4">
+                                                                            <Button type={"button"}
+                                                                                    variant={"destructive"}
+                                                                                    onClick={() => {
+                                                                                        //const updatedMedicines = medicines.filter((m) => m.id !== medicine.id);
+                                                                                        //setMedicines(updatedMedicines);
+                                                                                    }}>Remove</Button>
+                                                                        </TableCell>
+                                                                    </TableRow>
+                                                                )) : (
                                                                     <TableRow>
                                                                         <TableCell className="w-1/4">Nothing</TableCell>
                                                                         <TableCell className="w-1/4">added</TableCell>
@@ -377,10 +377,10 @@ function ChildForm() {
                                                 <form>
                                                     {//onSubmit={medicineForm.handleSubmit(onMedicineSubmit)}>
                                                     }
-                                                    <InputMedicinesHandler medicines={medicines}
+                                                    <InputMedicinesHandler regularMedicines={medicines}
                                                                            setMedicines={setMedicines}
                                                                            form={medicineForm}
-                                                                            onMedicinePressed={onMedicinePressed}/>
+                                                                           onMedicinePressed={onMedicinePressed}/>
                                                 </form>
                                             </Form>
                                         </DialogContent>
@@ -391,12 +391,12 @@ function ChildForm() {
                         )}
                     />
                     <Button type="submit"
-                    onClick={()=>{
-                        toast({
-                            title: "Child data successfully added",
-                            description: form.getValues("givenName") +" "+ form.getValues("familyName"),
-                        })
-                    }}>Submit</Button>
+                            onClick={() => {
+                                toast({
+                                    title: "Child data successfully added",
+                                    description: form.getValues("givenName") + " " + form.getValues("familyName"),
+                                })
+                            }}>Submit</Button>
                 </form>
             </Form>
         </div>

@@ -5,34 +5,35 @@ import {Button} from "@/components/ui/button";
 import {FormControl, FormField, FormItem, FormLabel} from "@/components/ui/form";
 import {Medicine} from "@/form/InputDiseaseHandler";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import { ToastAction } from "@/components/ui/toast"
-import { useToast } from "@/components/ui/use-toast"
+import {ToastAction} from "@/components/ui/toast"
+import {useToast} from "@/components/ui/use-toast"
 import {cn} from "@/lib/utils";
 import {Calendar as CalendarIcon} from "lucide-react";
 import {format} from "date-fns";
 import {Calendar} from "@/components/ui/calendar";
+
 interface InputHandlerProps {
-    medicines: Medicine[]
+    regularMedicines: Medicine[]
     setMedicines: React.Dispatch<Medicine[]>
     form:
-        UseFormReturn<{     medicines?: {         name: string;         dose: string;         takenSince?: any;     }[] | undefined; }, any, undefined>
+        UseFormReturn<{ regularMedicines?: { name: string; dose: string; takenSince?: any; }[] | undefined; }, any, undefined>
     onMedicinePressed: (medicines: Medicine[]) => void;
 }
 
 export function InputMedicinesHandler({
-                                          medicines,
+                                          regularMedicines,
                                           setMedicines,
                                           form,
-                                            onMedicinePressed
+                                          onMedicinePressed
                                       }: InputHandlerProps) {
     const [medicineName, setMedicineName] = useState("");
     const [medicineDose, setMedicineDose] = useState("");
     const [medicineTakenSince, setMedicineTakenSince] = useState<Date>();
     const [medicineID, setMedicineID] = useState(0);
     const handleAddMedicines = () => {
-        const newMedicine = {id: medicineID,name: medicineName, dose: medicineDose, takenSince: medicineTakenSince};
-        setMedicines([...medicines, newMedicine])
-        onMedicinePressed([...medicines, newMedicine])
+        const newMedicine = {id: medicineID, name: medicineName, dose: medicineDose, takenSince: medicineTakenSince};
+        setMedicines([...regularMedicines, newMedicine])
+        onMedicinePressed([...regularMedicines, newMedicine])
         setMedicineID(medicineID + 1)
     };
     const {toast} = useToast()
@@ -40,7 +41,7 @@ export function InputMedicinesHandler({
         <div className="grid w-full items-center gap-4">
             <FormField
                 control={form.control}
-                name={`medicines.${medicineID}.name`}
+                name={`regularMedicines.${medicineID}.name`}
                 render={({field}) => (
                     <FormItem>
                         <FormLabel>Name</FormLabel>
@@ -48,7 +49,7 @@ export function InputMedicinesHandler({
                             <Input placeholder="Name" onChange={
                                 (event) => {
                                     setMedicineName(event.target.value)
-                                    form.setValue(`medicines.${medicineID}.name`, event.target.value,{shouldValidate: true})
+                                    form.setValue(`regularMedicines.${medicineID}.name`, event.target.value, {shouldValidate: true})
                                 }}/>
                         </FormControl>
                     </FormItem>
@@ -56,7 +57,7 @@ export function InputMedicinesHandler({
             />
             <FormField
                 control={form.control}
-                name={`medicines.${medicineID}.dose`}
+                name={`regularMedicines.${medicineID}.dose`}
                 render={({field}) => (
                     <FormItem>
                         <FormLabel>Dose</FormLabel>
@@ -65,7 +66,7 @@ export function InputMedicinesHandler({
                                    onChange={
                                        (event) => {
                                            setMedicineDose(event.target.value)
-                                           form.setValue(`medicines.${medicineID}.dose`, event.target.value,{shouldValidate: true})
+                                           form.setValue(`regularMedicines.${medicineID}.dose`, event.target.value, {shouldValidate: true})
                                        }}/>
                         </FormControl>
                     </FormItem>
@@ -73,7 +74,7 @@ export function InputMedicinesHandler({
             />
             <FormField
                 control={form.control}
-                name={`medicines.${medicineID}.takenSince`}
+                name={`regularMedicines.${medicineID}.takenSince`}
                 render={({field}) => {
                     return (
                         <FormItem>
@@ -89,7 +90,8 @@ export function InputMedicinesHandler({
                                             )}
                                         >
                                             <CalendarIcon className="mr-2 h-4 w-4"/>
-                                            {medicineTakenSince ? format(medicineTakenSince, "PPP") : <span>Pick a date</span>}
+                                            {medicineTakenSince ? format(medicineTakenSince, "P") :
+                                                <span>Pick a date</span>}
                                         </Button>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-auto p-0">
@@ -98,7 +100,7 @@ export function InputMedicinesHandler({
                                             initialFocus
                                             selected={medicineTakenSince}
                                             onSelect={(newDate) => {
-                                                form.setValue(`medicines.${medicineID}.takenSince`, newDate ? format(newDate, "yyyy-MM-dd") : undefined,{shouldValidate: true});
+                                                form.setValue(`regularMedicines.${medicineID}.takenSince`, newDate ? newDate : undefined, {shouldValidate: true});
                                                 setMedicineTakenSince(newDate);
                                             }}
                                             defaultMonth={new Date(2018, 1)}
@@ -112,14 +114,14 @@ export function InputMedicinesHandler({
                 }}
             />
 
-            <Button onClick={()=> {
+            <Button onClick={() => {
                 handleAddMedicines()
                 toast({
                     title: "Medicine successfully added",
-                    description: medicineName +" "+ medicineDose +" "+ medicineTakenSince,
+                    description: medicineName + " " + medicineDose + " " + medicineTakenSince,
                     action: (
                         //todo
-                        <ToastAction altText="Goto schedule to undo" ></ToastAction>
+                        <ToastAction altText="Goto schedule to undo"></ToastAction>
                     ),
                 })
             }

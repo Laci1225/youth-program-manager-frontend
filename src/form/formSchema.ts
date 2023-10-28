@@ -9,7 +9,7 @@ export const formSchema = z.object({
     birthDate: dateSchema,
     birthPlace: z.string().min(2, 'Birth Place must be at least 2 characters.'),
     address: z.string().min(2, 'Address must be at least 2 characters.'),
-    diseases:
+    diagnosedDiseases:
         z.array(
             z.object({
                     //id: z.number(),
@@ -18,7 +18,7 @@ export const formSchema = z.object({
                 }
             ),
         ),
-    medicines:
+    regularMedicines:
         z.array(
             z.object({
                     name: nameSchema,
@@ -29,7 +29,7 @@ export const formSchema = z.object({
         ).optional()
 })
 export const medicineSchema = z.object({
-    medicines:
+    regularMedicines:
         z.array(
             z.object({
                     name: nameSchema,
@@ -40,7 +40,7 @@ export const medicineSchema = z.object({
         ).optional()
 })
 export const diseaseSchema = z.object({
-    diseases:
+    diagnosedDiseases:
         z.array(
             z.object({
                     //id: z.number(),

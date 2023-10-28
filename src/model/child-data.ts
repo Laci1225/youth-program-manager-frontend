@@ -6,11 +6,13 @@ export interface ChildData{
     givenName: string,
     email: string,
     phoneNumber: string,
-    birthDate: string,
+    birthDate: Date,
     birthPlace: string,
     address: string,
-    diseases: Disease[],
-    medicines: Medicine[],
+    diagnosedDiseases: Disease[],
+    hasDiagnosedDiseases: boolean
+    regularMedicines: Medicine[],
+    hasRegularMedicines:boolean
     createdDate: string,
     modifiedDate: string
 }
