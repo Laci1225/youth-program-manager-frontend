@@ -1,23 +1,21 @@
-import {UseFormReturn} from "react-hook-form";
-import React, {useState} from "react";
+import {useForm, UseFormReturn} from "react-hook-form";
+import React from "react";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
-import {FormControl, FormField, FormItem, FormLabel} from "@/components/ui/form";
-import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import {cn} from "@/lib/utils";
-import {Calendar as CalendarIcon} from "lucide-react";
-import {format} from "date-fns";
-import {Calendar} from "@/components/ui/calendar";
-import {ToastAction} from "@/components/ui/toast";
+import {Form, FormControl, FormField, FormItem, FormLabel} from "@/components/ui/form";
 import {toast} from "@/components/ui/use-toast";
+import CalendarInput from "@/form/CalendarInput";
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
+import * as z from "zod";
+import {diseaseSchema} from "@/form/formSchema";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {handleSubmitStopPropagation} from "@/form/stopPropagation";
 
 export interface Disease {
-    id: number;
     name: string;
     diagnosedAt: any;//TODO any
 }// TODO not in a good place
 export interface Medicine {
-    id: number;
     name: string;
     dose: string;
     takenSince: any;
@@ -25,103 +23,85 @@ export interface Medicine {
 
 
 interface InputHandlerProps {
-    diseases: Disease[]
-    setDiseases: React.Dispatch<Disease[]>
     form:
-        UseFormReturn<{
-            diseases: {
-                name: string;
-                diagnosedAt: Date;
-            }[];
-        }, any, undefined>
-    onDiseasePressed: (diseases: Disease[]) => void;
+        UseFormReturn<{ diseases: { name: string; diagnosedAt: Date; }[]; address: string; familyName: string; givenName: string; birthDate: Date; birthPlace: string; medicines?: { name: string; dose: string; takenSince?: any; }[] | undefined; }, any, undefined>
 }
 
-export function InputDiseaseHandler({
-                                        diseases,
-                                        setDiseases,
-                                        form,
-                                        onDiseasePressed
-                                    }: InputHandlerProps) {
-    const [diseaseID, setDiseaseID] = useState(0);
-    const [diseaseName, setDiseaseName] = useState("");
-    const [diseaseDiagnosedAt, setDiseaseDiagnosedAt] = useState<Date>();
-    const handleAddDisease = () => {
-        const newDisease = {id: diseaseID,name: diseaseName, diagnosedAt: diseaseDiagnosedAt};
-        setDiseases([...diseases, newDisease])
-        onDiseasePressed([...diseases, newDisease])//todo it is working with diseases it isn't
-        setDiseaseID(diseaseID + 1)
-    };
+
+export function InputDiseaseHandler({form,}: InputHandlerProps) {
+
+    const diseaseForm = useForm<z.infer<typeof diseaseSchema>>({
+        resolver: zodResolver(diseaseSchema),
+        defaultValues: {
+            name: "",
+            diagnosedAt: undefined
+        }
+    })
+
+    function onDiseaseSubmit(values: z.infer<typeof diseaseSchema>) {
+        form.setValue("diseases", [...(form.getValues("diseases")), values], {shouldValidate: true})
+        console.log(form.getValues("diseases"))
+    }
+
     return (
-        <div className="grid w-full items-center gap-4">
-            <FormField
-                control={form.control}
-                name={`diseases.${diseaseID}.name`}
-                render={({field}) => (
-                    <FormItem>
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                            <Input placeholder="Name"
-                                   onChange={
-                                       (event) => {
-                                           setDiseaseName(event.target.value)
-                                           form.setValue(`diseases.${diseaseID}.name`, event.target.value, {shouldValidate: true})
-                                       }}/>
-                        </FormControl>
-                    </FormItem>
-                )}
-            />
-            <FormField
-                control={form.control}
-                name={`diseases.${diseaseID}.diagnosedAt`}
-                render={({field}) => (
-                        <FormItem>
-                            <FormLabel>Diagnosed at</FormLabel>
-                            <FormControl>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant={"outline"}
-                                            className={cn(
-                                                "w-[280px] justify-start text-left font-normal",
-                                                !diseaseDiagnosedAt && "text-muted-foreground"
-                                            )}
-                                        >
-                                            <CalendarIcon className="mr-2 h-4 w-4"/>
-                                            {diseaseDiagnosedAt ? format(diseaseDiagnosedAt, "PPP") :
-                                                <span>Pick a date</span>}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0">
-                                        <Calendar
-                                            mode={"single"}
-                                            initialFocus
-                                            selected={diseaseDiagnosedAt}
-                                            onSelect={(newDate) => {
-                                                form.setValue(`diseases.${diseaseID}.diagnosedAt`, newDate ? newDate : new Date(), {shouldValidate: true});
-                                                setDiseaseDiagnosedAt(newDate);
-                                            }}
-                                            defaultMonth={new Date(2018, 1)}
-                                            toMonth={new Date()}
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                            </FormControl>
-                        </FormItem>
-                    )
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button className={"w-full h-full"} type={"button"} inputMode={"none"}
+                        variant={"ghost"}>
+                    Add a diagnosed disease
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[800px] h-full overflow-auto">
+                <DialogHeader>
+                    <DialogTitle>Edit profile</DialogTitle>
+                </DialogHeader>
+                <Form {...diseaseForm}>
+                    <form
+                        onSubmit={handleSubmitStopPropagation(diseaseForm)(onDiseaseSubmit, () => "Other string")}>
+                        <div className="grid w-full items-center gap-4">
+                            <FormField
+                                control={diseaseForm.control}
+                                name={`name`}
+                                render={({field}) => (
+                                    <FormItem>
+                                        <FormLabel>Name</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Name" {...field}/>
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={diseaseForm.control}
+                                name={`diagnosedAt`}
+                                render={({field}) => (
+                                    <FormItem>
+                                        <FormLabel>Diagnosed at</FormLabel>
+                                        <FormControl>
+                                            <CalendarInput field={field} form={diseaseForm}
+                                                           name={`diagnosedAt`}/>
+                                        </FormControl>
+                                    </FormItem>
+                                )
+                                }
+                            />
+                            <Button type={"submit"} onClick={() => {
+                                toast({
+                                    title: "Disease successfully added",
+                                    //description: diseaseName +" "+ diseaseDiagnosedAt,
+                                })
+                            }
+                            }>Add</Button>
+                        </div>
+                    </form>
+                </Form>
+                <DialogFooter>
+                    <Button type="submit">Save changes</Button>{//todo
                 }
-            />
-                        <Button type={"button"} onClick={()=>{
-                            handleAddDisease()
-                            toast({
-                                title: "Disease successfully added",
-                                description: diseaseName +" "+ diseaseDiagnosedAt,
-                                action: (
-                                    <ToastAction altText="Goto schedule to undo" ></ToastAction>
-                                ),
-                            })}
-                        }>Add</Button>
-        </div>)
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
 }
 
 //<Button variant="outline" onClick={() => setShowDisease2Form(false)}>Cancel</Button>

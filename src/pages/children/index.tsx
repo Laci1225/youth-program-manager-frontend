@@ -12,7 +12,6 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -22,10 +21,6 @@ import React, {useEffect, useState} from "react";
 import {ChildData} from "@/model/child-data";
 import {client} from "@/api/client";
 import {gql} from "@apollo/client";
-import {redirect} from "next/navigation";
-import {router} from "next/client";
-import {Label} from "@/components/ui/label";
-import {Input} from "@/components/ui/input";
 import ChildForm from "@/form/ChildForm";
 import {Toaster} from "@/components/ui/toaster";
 
