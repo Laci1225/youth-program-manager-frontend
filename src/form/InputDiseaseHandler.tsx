@@ -11,20 +11,24 @@ import {diseaseSchema} from "@/form/formSchema";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {handleSubmitStopPropagation} from "@/form/stopPropagation";
 
-export interface Disease {
-    name: string;
-    diagnosedAt: any;//TODO any
-}// TODO not in a good place
-export interface Medicine {
-    name: string;
-    dose: string;
-    takenSince: any;
-}
-
-
 interface InputHandlerProps {
     form:
-        UseFormReturn<{ diseases: { name: string; diagnosedAt: Date; }[]; address: string; familyName: string; givenName: string; birthDate: Date; birthPlace: string; medicines?: { name: string; dose: string; takenSince?: any; }[] | undefined; }, any, undefined>
+        UseFormReturn<{
+            diseases: {
+                name: string;
+                diagnosedAt: Date;
+            }[];
+            address: string;
+            familyName: string;
+            givenName: string;
+            birthDate: Date;
+            birthPlace: string;
+            medicines?: {
+                name: string;
+                dose: string;
+                takenSince?: any;
+            }[] | undefined;
+        }, any, undefined>
 }
 
 
@@ -41,6 +45,10 @@ export function InputDiseaseHandler({form,}: InputHandlerProps) {
     function onDiseaseSubmit(values: z.infer<typeof diseaseSchema>) {
         form.setValue("diseases", [...(form.getValues("diseases")), values], {shouldValidate: true})
         console.log(form.getValues("diseases"))
+        toast({
+            title: "Disease successfully added",
+            //description: diseaseName +" "+ diseaseDiagnosedAt,
+        })
     }
 
     return (
@@ -78,20 +86,13 @@ export function InputDiseaseHandler({form,}: InputHandlerProps) {
                                     <FormItem>
                                         <FormLabel>Diagnosed at</FormLabel>
                                         <FormControl>
-                                            <CalendarInput field={field} form={diseaseForm}
-                                                           name={`diagnosedAt`}/>
+                                            <CalendarInput field={field} form={diseaseForm}/>
                                         </FormControl>
                                     </FormItem>
                                 )
                                 }
                             />
-                            <Button type={"submit"} onClick={() => {
-                                toast({
-                                    title: "Disease successfully added",
-                                    //description: diseaseName +" "+ diseaseDiagnosedAt,
-                                })
-                            }
-                            }>Add</Button>
+                            <Button type={"submit"}>Add</Button>
                         </div>
                     </form>
                 </Form>

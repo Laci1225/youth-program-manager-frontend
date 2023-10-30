@@ -2,7 +2,7 @@ import {client} from "@/api/client";
 import {gql} from "@apollo/client";
 import {ChildData} from "@/model/child-data";
 
-export default function (values: ChildData){
+export default function addChild(values: ChildData){
     return client
         .mutate({
             mutation: gql(`

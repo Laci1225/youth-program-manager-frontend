@@ -1,131 +1,117 @@
-import {UseFormReturn} from "react-hook-form";
-import React, {useState} from "react";
+import {useForm, UseFormReturn} from "react-hook-form";
+import React from "react";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
-import {FormControl, FormField, FormItem, FormLabel} from "@/components/ui/form";
-import {Medicine} from "@/form/InputDiseaseHandler";
-import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import { ToastAction } from "@/components/ui/toast"
-import { useToast } from "@/components/ui/use-toast"
-import {cn} from "@/lib/utils";
-import {Calendar as CalendarIcon} from "lucide-react";
-import {format} from "date-fns";
-import {Calendar} from "@/components/ui/calendar";
+import {Form, FormControl, FormField, FormItem, FormLabel} from "@/components/ui/form";
+import {useToast} from "@/components/ui/use-toast"
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
+import * as z from "zod";
+import {medicineSchema} from "@/form/formSchema";
+import {zodResolver} from "@hookform/resolvers/zod";
+import CalendarInput from "@/form/CalendarInput";
+import {handleSubmitStopPropagation} from "@/form/stopPropagation";
+
 interface InputHandlerProps {
-    medicines: Medicine[]
-    setMedicines: React.Dispatch<Medicine[]>
     form:
-        UseFormReturn<{     medicines?: {         name: string;         dose: string;         takenSince?: any;     }[] | undefined; }, any, undefined>
-    onMedicinePressed: (medicines: Medicine[]) => void;
+        UseFormReturn<{
+            familyName: string;
+            givenName: string;
+            birthDate: Date;
+            birthPlace: string;
+            address: string;
+            diseases: {
+                name: string;
+                diagnosedAt: Date;
+            }[];
+            medicines?: {
+                name: string;
+                dose: string;
+                takenSince?: any;
+            }[] | undefined;
+        }, any, undefined>
 }
 
-export function InputMedicinesHandler({
-                                          medicines,
-                                          setMedicines,
-                                          form,
-                                            onMedicinePressed
-                                      }: InputHandlerProps) {
-    const [medicineName, setMedicineName] = useState("");
-    const [medicineDose, setMedicineDose] = useState("");
-    const [medicineTakenSince, setMedicineTakenSince] = useState<Date>();
-    const [medicineID, setMedicineID] = useState(0);
-    const handleAddMedicines = () => {
-        const newMedicine = {id: medicineID,name: medicineName, dose: medicineDose, takenSince: medicineTakenSince};
-        setMedicines([...medicines, newMedicine])
-        onMedicinePressed([...medicines, newMedicine])
-        setMedicineID(medicineID + 1)
-    };
+export function InputMedicinesHandler({form,}: InputHandlerProps) {
+
+    const medicineForm = useForm<z.infer<typeof medicineSchema>>({
+        resolver: zodResolver(medicineSchema),
+        defaultValues: {
+            name: "",
+            dose: "",
+            takenSince: undefined
+        }
+    })
+
+    function onMedicineSubmit(values: z.infer<typeof medicineSchema>) {
+        form.setValue("medicines", [...(form.getValues("medicines") ?? []), values], {shouldValidate: true})
+        console.log(form.getValues("medicines"))
+        toast({
+            title: "Medicine successfully added",
+            //description: medicineName +" "+ medicineDose +" "+ medicineTakenSince,
+        })
+    }
+
     const {toast} = useToast()
     return (
-        <div className="grid w-full items-center gap-4">
-            <FormField
-                control={form.control}
-                name={`medicines.${medicineID}.name`}
-                render={({field}) => (
-                    <FormItem>
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                            <Input placeholder="Name" onChange={
-                                (event) => {
-                                    setMedicineName(event.target.value)
-                                    form.setValue(`medicines.${medicineID}.name`, event.target.value,{shouldValidate: true})
-                                }}/>
-                        </FormControl>
-                    </FormItem>
-                )}
-            />
-            <FormField
-                control={form.control}
-                name={`medicines.${medicineID}.dose`}
-                render={({field}) => (
-                    <FormItem>
-                        <FormLabel>Dose</FormLabel>
-                        <FormControl>
-                            <Input placeholder="Dose"
-                                   onChange={
-                                       (event) => {
-                                           setMedicineDose(event.target.value)
-                                           form.setValue(`medicines.${medicineID}.dose`, event.target.value,{shouldValidate: true})
-                                       }}/>
-                        </FormControl>
-                    </FormItem>
-                )}
-            />
-            <FormField
-                control={form.control}
-                name={`medicines.${medicineID}.takenSince`}
-                render={({field}) => {
-                    return (
-                        <FormItem>
-                            <FormLabel>Taken since</FormLabel>
-                            <FormControl>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant={"outline"}
-                                            className={cn(
-                                                "w-[280px] justify-start text-left font-normal",
-                                                !medicineTakenSince && "text-muted-foreground"
-                                            )}
-                                        >
-                                            <CalendarIcon className="mr-2 h-4 w-4"/>
-                                            {medicineTakenSince ? format(medicineTakenSince, "PPP") : <span>Pick a date</span>}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0">
-                                        <Calendar
-                                            mode={"single"}
-                                            initialFocus
-                                            selected={medicineTakenSince}
-                                            onSelect={(newDate) => {
-                                                form.setValue(`medicines.${medicineID}.takenSince`, newDate ? format(newDate, "yyyy-MM-dd") : undefined,{shouldValidate: true});
-                                                setMedicineTakenSince(newDate);
-                                            }}
-                                            defaultMonth={new Date(2018, 1)}
-                                            toMonth={new Date()}
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                            </FormControl>
-                        </FormItem>
-                    )
-                }}
-            />
-
-            <Button onClick={()=> {
-                handleAddMedicines()
-                toast({
-                    title: "Medicine successfully added",
-                    description: medicineName +" "+ medicineDose +" "+ medicineTakenSince,
-                    action: (
-                        //todo
-                        <ToastAction altText="Goto schedule to undo" ></ToastAction>
-                    ),
-                })
-            }
-            }
-
-                    type={"button"}>Add</Button>
-        </div>
+        <Dialog>
+            <DialogTrigger asChild>
+                <div className={"w-full"}>
+                    <Button className={"w-full h-full"} type={"button"} inputMode={"none"}
+                            variant={"ghost"}>
+                        Add a regular medicine
+                    </Button>
+                </div>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[800px] h-full overflow-auto">
+                <DialogHeader>
+                    <DialogTitle>Edit profile</DialogTitle>
+                </DialogHeader>
+                <Form {...medicineForm}>
+                    <form onSubmit={handleSubmitStopPropagation(medicineForm)(onMedicineSubmit)}>
+                        <div className="grid w-full items-center gap-4">
+                            <FormField
+                                control={medicineForm.control}
+                                name={`name`}
+                                render={({field}) => (
+                                    <FormItem>
+                                        <FormLabel>Name</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Name" {...field}/>
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={medicineForm.control}
+                                name={`dose`}
+                                render={({field}) => (
+                                    <FormItem>
+                                        <FormLabel>Dose</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Dose" {...field}/>
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={medicineForm.control}
+                                name={`takenSince`}
+                                render={({field}) => {
+                                    return (
+                                        <FormItem>
+                                            <FormLabel>Taken since</FormLabel>
+                                            <FormControl>
+                                                <CalendarInput field={field} form={medicineForm}/>
+                                            </FormControl>
+                                        </FormItem>
+                                    )
+                                }}
+                            />
+                            <Button type={"submit"}>Add</Button>
+                        </div>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
     )
 }
