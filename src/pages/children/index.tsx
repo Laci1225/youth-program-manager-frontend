@@ -77,7 +77,7 @@ export default function Children() {
                                 <TableRow key={child.id}>
                                     <TableCell className="w-1/5">{child.familyName}</TableCell>
                                     <TableCell className="w-1/5">{child.givenName}</TableCell>
-                                    <TableCell className="w-1/5">{format(child.birthDate,"P")}</TableCell>
+                                    <TableCell className="w-1/5">{format(new Date(child.birthDate),"P")}</TableCell>
                                     <TableCell className="w-1/5">{child.address}</TableCell>
                                     <TableCell className="w-1/5 text-right">
                                         <Button type={"button"} variant={"destructive"}
