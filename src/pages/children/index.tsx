@@ -39,8 +39,8 @@ export default function Children() {
     useEffect(() => {
         client
             .query({
-                query: gql(`
-                query GetChild {
+                query: gql`
+                query {
                     children {
                         id
                         familyName
@@ -51,9 +51,12 @@ export default function Children() {
                         hasRegularMedicines
                     }
                 }
-            `),
+            `,
             })
-            .then((result) => setChildren(result.data.children));
+            .then((result) =>{
+                const children = result.data.children
+                setChildren(children)
+            })
     }, []);
 
     return (
@@ -108,8 +111,7 @@ export default function Children() {
                                 </TableRow>
                             ))) : (
                             <TableRow>
-                                <TableCell className="w-1/2">Nothing</TableCell>
-                                <TableCell className="w-1/2">added</TableCell>
+                                <TableCell colSpan={5} className="w-1/2">Nothing added</TableCell>
 
                             </TableRow>
                         )}

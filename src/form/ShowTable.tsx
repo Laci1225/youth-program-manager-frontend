@@ -47,9 +47,7 @@ export default function ShowTable({tableFields, value}: ShowTableProps) {
                         </TableRow>
                     ))) : (
                     <TableRow>
-                        <TableCell className="w-1/3">Nothing</TableCell>
-                        <TableCell className="w-1/3">added</TableCell>
-                        <TableCell className="w-1/3">yet</TableCell>
+                        <TableCell className={"text-center text-gray-400"} colSpan={tableFields.length}>Nothing added yet</TableCell>
                     </TableRow>
                 )}
             </TableBody>

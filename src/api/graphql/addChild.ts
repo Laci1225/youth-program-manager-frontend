@@ -5,7 +5,7 @@ import {ChildDataInput} from "@/model/child-data";
 export default function addChild(values: ChildDataInput){
     return client
         .mutate({
-            mutation: gql(`
+            mutation: gql`
                 mutation AddChild($child: ChildInput!) {
                     addChild(child: $child) {
                         familyName
@@ -24,7 +24,7 @@ export default function addChild(values: ChildDataInput){
                         }
                     }
                 }
-            `),
+            `,
             variables: {
                 child: {
                     familyName: values.familyName,

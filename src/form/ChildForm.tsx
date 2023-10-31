@@ -119,12 +119,12 @@ function ChildForm() {
                         name="diagnosedDiseases"
                         render={({field}) => (
                             <FormItem>
-                                <FormLabel className={"block"}>Diseases </FormLabel>
+                                <FormLabel className={"block"}>Diagnosed diseases</FormLabel>
                                 <FormControl>
                                     <InputDiseaseHandler form={form}/>
                                 </FormControl>
                                 <FormMessage/>
-                                <ShowTable tableFields={["name", "diagnosedAt"]} {...field}/>
+                                <ShowTable tableFields={["Name", "Diagnosed at"]} {...field}/>
                             </FormItem>
                         )}
                     />
@@ -133,7 +133,7 @@ function ChildForm() {
                         name="regularMedicines"
                         render={({field}) => (
                             <FormItem>
-                                <FormLabel>Medicines</FormLabel>
+                                <FormLabel>Regular medicines</FormLabel>
                                 <FormControl>
                                     <InputMedicinesHandler form={form}/>
                                 </FormControl>
