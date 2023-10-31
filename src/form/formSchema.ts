@@ -1,30 +1,26 @@
 import * as z from "zod";
 
-const nameSchema = z.string().min(2, 'Name must be at least 2 characters.');
-const dateSchema = z.date().max(new Date(),'Invalid date format');
-const doseSchema = z.string().min(2, 'Dose must be at least 2 characters.');
-
 export const medicineSchema = z.object({
-                    name: nameSchema,
-                    dose: doseSchema,
-                    takenSince: z.any().optional(),
+    name: z.string().min(2, 'Name must be at least 2 characters.'),
+    dose: z.string().min(2, 'Dose must be at least 2 characters.'),
+    takenSince: z.date().max(new Date(), 'Invalid date format').optional(),
 })
 export const diseaseSchema = z.object({
-                    name: nameSchema,
-                    diagnosedAt: dateSchema
+    name: z.string().min(2, 'Name must be at least 2 characters.'),
+    diagnosedAt: z.date().max(new Date(), 'Invalid date format')
 })
 export const formSchema = z.object({
-    familyName: nameSchema,
-    givenName: nameSchema,
-    birthDate: dateSchema,
+    familyName: z.string().min(2, 'Name must be at least 2 characters.'),
+    givenName: z.string().min(2, 'Name must be at least 2 characters.'),
+    birthDate: z.date().max(new Date(), 'Invalid date format'),
     birthPlace: z.string().min(2, 'Birth Place must be at least 2 characters.'),
     address: z.string().min(2, 'Address must be at least 2 characters.'),
     diseases:
         z.array(
             diseaseSchema
-            ),
+        ),
     medicines:
         z.array(
-                medicineSchema
-            ).optional()
+            medicineSchema
+        ).optional()
 })

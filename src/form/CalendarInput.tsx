@@ -6,14 +6,13 @@ import {format} from "date-fns";
 import {Calendar} from "@/components/ui/calendar";
 import {PopoverClose} from "@radix-ui/react-popover";
 import React from "react";
-import {ControllerRenderProps, UseFormReturn} from "react-hook-form";
 
-interface CalendarProps {
-    field: ControllerRenderProps,
-    form: UseFormReturn,
+export interface CalendarInputProps {
+    value: any;
+    onChange: (newValue: any) => void;
 }
 
-export default function CalendarInput({field, form}: CalendarProps) {
+export default function CalendarInput({value, onChange}: CalendarInputProps) {
     return (
         <Popover>
             <PopoverTrigger asChild>
@@ -21,12 +20,12 @@ export default function CalendarInput({field, form}: CalendarProps) {
                     variant={"outline"}
                     className={cn(
                         "justify-start text-left font-normal inline-block w-full",
-                        !field.value && "text-muted-foreground"
+                        !value && "text-muted-foreground"
                     )}
                 >
                     <div className="flex">
                         <CalendarIcon className="mr-2 h-4 w-4"/>
-                        {field.value ? format(field.value, "P") :
+                        {value ? format(value, "P") :
                             <span>Pick a date</span>}</div>
                 </Button>
             </PopoverTrigger>
@@ -34,9 +33,9 @@ export default function CalendarInput({field, form}: CalendarProps) {
                 <Calendar
                     mode={"single"}
                     initialFocus
-                    selected={field.value}
+                    selected={value}
                     onSelect={(newDate) => {
-                        form.setValue(field.name, newDate ? newDate : new Date(), {shouldValidate: true});
+                        onChange(newDate ? newDate : new Date());
                     }}
                     defaultMonth={new Date(2010, 1)}
                     toDate={new Date()}

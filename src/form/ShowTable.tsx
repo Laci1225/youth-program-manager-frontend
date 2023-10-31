@@ -2,18 +2,15 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/c
 import React from "react";
 import {format} from "date-fns";
 import {Button} from "@/components/ui/button";
-import {UseFormReturn} from "react-hook-form";
 import {Disease} from "@/model/disease";
 import {Medicine} from "@/model/medicine";
 
 interface ShowTableProps {
     tableFields: string[],
-    formField: string,
-    form: UseFormReturn
+    value: any;
 }
 
-export default function ShowTable({tableFields, formField, form}: ShowTableProps) {
-
+export default function ShowTable({tableFields, value}: ShowTableProps) {
     return (<div className={"w-full"}>
         <Table className={"w-full border border-gray-200"}>
             <TableHeader>
@@ -27,15 +24,15 @@ export default function ShowTable({tableFields, formField, form}: ShowTableProps
                 </TableRow>
             </TableHeader>
             <TableBody>{
-                form.getValues(formField) && form.getValues(formField)?.length !== 0 ? (
-                    form.getValues(formField).map((field: Array<Disease | Medicine>, index: number) => (
+                value && value?.length !== 0 ? (
+                    value.map((field: Disease | Medicine, index: number) => (
                         <TableRow key={index}>
-                            {Object.keys(field).map((key) => (
-                                <TableCell key={key}>
-                                    {field[key] instanceof Date ? (
-                                        <>{format(field[key], "P")}</>
+                            {Object.values(field).map((value) => (
+                                <TableCell key={value}>
+                                    {value instanceof Date ? (
+                                        <>{format(value, "P")}</>
                                     ) : (
-                                        <>{field[key]}</>
+                                        <>{value}</>
                                     )}
                                 </TableCell>
                             ))}

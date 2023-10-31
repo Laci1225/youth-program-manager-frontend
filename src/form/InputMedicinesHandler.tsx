@@ -28,7 +28,7 @@ interface InputHandlerProps {
                 dose: string;
                 takenSince?: any;
             }[] | undefined;
-        }, any, undefined>
+        }>
 }
 
 export function InputMedicinesHandler({form,}: InputHandlerProps) {
@@ -101,7 +101,7 @@ export function InputMedicinesHandler({form,}: InputHandlerProps) {
                                         <FormItem>
                                             <FormLabel>Taken since</FormLabel>
                                             <FormControl>
-                                                <CalendarInput field={field} form={medicineForm}/>
+                                                <CalendarInput {...field}/>
                                             </FormControl>
                                         </FormItem>
                                     )

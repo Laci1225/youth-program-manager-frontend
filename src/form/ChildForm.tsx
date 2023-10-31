@@ -43,7 +43,7 @@ function ChildForm() {
     }
 
     return (
-        <div className={"container w-4/6 "}>
+        <div className={"container"}>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}
                       className="flex justify-center flex-col space-y-4">
@@ -81,7 +81,7 @@ function ChildForm() {
                                 <FormItem>
                                     <FormLabel>Birthdate</FormLabel>
                                     <FormControl>
-                                        <CalendarInput field={field} form={form}/>
+                                        <CalendarInput {...field}/>
                                     </FormControl>
                                     <FormMessage/>
                                 </FormItem>
@@ -124,10 +124,10 @@ function ChildForm() {
                                     <InputDiseaseHandler form={form}/>
                                 </FormControl>
                                 <FormMessage/>
+                                <ShowTable tableFields={["name", "diagnosedAt"]} {...field}/>
                             </FormItem>
                         )}
                     />
-                    <ShowTable tableFields={["name", "diagnosedAt"]} formField={"diseases"} form={form}/>
                     <FormField
                         control={form.control}
                         name="medicines"
@@ -138,11 +138,11 @@ function ChildForm() {
                                     <InputMedicinesHandler form={form}/>
                                 </FormControl>
                                 <FormMessage/>
+                                <ShowTable tableFields={["Name", "Dose", "Taken since"]} {...field}/>
                             </FormItem>
                         )}
                     />
-                    <ShowTable tableFields={["Name", "Dose", "Taken since"]} formField={"medicines"} form={form}/>
-                    <Button type="submit">Submit</Button>
+                    <Button className="sticky bottom-0 p-4" type="submit">Submit</Button>
                 </form>
             </Form>
         </div>

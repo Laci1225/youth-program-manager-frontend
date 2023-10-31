@@ -28,7 +28,7 @@ interface InputHandlerProps {
                 dose: string;
                 takenSince?: any;
             }[] | undefined;
-        }, any, undefined>
+        }>
 }
 
 
@@ -86,23 +86,20 @@ export function InputDiseaseHandler({form,}: InputHandlerProps) {
                                     <FormItem>
                                         <FormLabel>Diagnosed at</FormLabel>
                                         <FormControl>
-                                            <CalendarInput field={field} form={diseaseForm}/>
+                                            <CalendarInput  {...field}/>
                                         </FormControl>
                                     </FormItem>
-                                )
-                                }
+                                )}
                             />
                             <Button type={"submit"}>Add</Button>
                         </div>
                     </form>
                 </Form>
                 <DialogFooter>
-                    <Button type="submit">Save changes</Button>{//todo
+                    <Button type="button">Save changes</Button>{//todo
                 }
                 </DialogFooter>
             </DialogContent>
         </Dialog>
     )
 }
-
-//<Button variant="outline" onClick={() => setShowDisease2Form(false)}>Cancel</Button>

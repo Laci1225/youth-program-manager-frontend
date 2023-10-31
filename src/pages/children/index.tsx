@@ -11,7 +11,6 @@ import {
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -23,6 +22,7 @@ import {client} from "@/api/client";
 import {gql} from "@apollo/client";
 import ChildForm from "@/form/ChildForm";
 import {Toaster} from "@/components/ui/toaster";
+import {format} from "date-fns";
 
 /*
 export const getServerSideProps = (async () => {
@@ -77,7 +77,7 @@ export default function Children() {
                                 <TableRow key={child.id}>
                                     <TableCell className="w-1/5">{child.familyName}</TableCell>
                                     <TableCell className="w-1/5">{child.givenName}</TableCell>
-                                    <TableCell className="w-1/5">{child.birthDate}</TableCell>
+                                    <TableCell className="w-1/5">{format(child.birthDate,"P")}</TableCell>
                                     <TableCell className="w-1/5">{child.address}</TableCell>
                                     <TableCell className="w-1/5 text-right">
                                         <Button type={"button"} variant={"destructive"}
@@ -104,14 +104,11 @@ export default function Children() {
                                         Add child
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent className="sm:max-w-[800px] h-full overflow-auto">
+                                <DialogContent className="sm:max-w-[600px] h-[90vh] overflow-auto">
                                     <DialogHeader>
                                         <DialogTitle>Edit profile</DialogTitle>
-                                        <DialogDescription>
-                                        </DialogDescription>
                                     </DialogHeader>
                                     <ChildForm/>
-
                                 </DialogContent>
                             </Dialog>
 
