@@ -19,11 +19,11 @@ interface InputHandlerProps {
             birthDate: Date;
             birthPlace: string;
             address: string;
-            diseases: {
+            diagnosedDiseases: {
                 name: string;
                 diagnosedAt: Date;
             }[];
-            medicines?: {
+            regularMedicines?: {
                 name: string;
                 dose: string;
                 takenSince?: any;
@@ -43,8 +43,8 @@ export function InputMedicinesHandler({form,}: InputHandlerProps) {
     })
 
     function onMedicineSubmit(values: z.infer<typeof medicineSchema>) {
-        form.setValue("medicines", [...(form.getValues("medicines") ?? []), values], {shouldValidate: true})
-        console.log(form.getValues("medicines"))
+        form.setValue("regularMedicines", [...(form.getValues("regularMedicines") ?? []), values], {shouldValidate: true})
+        console.log(form.getValues("regularMedicines"))
         toast({
             title: "Medicine successfully added",
             //description: medicineName +" "+ medicineDose +" "+ medicineTakenSince,

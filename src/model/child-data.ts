@@ -8,8 +8,10 @@ export interface ChildData {
     birthDate: Date,
     birthPlace: string,
     address: string,
-    diseases: Disease[],
-    medicines?: Medicine[] | undefined,
+    diagnosedDiseases: Disease[],
+    hasDiagnosedDiseases: boolean
+    regularMedicines?: Medicine[] | undefined,
+    hasRegularMedicines:boolean
     createdDate: string,
     modifiedDate: string
 }
@@ -20,6 +22,6 @@ export interface ChildDataInput {
     birthDate: Date,
     birthPlace: string,
     address: string,
-    diseases: Disease[],
-    medicines?: Medicine[] | undefined,
+    diagnosedDiseases: Disease[],
+    regularMedicines?: Medicine[] | undefined,
 }

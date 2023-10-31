@@ -23,8 +23,8 @@ function ChildForm() {
             birthDate: undefined,
             birthPlace: "",
             address: "",
-            diseases: [],
-            //medicines: [{name: "", dose: "", takenSince: undefined}]
+            diagnosedDiseases: [],
+            regularMedicines: []
         },
     })
 
@@ -116,7 +116,7 @@ function ChildForm() {
                     />
                     <FormField
                         control={form.control}
-                        name="diseases"
+                        name="diagnosedDiseases"
                         render={({field}) => (
                             <FormItem>
                                 <FormLabel className={"block"}>Diseases </FormLabel>
@@ -130,7 +130,7 @@ function ChildForm() {
                     />
                     <FormField
                         control={form.control}
-                        name="medicines"
+                        name="regularMedicines"
                         render={({field}) => (
                             <FormItem>
                                 <FormLabel>Medicines</FormLabel>

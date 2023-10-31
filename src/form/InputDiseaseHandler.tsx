@@ -14,7 +14,7 @@ import {handleSubmitStopPropagation} from "@/form/stopPropagation";
 interface InputHandlerProps {
     form:
         UseFormReturn<{
-            diseases: {
+            diagnosedDiseases: {
                 name: string;
                 diagnosedAt: Date;
             }[];
@@ -23,7 +23,7 @@ interface InputHandlerProps {
             givenName: string;
             birthDate: Date;
             birthPlace: string;
-            medicines?: {
+            regularMedicines?: {
                 name: string;
                 dose: string;
                 takenSince?: any;
@@ -43,8 +43,8 @@ export function InputDiseaseHandler({form,}: InputHandlerProps) {
     })
 
     function onDiseaseSubmit(values: z.infer<typeof diseaseSchema>) {
-        form.setValue("diseases", [...(form.getValues("diseases")), values], {shouldValidate: true})
-        console.log(form.getValues("diseases"))
+        form.setValue("diagnosedDiseases", [...(form.getValues("diagnosedDiseases")), values], {shouldValidate: true})
+        console.log(form.getValues("diagnosedDiseases"))
         toast({
             title: "Disease successfully added",
             //description: diseaseName +" "+ diseaseDiagnosedAt,
