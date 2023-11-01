@@ -6,13 +6,6 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
 import {Button} from "@/components/ui/button";
 import React, {useEffect, useState} from "react";
 import {ChildData} from "@/model/child-data";
@@ -38,8 +31,8 @@ export default function Children() {
     const [children, setChildren] = useState<ChildData[]>([])
     useEffect(() => {
         client
-            .query({
-                query: gql`
+        .query({
+            query: gql`
                 query {
                     children {
                         id
@@ -52,27 +45,18 @@ export default function Children() {
                     }
                 }
             `,
-            })
-            .then((result) =>{
-                const children = result.data.children
-                setChildren(children)
-            })
+        })
+        .then((result) => {
+            const children = result.data.children
+            setChildren(children)
+        })
     }, []);
+
 
     return (
         <div className={"container w-4/6 py-28"}>
             <div className={"flex justify-between px-6 pb-6"}>Children
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button>+ Add</Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[800px]">
-                        <DialogHeader>
-                            <DialogTitle>Edit profile</DialogTitle>
-                        </DialogHeader>
-                        <ChildForm/>
-                    </DialogContent>
-                </Dialog>
+                <ChildForm setChildren={setChildren}/>
             </div>
             <Table className={"border border-gray-700 rounded"}>
                 <TableHeader>
@@ -97,8 +81,8 @@ export default function Children() {
                                     </TableCell>
                                     <TableCell className="text-center">
                                         {child.hasDiagnosedDiseases ?
-                                        <span className="material-icons-outlined">check_box</span> :
-                                        <span className="material-icons-outlined">check_box_outline_blank</span>}
+                                            <span className="material-icons-outlined">check_box</span> :
+                                            <span className="material-icons-outlined">check_box_outline_blank</span>}
                                     </TableCell>
                                     <TableCell className="text-center">{child.hasRegularMedicines ?
                                         <span className="material-icons-outlined">check_box</span> :

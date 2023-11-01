@@ -23,7 +23,7 @@ interface InputHandlerProps {
 }
 
 
-export function InputDiseaseHandler({ value, onChange }: InputHandlerProps){
+export function InputDiseaseHandler({value, onChange}: InputHandlerProps) {
     const diseaseForm = useForm<z.infer<typeof diseaseSchema>>({
         resolver: zodResolver(diseaseSchema),
         defaultValues: {
@@ -34,12 +34,13 @@ export function InputDiseaseHandler({ value, onChange }: InputHandlerProps){
     const [isDialogOpen, setDialogOpen] = useState(false);
 
     function onDiseaseSubmit(values: z.infer<typeof diseaseSchema>) {
-        onChange([ ...value ?? [], values ]);
+        onChange([...value ?? [], values]);
         toast({
             title: "Disease successfully added",
         })
         setDialogOpen(false);
     }
+
     return (
         <Dialog>
             <DialogTrigger asChild className="block w-full text-left">
@@ -48,48 +49,49 @@ export function InputDiseaseHandler({ value, onChange }: InputHandlerProps){
                         variant={"outline"}
                         onClick={() => {
                             setDialogOpen(true)
-                            diseaseForm.reset()}}>
+                            diseaseForm.reset()
+                        }}>
                     Add a diagnosed disease
                 </Button>
             </DialogTrigger>
             {isDialogOpen && (
-            <DialogContent className="sm:max-w-[500px] h-[500px] overflow-auto">
-                <DialogHeader>
-                    <DialogTitle>Create a disease</DialogTitle>
-                </DialogHeader>
-                <Form {...diseaseForm}>
-                    <form
-                        onSubmit={handleSubmitStopPropagation(diseaseForm)(onDiseaseSubmit)}>
-                        <div className="grid w-full items-center gap-4">
-                            <FormField
-                                control={diseaseForm.control}
-                                name={`name`}
-                                render={({field}) => (
-                                    <FormItem>
-                                        <FormLabel>Name*</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Name" {...field}/>
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={diseaseForm.control}
-                                name={`diagnosedAt`}
-                                render={({field}) => (
-                                    <FormItem>
-                                        <FormLabel>Diagnosed at*</FormLabel>
-                                        <FormControl>
-                                            <CalendarInput  {...field}/>
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                            <Button type={"submit"}>Add</Button>
-                        </div>
-                    </form>
-                </Form>
-            </DialogContent>
+                <DialogContent className="sm:max-w-[500px] h-[500px] overflow-auto">
+                    <DialogHeader>
+                        <DialogTitle>Create a disease</DialogTitle>
+                    </DialogHeader>
+                    <Form {...diseaseForm}>
+                        <form
+                            onSubmit={handleSubmitStopPropagation(diseaseForm)(onDiseaseSubmit)}>
+                            <div className="grid w-full items-center gap-4">
+                                <FormField
+                                    control={diseaseForm.control}
+                                    name={`name`}
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Name*</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Name" {...field}/>
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={diseaseForm.control}
+                                    name={`diagnosedAt`}
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Diagnosed at*</FormLabel>
+                                            <FormControl>
+                                                <CalendarInput  {...field}/>
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+                                <Button type={"submit"}>Add</Button>
+                            </div>
+                        </form>
+                    </Form>
+                </DialogContent>
             )}
         </Dialog>
     )

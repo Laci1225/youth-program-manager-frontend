@@ -16,7 +16,7 @@ interface InputHandlerProps {
     onChange: (newValue: any) => void
 }
 
-export function InputMedicinesHandler({ value, onChange}: InputHandlerProps) {
+export function InputMedicinesHandler({value, onChange}: InputHandlerProps) {
 
     const medicineForm = useForm<z.infer<typeof medicineSchema>>({
         resolver: zodResolver(medicineSchema),
@@ -29,7 +29,7 @@ export function InputMedicinesHandler({ value, onChange}: InputHandlerProps) {
     const [isDialogOpen, setDialogOpen] = useState(false);
 
     function onMedicineSubmit(values: z.infer<typeof medicineSchema>) {
-        onChange([ ...value ?? [], values ]);
+        onChange([...value ?? [], values]);
         toast({
             title: "Medicine successfully added",
         })
@@ -40,15 +40,16 @@ export function InputMedicinesHandler({ value, onChange}: InputHandlerProps) {
     return (
         <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild className="block w-full text-left">
-            <Button className={"justify-start w-full border border-gray-700"}
-                    type={"button"}
-                    variant={"outline"}
-                    onClick={() => {
-                        setDialogOpen(true)
-                        medicineForm.reset()}}>
-                Add a diagnosed disease
-            </Button>
-        </DialogTrigger>
+                <Button className={"justify-start w-full border border-gray-700"}
+                        type={"button"}
+                        variant={"outline"}
+                        onClick={() => {
+                            setDialogOpen(true)
+                            medicineForm.reset()
+                        }}>
+                    Add a regular medicine
+                </Button>
+            </DialogTrigger>
             <DialogContent className="sm:max-w-[500px] h-[500px] overflow-auto">
                 <DialogHeader>
                     <DialogTitle>Edit profile</DialogTitle>
@@ -61,7 +62,7 @@ export function InputMedicinesHandler({ value, onChange}: InputHandlerProps) {
                                 name={`name`}
                                 render={({field}) => (
                                     <FormItem>
-                                        <FormLabel>Name</FormLabel>
+                                        <FormLabel>Name*</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Name" {...field}/>
                                         </FormControl>
@@ -73,7 +74,7 @@ export function InputMedicinesHandler({ value, onChange}: InputHandlerProps) {
                                 name={`dose`}
                                 render={({field}) => (
                                     <FormItem>
-                                        <FormLabel>Dose</FormLabel>
+                                        <FormLabel>Dose*</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Dose" {...field}/>
                                         </FormControl>
