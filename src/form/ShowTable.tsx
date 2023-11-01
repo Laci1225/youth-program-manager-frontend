@@ -42,7 +42,7 @@ export default function ShowTable({tableFields, value}: ShowTableProps) {
                                         onClick={() => {
                                             //const updatedDiseases = diseases.filter((d) => d.id !== disease.id);
                                             //setDiseases(updatedDiseases);
-                                        }}>Remove</Button>
+                                        }}><span className="material-icons-outlined">delete</span></Button>
                             </TableCell>
                         </TableRow>
                     ))) : (

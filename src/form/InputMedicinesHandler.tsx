@@ -1,5 +1,5 @@
 import {useForm, UseFormReturn} from "react-hook-form";
-import React from "react";
+import React, {useState} from "react";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {Form, FormControl, FormField, FormItem, FormLabel} from "@/components/ui/form";
@@ -41,6 +41,7 @@ export function InputMedicinesHandler({form,}: InputHandlerProps) {
             takenSince: undefined
         }
     })
+    const [isDialogOpen, setDialogOpen] = useState(false);
 
     function onMedicineSubmit(values: z.infer<typeof medicineSchema>) {
         form.setValue("regularMedicines", [...(form.getValues("regularMedicines") ?? []), values], {shouldValidate: true})
@@ -49,20 +50,23 @@ export function InputMedicinesHandler({form,}: InputHandlerProps) {
             title: "Medicine successfully added",
             //description: medicineName +" "+ medicineDose +" "+ medicineTakenSince,
         })
+        setDialogOpen(false)
     }
 
     const {toast} = useToast()
     return (
-        <Dialog>
-            <DialogTrigger asChild>
-                <div className={"w-full"}>
-                    <Button className={"w-full h-full"} type={"button"} inputMode={"none"}
-                            variant={"ghost"}>
-                        Add a regular medicine
-                    </Button>
-                </div>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[800px] h-full overflow-auto">
+        <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild className="block w-full text-left">
+            <Button className={"justify-start w-full border border-gray-700"}
+                    type={"button"}
+                    variant={"outline"}
+                    onClick={() => {
+                        setDialogOpen(true)
+                        medicineForm.reset()}}>
+                Add a diagnosed disease
+            </Button>
+        </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px] h-[500px] overflow-auto">
                 <DialogHeader>
                     <DialogTitle>Edit profile</DialogTitle>
                 </DialogHeader>

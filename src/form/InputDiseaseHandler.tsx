@@ -1,11 +1,17 @@
 import {useForm, UseFormReturn} from "react-hook-form";
-import React from "react";
+import React, {useState} from "react";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {Form, FormControl, FormField, FormItem, FormLabel} from "@/components/ui/form";
 import {toast} from "@/components/ui/use-toast";
 import CalendarInput from "@/form/CalendarInput";
-import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from "@/components/ui/dialog";
 import * as z from "zod";
 import {diseaseSchema} from "@/form/formSchema";
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -41,38 +47,43 @@ export function InputDiseaseHandler({form,}: InputHandlerProps) {
             diagnosedAt: undefined
         }
     })
+    const [isDialogOpen, setDialogOpen] = useState(false);
 
     function onDiseaseSubmit(values: z.infer<typeof diseaseSchema>) {
         form.setValue("diagnosedDiseases", [...(form.getValues("diagnosedDiseases")) ?? [], values], {shouldValidate: true})
         console.log(form.getValues("diagnosedDiseases"))
         toast({
             title: "Disease successfully added",
-            //description: diseaseName +" "+ diseaseDiagnosedAt,
         })
+        setDialogOpen(false);
     }
-
     return (
         <Dialog>
-            <DialogTrigger asChild>
-                <Button className={"w-full h-full"} type={"button"} inputMode={"none"}
-                        variant={"ghost"}>
+            <DialogTrigger asChild className="block w-full text-left">
+                <Button className={"justify-start w-full border border-gray-700"}
+                        type={"button"}
+                        variant={"outline"}
+                        onClick={() => {
+                            setDialogOpen(true)
+                            diseaseForm.reset()}}>
                     Add a diagnosed disease
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[800px] h-full overflow-auto">
+            {isDialogOpen && (
+            <DialogContent className="sm:max-w-[500px] h-[500px] overflow-auto">
                 <DialogHeader>
-                    <DialogTitle>Edit profile</DialogTitle>
+                    <DialogTitle>Create a disease</DialogTitle>
                 </DialogHeader>
                 <Form {...diseaseForm}>
                     <form
-                        onSubmit={handleSubmitStopPropagation(diseaseForm)(onDiseaseSubmit, () => "Other string")}>
+                        onSubmit={handleSubmitStopPropagation(diseaseForm)(onDiseaseSubmit)}>
                         <div className="grid w-full items-center gap-4">
                             <FormField
                                 control={diseaseForm.control}
                                 name={`name`}
                                 render={({field}) => (
                                     <FormItem>
-                                        <FormLabel>Name</FormLabel>
+                                        <FormLabel>Name*</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Name" {...field}/>
                                         </FormControl>
@@ -84,7 +95,7 @@ export function InputDiseaseHandler({form,}: InputHandlerProps) {
                                 name={`diagnosedAt`}
                                 render={({field}) => (
                                     <FormItem>
-                                        <FormLabel>Diagnosed at</FormLabel>
+                                        <FormLabel>Diagnosed at*</FormLabel>
                                         <FormControl>
                                             <CalendarInput  {...field}/>
                                         </FormControl>
@@ -95,11 +106,8 @@ export function InputDiseaseHandler({form,}: InputHandlerProps) {
                         </div>
                     </form>
                 </Form>
-                <DialogFooter>
-                    <Button type="button">Save changes</Button>{//todo
-                }
-                </DialogFooter>
             </DialogContent>
+            )}
         </Dialog>
     )
 }
