@@ -1,4 +1,4 @@
-import {useForm, UseFormReturn} from "react-hook-form";
+import {useForm} from "react-hook-form";
 import React, {useState} from "react";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
@@ -12,26 +12,11 @@ import CalendarInput from "@/form/CalendarInput";
 import {handleSubmitStopPropagation} from "@/form/stopPropagation";
 
 interface InputHandlerProps {
-    form:
-        UseFormReturn<{
-            familyName: string;
-            givenName: string;
-            birthDate: Date;
-            birthPlace: string;
-            address: string;
-            diagnosedDiseases: {
-                name: string;
-                diagnosedAt: Date;
-            }[];
-            regularMedicines?: {
-                name: string;
-                dose: string;
-                takenSince?: any;
-            }[] | undefined;
-        }>
+    value: any;
+    onChange: (newValue: any) => void
 }
 
-export function InputMedicinesHandler({form,}: InputHandlerProps) {
+export function InputMedicinesHandler({ value, onChange}: InputHandlerProps) {
 
     const medicineForm = useForm<z.infer<typeof medicineSchema>>({
         resolver: zodResolver(medicineSchema),
@@ -44,11 +29,9 @@ export function InputMedicinesHandler({form,}: InputHandlerProps) {
     const [isDialogOpen, setDialogOpen] = useState(false);
 
     function onMedicineSubmit(values: z.infer<typeof medicineSchema>) {
-        form.setValue("regularMedicines", [...(form.getValues("regularMedicines") ?? []), values], {shouldValidate: true})
-        console.log(form.getValues("regularMedicines"))
+        onChange([ ...value ?? [], values ]);
         toast({
             title: "Medicine successfully added",
-            //description: medicineName +" "+ medicineDose +" "+ medicineTakenSince,
         })
         setDialogOpen(false)
     }

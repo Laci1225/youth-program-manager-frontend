@@ -1,4 +1,4 @@
-import {useForm, UseFormReturn} from "react-hook-form";
+import {useForm} from "react-hook-form";
 import React, {useState} from "react";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
@@ -18,28 +18,12 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {handleSubmitStopPropagation} from "@/form/stopPropagation";
 
 interface InputHandlerProps {
-    form:
-        UseFormReturn<{
-            diagnosedDiseases: {
-                name: string;
-                diagnosedAt: Date;
-            }[];
-            address: string;
-            familyName: string;
-            givenName: string;
-            birthDate: Date;
-            birthPlace: string;
-            regularMedicines?: {
-                name: string;
-                dose: string;
-                takenSince?: any;
-            }[] | undefined;
-        }>
+    value: any;
+    onChange: (newValue: any) => void
 }
 
 
-export function InputDiseaseHandler({form,}: InputHandlerProps) {
-
+export function InputDiseaseHandler({ value, onChange }: InputHandlerProps){
     const diseaseForm = useForm<z.infer<typeof diseaseSchema>>({
         resolver: zodResolver(diseaseSchema),
         defaultValues: {
@@ -50,8 +34,7 @@ export function InputDiseaseHandler({form,}: InputHandlerProps) {
     const [isDialogOpen, setDialogOpen] = useState(false);
 
     function onDiseaseSubmit(values: z.infer<typeof diseaseSchema>) {
-        form.setValue("diagnosedDiseases", [...(form.getValues("diagnosedDiseases")) ?? [], values], {shouldValidate: true})
-        console.log(form.getValues("diagnosedDiseases"))
+        onChange([ ...value ?? [], values ]);
         toast({
             title: "Disease successfully added",
         })

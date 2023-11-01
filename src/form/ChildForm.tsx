@@ -132,7 +132,7 @@ function ChildForm() {
                                 <FormItem>
                                     <FormLabel className={"block"}>Diagnosed diseases*</FormLabel>
                                     <FormControl>
-                                        <InputDiseaseHandler form={form}/>
+                                        <InputDiseaseHandler {...field}/>
                                     </FormControl>
                                     <FormMessage/>
                                     <ShowTable tableFields={["Name", "Diagnosed at"]} {...field}/>
@@ -146,7 +146,7 @@ function ChildForm() {
                                 <FormItem>
                                     <FormLabel>Regular medicines</FormLabel>
                                     <FormControl>
-                                        <InputMedicinesHandler form={form}/>
+                                        <InputMedicinesHandler {...field}/>
                                     </FormControl>
                                     <FormMessage/>
                                     <ShowTable tableFields={["Name", "Dose", "Taken since"]} {...field}/>
