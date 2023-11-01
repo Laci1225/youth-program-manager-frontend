@@ -60,13 +60,13 @@ export default function Children() {
     }, []);
 
     return (
-        <div className={"container w-4/6 p-28"}>
+        <div className={"container w-4/6 py-28"}>
             <div className={"flex justify-between px-6 pb-6"}>Children
                 <Dialog>
                     <DialogTrigger asChild>
                         <Button>+ Add</Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[800px] h-full overflow-auto">
+                    <DialogContent className="sm:max-w-[800px]">
                         <DialogHeader>
                             <DialogTitle>Edit profile</DialogTitle>
                         </DialogHeader>
@@ -77,11 +77,11 @@ export default function Children() {
             <Table className={"border border-gray-700 rounded"}>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="w-1/5 text-center">Name</TableHead>
-                        <TableHead className="w-1/5 text-center">Birth Date</TableHead>
-                        <TableHead className="w-1/5 text-center">Has diagnosed diseases</TableHead>
-                        <TableHead className="w-1/5 text-center">Takes any medicines</TableHead>
-                        <TableHead className="w-1/5 text-right pr-12">Edit</TableHead>
+                        <TableHead className="text-center">Name</TableHead>
+                        <TableHead className="text-center">Birth Date</TableHead>
+                        <TableHead className="text-center">Has diagnosed diseases</TableHead>
+                        <TableHead className="text-center">Takes any medicines</TableHead>
+                        <TableHead className="p-1"></TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -89,19 +89,22 @@ export default function Children() {
                         children && children.length !== 0 ? (
                             children.map((child) => (
                                 <TableRow key={child.id}>
-                                    <TableCell
-                                        className="w-1/5 text-center">{child.givenName} {child.familyName}</TableCell>
-                                    <TableCell
-                                        className="w-1/5 text-center">{format(new Date(child.birthDate), "P")}</TableCell>
-                                    <TableCell className="w-1/5 text-center">{child.hasDiagnosedDiseases ?
+                                    <TableCell className="text-center">
+                                        {child.givenName} {child.familyName}
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        {format(new Date(child.birthDate), "P")}
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        {child.hasDiagnosedDiseases ?
                                         <span className="material-icons-outlined">check_box</span> :
                                         <span className="material-icons-outlined">check_box_outline_blank</span>}
                                     </TableCell>
-                                    <TableCell className="w-1/5 text-center">{child.hasRegularMedicines ?
+                                    <TableCell className="text-center">{child.hasRegularMedicines ?
                                         <span className="material-icons-outlined">check_box</span> :
                                         <span className="material-icons-outlined">check_box_outline_blank</span>}
                                     </TableCell>
-                                    <TableCell className="w-1/5 text-right">
+                                    <TableCell className="p-1 text-right">
                                         <Button type={"button"} variant={"destructive"}
                                                 onClick={() => {
                                                     const updatedChildren = children.filter((c) => c.id !== child.id);
@@ -111,8 +114,7 @@ export default function Children() {
                                 </TableRow>
                             ))) : (
                             <TableRow>
-                                <TableCell colSpan={5} className="w-1/2">Nothing added</TableCell>
-
+                                <TableCell colSpan={5}>Nothing added</TableCell>
                             </TableRow>
                         )}
                 </TableBody>

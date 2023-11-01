@@ -1,24 +1,11 @@
+import { GetServerSideProps } from "next";
 
-/*
-
-const client = new ApolloClient({
-    uri: '/graphql',
-    cache: new InMemoryCache(),
-});
-
-const [children, setChildren] = useState<ChildData[]>()
-    client
-    .query({
-        query: gql`
-            query GetLocations {
-                children {
-                    givenName
-                }
-            }
-        `,
-    })
-    .then((result) => setChildren(result.data.children));*/
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    context.res.writeHead(302, { Location: "/children" });
+    context.res.end();
+    return { props: {} };
+};
 
 export default function Home() {
-    //TODO
+
 }

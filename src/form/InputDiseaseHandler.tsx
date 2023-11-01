@@ -43,7 +43,7 @@ export function InputDiseaseHandler({form,}: InputHandlerProps) {
     })
 
     function onDiseaseSubmit(values: z.infer<typeof diseaseSchema>) {
-        form.setValue("diagnosedDiseases", [...(form.getValues("diagnosedDiseases")), values], {shouldValidate: true})
+        form.setValue("diagnosedDiseases", [...(form.getValues("diagnosedDiseases")) ?? [], values], {shouldValidate: true})
         console.log(form.getValues("diagnosedDiseases"))
         toast({
             title: "Disease successfully added",
