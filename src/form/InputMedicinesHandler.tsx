@@ -52,7 +52,7 @@ export function InputMedicinesHandler({value, onChange}: InputHandlerProps) {
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px] h-[500px] overflow-auto">
                 <DialogHeader>
-                    <DialogTitle>Edit profile</DialogTitle>
+                    <DialogTitle>Create a medicine</DialogTitle>
                 </DialogHeader>
                 <Form {...medicineForm}>
                     <form onSubmit={handleSubmitStopPropagation(medicineForm)(onMedicineSubmit)}>

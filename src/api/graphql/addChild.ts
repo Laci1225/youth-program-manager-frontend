@@ -1,4 +1,4 @@
-import {client} from "@/api/client";
+import {client} from "@/api/graphql/client";
 import {gql} from "@apollo/client";
 import {ChildDataInput} from "@/model/child-data";
 

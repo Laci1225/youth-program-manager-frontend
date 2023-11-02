@@ -7,9 +7,9 @@ import {
     TableRow
 } from "@/components/ui/table";
 import {Button} from "@/components/ui/button";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {ChildData} from "@/model/child-data";
-import {client} from "@/api/client";
+import {client} from "@/api/graphql/client";
 import {gql} from "@apollo/client";
 import ChildForm from "@/form/ChildForm";
 import {Toaster} from "@/components/ui/toaster";
@@ -29,28 +29,26 @@ export default function Seasons({children}: InferGetServerSidePropsType<typeof g
 */
 export default function Children() {
     const [children, setChildren] = useState<ChildData[]>([])
-    useEffect(() => {
-        client
-        .query({
-            query: gql`
-                query {
-                    children {
-                        id
-                        familyName
-                        givenName
-                        birthDate
-                        address
-                        hasDiagnosedDiseases
-                        hasRegularMedicines
-                    }
+    client
+    .query({
+        query: gql`
+            query {
+                children {
+                    id
+                    familyName
+                    givenName
+                    birthDate
+                    address
+                    hasDiagnosedDiseases
+                    hasRegularMedicines
                 }
-            `,
-        })
-        .then((result) => {
-            const children = result.data.children
-            setChildren(children)
-        })
-    }, []);
+            }
+        `,
+    })
+    .then((result) => {
+        const children = result.data.children
+        setChildren(children)
+    })
 
 
     return (
