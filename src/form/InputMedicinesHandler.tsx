@@ -10,10 +10,11 @@ import {medicineSchema} from "@/form/formSchema";
 import {zodResolver} from "@hookform/resolvers/zod";
 import CalendarInput from "@/form/CalendarInput";
 import {handleSubmitStopPropagation} from "@/form/stopPropagation";
+import {Medicine} from "@/model/medicine";
 
 interface InputHandlerProps {
-    value: any;
-    onChange: (newValue: any) => void
+    value?: Medicine[];
+    onChange: (newValue: Medicine[]) => void
 }
 
 export function InputMedicinesHandler({value, onChange}: InputHandlerProps) {
@@ -29,11 +30,18 @@ export function InputMedicinesHandler({value, onChange}: InputHandlerProps) {
     const [isDialogOpen, setDialogOpen] = useState(false);
 
     function onMedicineSubmit(values: z.infer<typeof medicineSchema>) {
-        onChange([...value ?? [], values]);
-        toast({
-            title: "Medicine successfully added",
-        })
-        setDialogOpen(false)
+        if (![...value ?? []].map(medicine => medicine.name).includes(values.name)) {
+            onChange([...value ?? [], values]);
+            toast({
+                title: "Medicine successfully added",
+            })
+            setDialogOpen(false);
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Choose a unique medicine name",
+            })
+        }
     }
 
     const {toast} = useToast()
@@ -89,7 +97,7 @@ export function InputMedicinesHandler({value, onChange}: InputHandlerProps) {
                                         <FormItem>
                                             <FormLabel>Taken since</FormLabel>
                                             <FormControl>
-                                                <CalendarInput {...field}/>
+                                                <CalendarInput {...field} shownYear={2016}/>
                                             </FormControl>
                                         </FormItem>
                                     )

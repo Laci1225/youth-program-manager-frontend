@@ -1,7 +1,7 @@
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
-import React, {Dispatch, SetStateAction, useState} from "react";
+import React, {useState} from "react";
 import {useForm} from "react-hook-form"
 import * as z from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -18,12 +18,12 @@ import {ChildData} from "@/model/child-data";
 import Spinner from "@/components/ui/spinner";
 
 interface ChildFormProps {
-    setChildren: Dispatch<SetStateAction<ChildData[]>>
+    onChildCreated: (child: ChildData) => void;
 }
 
-function ChildForm({setChildren}: ChildFormProps) {
+function ChildForm({onChildCreated}: ChildFormProps) {
 
-    const [receivedAnswer, setReceivedAnswer] = useState(true)
+    const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -40,29 +40,26 @@ function ChildForm({setChildren}: ChildFormProps) {
     const [isDialogOpen, setDialogOpen] = useState(false);
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        setReceivedAnswer(false)
-        console.log(values)
+        setIsSubmitting(true)
 
         addChild(values)
             .then((result) => {
                 const addedChild = result.data.addChild;
 
-                setChildren(prevState => [...prevState, addedChild])
+                onChildCreated(addedChild)
                 toast({
                     title: "The child is successfully added",
-                    description: form.getValues("givenName") + " " + form.getValues("familyName"),
+                    description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,
                 })
-                setReceivedAnswer(true)
                 setDialogOpen(false)
             }).catch(reason => {
-                toast({
-                    variant: "destructive",
-                    title: reason.toString(),
-                })
-                setReceivedAnswer(true)
-
-            }
-        )
+            toast({
+                variant: "destructive",
+                title: reason.toString(),
+            })
+        }).finally(() => {
+            setIsSubmitting(false)
+        })
     }
 
     return (
@@ -116,7 +113,7 @@ function ChildForm({setChildren}: ChildFormProps) {
                                             <FormItem>
                                                 <FormLabel>Birthdate*</FormLabel>
                                                 <FormControl>
-                                                    <CalendarInput {...field}/>
+                                                    <CalendarInput {...field} shownYear={2010}/>
                                                 </FormControl>
                                                 <FormMessage/>
                                             </FormItem>
@@ -178,9 +175,10 @@ function ChildForm({setChildren}: ChildFormProps) {
                                     )}
                                 />
                             </ScrollArea>
-                            {receivedAnswer ?
+                            {isSubmitting ?
+                                <Button type="submit" disabled>{<Spinner/>}</Button>
+                                :
                                 <Button type="submit">Submit</Button>
-                                : <Spinner/>
                             }
                         </form>
                     </Form>

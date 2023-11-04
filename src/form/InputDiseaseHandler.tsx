@@ -16,10 +16,11 @@ import * as z from "zod";
 import {diseaseSchema} from "@/form/formSchema";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {handleSubmitStopPropagation} from "@/form/stopPropagation";
+import {Disease} from "@/model/disease";
 
 interface InputHandlerProps {
-    value: any;
-    onChange: (newValue: any) => void
+    value: Disease[];
+    onChange: (newValue: Disease[]) => void
 }
 
 
@@ -34,15 +35,22 @@ export function InputDiseaseHandler({value, onChange}: InputHandlerProps) {
     const [isDialogOpen, setDialogOpen] = useState(false);
 
     function onDiseaseSubmit(values: z.infer<typeof diseaseSchema>) {
-        onChange([...value ?? [], values]);
-        toast({
-            title: "Disease successfully added",
-        })
-        setDialogOpen(false);
+        if (![...value ?? []].map(disease => disease.name).includes(values.name)) {
+            onChange([...value ?? [], values]);
+            toast({
+                title: "Disease successfully added",
+            })
+            setDialogOpen(false);
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Choose a unique disease name",
+            })
+        }
     }
 
     return (
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild className="block w-full text-left">
                 <Button className={"justify-start w-full border border-gray-700"}
                         type={"button"}
@@ -54,45 +62,43 @@ export function InputDiseaseHandler({value, onChange}: InputHandlerProps) {
                     Add a diagnosed disease
                 </Button>
             </DialogTrigger>
-            {isDialogOpen && (
-                <DialogContent className="sm:max-w-[500px] h-[500px] overflow-auto">
-                    <DialogHeader>
-                        <DialogTitle>Create a disease</DialogTitle>
-                    </DialogHeader>
-                    <Form {...diseaseForm}>
-                        <form
-                            onSubmit={handleSubmitStopPropagation(diseaseForm)(onDiseaseSubmit)}>
-                            <div className="grid w-full items-center gap-4">
-                                <FormField
-                                    control={diseaseForm.control}
-                                    name={`name`}
-                                    render={({field}) => (
-                                        <FormItem>
-                                            <FormLabel>Name*</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Name" {...field}/>
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={diseaseForm.control}
-                                    name={`diagnosedAt`}
-                                    render={({field}) => (
-                                        <FormItem>
-                                            <FormLabel>Diagnosed at*</FormLabel>
-                                            <FormControl>
-                                                <CalendarInput  {...field}/>
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                                <Button type={"submit"}>Add</Button>
-                            </div>
-                        </form>
-                    </Form>
-                </DialogContent>
-            )}
+            <DialogContent className="sm:max-w-[500px] h-[500px] overflow-auto">
+                <DialogHeader>
+                    <DialogTitle>Create a disease</DialogTitle>
+                </DialogHeader>
+                <Form {...diseaseForm}>
+                    <form
+                        onSubmit={handleSubmitStopPropagation(diseaseForm)(onDiseaseSubmit)}>
+                        <div className="grid w-full items-center gap-4">
+                            <FormField
+                                control={diseaseForm.control}
+                                name={`name`}
+                                render={({field}) => (
+                                    <FormItem>
+                                        <FormLabel>Name*</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Name" {...field}/>
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={diseaseForm.control}
+                                name={`diagnosedAt`}
+                                render={({field}) => (
+                                    <FormItem>
+                                        <FormLabel>Diagnosed at*</FormLabel>
+                                        <FormControl>
+                                            <CalendarInput  {...field} shownYear={2016}/>
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+                            <Button type={"submit"}>Add</Button>
+                        </div>
+                    </form>
+                </Form>
+            </DialogContent>
         </Dialog>
     )
 }

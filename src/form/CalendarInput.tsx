@@ -8,9 +8,10 @@ import React, {useState} from "react";
 export interface CalendarInputProps {
     value: any;
     onChange: (newValue: any) => void;
+    shownYear: number
 }
 
-export default function CalendarInput({value, onChange}: CalendarInputProps) {
+export default function CalendarInput({value, onChange, shownYear}: CalendarInputProps) {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     return (
         <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
@@ -30,10 +31,10 @@ export default function CalendarInput({value, onChange}: CalendarInputProps) {
                     initialFocus
                     selected={value}
                     onSelect={(newDate) => {
-                        onChange(newDate ? newDate : new Date());
+                        onChange(newDate ? newDate : undefined);
                         setIsPopoverOpen(false);
                     }}
-                    defaultMonth={new Date(2010, 1)}
+                    defaultMonth={new Date(shownYear, 1)}
                     toDate={new Date()}
                 />
             </PopoverContent>

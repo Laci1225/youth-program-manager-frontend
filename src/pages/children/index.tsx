@@ -7,13 +7,12 @@ import {
     TableRow
 } from "@/components/ui/table";
 import {Button} from "@/components/ui/button";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {ChildData} from "@/model/child-data";
-import {client} from "@/api/graphql/client";
-import {gql} from "@apollo/client";
 import ChildForm from "@/form/ChildForm";
 import {Toaster} from "@/components/ui/toaster";
 import {format} from "date-fns";
+import getAllChildren from "@/api/graphql/getAllChildren";
 
 /*
 export const getServerSideProps = (async () => {
@@ -29,32 +28,21 @@ export default function Seasons({children}: InferGetServerSidePropsType<typeof g
 */
 export default function Children() {
     const [children, setChildren] = useState<ChildData[]>([])
-    client
-    .query({
-        query: gql`
-            query {
-                children {
-                    id
-                    familyName
-                    givenName
-                    birthDate
-                    address
-                    hasDiagnosedDiseases
-                    hasRegularMedicines
-                }
-            }
-        `,
-    })
-    .then((result) => {
-        const children = result.data.children
-        setChildren(children)
-    })
-
+    useEffect(() => {
+        getAllChildren()
+            .then((result) => {
+                const children = result.data.children
+                setChildren(children)
+            })
+    }, []);
+    const onChildCreated = (newChild: ChildData) => {
+        setChildren(prevState => [...prevState, newChild])
+    }
 
     return (
         <div className={"container w-4/6 py-28"}>
             <div className={"flex justify-between px-6 pb-6"}>Children
-                <ChildForm setChildren={setChildren}/>
+                <ChildForm onChildCreated={onChildCreated}/>
             </div>
             <Table className={"border border-gray-700 rounded"}>
                 <TableHeader>
