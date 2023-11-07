@@ -2,7 +2,7 @@ import {useForm} from "react-hook-form";
 import React, {useState} from "react";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
-import {Form, FormControl, FormField, FormItem, FormLabel} from "@/components/ui/form";
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import {toast} from "@/components/ui/use-toast";
 import CalendarInput from "@/form/CalendarInput";
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
@@ -38,7 +38,8 @@ export function InputDiseaseHandler({value, onChange}: InputHandlerProps) {
             });
             setDialogOpen(false);
         } else {
-            // schema validation
+            diseaseForm.setFocus('name')
+            diseaseForm.setError('name', {message: "Name already chosen"})
         }
     }
 
@@ -71,6 +72,7 @@ export function InputDiseaseHandler({value, onChange}: InputHandlerProps) {
                                     <FormControl>
                                         <Input placeholder="Name" {...field} defaultValue={field.value}/>
                                     </FormControl>
+                                    <FormMessage/>
                                 </FormItem>
                             )}
                         />
@@ -83,6 +85,7 @@ export function InputDiseaseHandler({value, onChange}: InputHandlerProps) {
                                     <FormControl>
                                         <CalendarInput  {...field} shownYear={2016}/>
                                     </FormControl>
+                                    <FormMessage/>
                                 </FormItem>
                             )}
                         />

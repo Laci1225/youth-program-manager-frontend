@@ -2,7 +2,7 @@ import {useForm} from "react-hook-form";
 import React, {useState} from "react";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
-import {Form, FormControl, FormField, FormItem, FormLabel} from "@/components/ui/form";
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import {toast} from "@/components/ui/use-toast"
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import * as z from "zod";
@@ -38,11 +38,8 @@ export function InputMedicinesHandler({value, onChange}: InputHandlerProps) {
             })
             setDialogOpen(false);
         } else {
-            toast({
-                variant: "destructive",
-                title: "Choose a unique medicine name",
-                duration: 2000
-            })
+            medicineForm.setFocus('name')
+            medicineForm.setError('name', {message: "Name already chosen"})
         }
     }
 
@@ -74,6 +71,7 @@ export function InputMedicinesHandler({value, onChange}: InputHandlerProps) {
                                         <FormControl>
                                             <Input placeholder="Name" {...field}/>
                                         </FormControl>
+                                        <FormMessage/>
                                     </FormItem>
                                 )}
                             />
@@ -86,6 +84,7 @@ export function InputMedicinesHandler({value, onChange}: InputHandlerProps) {
                                         <FormControl>
                                             <Input placeholder="Dose" {...field}/>
                                         </FormControl>
+                                        <FormMessage/>
                                     </FormItem>
                                 )}
                             />
@@ -99,6 +98,7 @@ export function InputMedicinesHandler({value, onChange}: InputHandlerProps) {
                                             <FormControl>
                                                 <CalendarInput {...field} shownYear={2016}/>
                                             </FormControl>
+                                            <FormMessage/>
                                         </FormItem>
                                     )
                                 }}
