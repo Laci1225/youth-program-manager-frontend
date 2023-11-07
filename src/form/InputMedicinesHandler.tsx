@@ -3,7 +3,7 @@ import React, {useState} from "react";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {Form, FormControl, FormField, FormItem, FormLabel} from "@/components/ui/form";
-import {useToast} from "@/components/ui/use-toast"
+import {toast} from "@/components/ui/use-toast"
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import * as z from "zod";
 import {medicineSchema} from "@/form/formSchema";
@@ -30,27 +30,27 @@ export function InputMedicinesHandler({value, onChange}: InputHandlerProps) {
     const [isDialogOpen, setDialogOpen] = useState(false);
 
     function onMedicineSubmit(values: z.infer<typeof medicineSchema>) {
-        if (![...value ?? []].map(medicine => medicine.name).includes(values.name)) {
+        if (!(value ?? []).map(medicine => medicine.name).includes(values.name)) {
             onChange([...value ?? [], values]);
             toast({
                 title: "Medicine successfully added",
+                duration: 2000
             })
             setDialogOpen(false);
         } else {
             toast({
                 variant: "destructive",
                 title: "Choose a unique medicine name",
+                duration: 2000
             })
         }
     }
 
-    const {toast} = useToast()
     return (
         <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild className="block w-full text-left">
-                <Button className={"justify-start w-full border border-gray-700"}
-                        type={"button"}
-                        variant={"outline"}
+            <DialogTrigger asChild>
+                <Button type={"button"}
+                        variant={"default"}
                         onClick={() => {
                             setDialogOpen(true)
                             medicineForm.reset()
@@ -58,13 +58,13 @@ export function InputMedicinesHandler({value, onChange}: InputHandlerProps) {
                     Add a regular medicine
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] h-[500px] overflow-auto">
+            <DialogContent className="sm:max-w-[500px] overflow-auto">
                 <DialogHeader>
                     <DialogTitle>Create a medicine</DialogTitle>
                 </DialogHeader>
                 <Form {...medicineForm}>
                     <form onSubmit={handleSubmitStopPropagation(medicineForm)(onMedicineSubmit)}>
-                        <div className="grid w-full items-center gap-4">
+                        <div className="grid w-full items-center">
                             <FormField
                                 control={medicineForm.control}
                                 name={`name`}

@@ -13,13 +13,14 @@ import addChild from "@/api/graphql/addChild";
 import CalendarInput from "@/form/CalendarInput";
 import ShowTable from "@/form/ShowTable";
 import {ScrollArea} from "@/components/ui/scroll-area"
-import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import {ChildData} from "@/model/child-data";
-import Spinner from "@/components/ui/spinner";
+import SubmitButton from "@/components/ui/submit-button";
 
 interface ChildFormProps {
     onChildCreated: (child: ChildData) => void;
 }
+
 
 function ChildForm({onChildCreated}: ChildFormProps) {
 
@@ -70,92 +71,94 @@ function ChildForm({onChildCreated}: ChildFormProps) {
                     form.reset()
                 }}>+ Add</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[800px]">
+            <DialogContent className="sm:max-w-[800px] h-[90vh] shadow-muted-foreground">
                 <DialogHeader>
                     <DialogTitle>Create a child</DialogTitle>
                 </DialogHeader>
-                <div className={""}>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)}
-                              className="flex justify-center flex-col space-y-4 mx-4">
-                            <ScrollArea className="h-[80vh] mx-4 overflow-auto">
-                                <FormField
-                                    control={form.control}
-                                    name="familyName"
-                                    render={({field}) => (
-                                        <FormItem>
-                                            <FormLabel>Family name*</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Family name" {...field} />
-                                            </FormControl>
-                                            <FormMessage/>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="givenName"
-                                    render={({field}) => (
-                                        <FormItem>
-                                            <FormLabel>Given name*</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Given name" {...field} />
-                                            </FormControl>
-                                            <FormMessage/>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="birthDate"
-                                    render={({field}) => {
-                                        return (
-                                            <FormItem>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)}
+                          className="flex justify-center flex-col space-y-4 mx-4">
+                        <ScrollArea className="h-[70vh] ">
+                            <div className="mx-4">
+                                <div className="flex flex-row flex-wrap">
+                                    <FormField
+                                        control={form.control}
+                                        name="familyName"
+                                        render={({field}) => (
+                                            <FormItem className="w-1/2">
+                                                <FormLabel>Family name*</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Family name" {...field} />
+                                                </FormControl>
+                                                <FormMessage/>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="givenName"
+                                        render={({field}) => (
+                                            <FormItem className="w-1/2">
+                                                <FormLabel>Given name*</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Given name" {...field} />
+                                                </FormControl>
+                                                <FormMessage/>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="birthDate"
+                                        render={({field}) => (
+                                            <FormItem className="w-1/2">
                                                 <FormLabel>Birthdate*</FormLabel>
                                                 <FormControl>
                                                     <CalendarInput {...field} shownYear={2010}/>
                                                 </FormControl>
                                                 <FormMessage/>
                                             </FormItem>
-                                        )
-                                    }}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="birthPlace"
-                                    render={({field}) => (
-                                        <FormItem>
-                                            <FormLabel>Birth place*</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Birth place" {...field} />
-                                            </FormControl>
-                                            <FormMessage/>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="address"
-                                    render={({field}) => (
-                                        <FormItem>
-                                            <FormLabel>Address*</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Address" {...field} />
-                                            </FormControl>
-                                            <FormMessage/>
-                                        </FormItem>
-                                    )}
-                                />
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="birthPlace"
+                                        render={({field}) => (
+                                            <FormItem className="w-1/2">
+                                                <FormLabel>Birth place*</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Birth place" {...field} />
+                                                </FormControl>
+                                                <FormMessage/>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="address"
+                                        render={({field}) => (
+                                            <FormItem className={"w-full"}>
+                                                <FormLabel>Address*</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Address" {...field} />
+                                                </FormControl>
+                                                <FormMessage/>
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
                                 <FormField
                                     control={form.control}
                                     name="diagnosedDiseases"
                                     render={({field}) => (
                                         <FormItem>
-                                            <FormLabel className={"block"}>Diagnosed diseases*</FormLabel>
-                                            <FormControl>
-                                                <InputDiseaseHandler {...field}/>
-                                            </FormControl>
-                                            <FormMessage/>
+                                            <div className="flex justify-between">
+                                                <FormLabel>Diagnosed diseases</FormLabel>
+                                                <FormControl>
+                                                    <InputDiseaseHandler {...field}/>
+                                                </FormControl>
+                                                <FormMessage/>
+                                            </div>
                                             <ShowTable tableFields={["Name", "Diagnosed at"]} {...field}/>
                                         </FormItem>
                                     )}
@@ -165,24 +168,24 @@ function ChildForm({onChildCreated}: ChildFormProps) {
                                     name="regularMedicines"
                                     render={({field}) => (
                                         <FormItem>
-                                            <FormLabel>Regular medicines</FormLabel>
-                                            <FormControl>
-                                                <InputMedicinesHandler {...field}/>
-                                            </FormControl>
-                                            <FormMessage/>
+                                            <div className="flex justify-between">
+                                                <FormLabel>Regular medicines</FormLabel>
+                                                <FormControl>
+                                                    <InputMedicinesHandler {...field}/>
+                                                </FormControl>
+                                                <FormMessage/>
+                                            </div>
                                             <ShowTable tableFields={["Name", "Dose", "Taken since"]} {...field}/>
                                         </FormItem>
                                     )}
                                 />
-                            </ScrollArea>
-                            {isSubmitting ?
-                                <Button type="submit" disabled>{<Spinner/>}</Button>
-                                :
-                                <Button type="submit">Submit</Button>
-                            }
-                        </form>
-                    </Form>
-                </div>
+                            </div>
+                        </ScrollArea>
+                        <DialogFooter>
+                            <SubmitButton isLoading={isSubmitting}/>
+                        </DialogFooter>
+                    </form>
+                </Form>
             </DialogContent>
         </Dialog>
     );

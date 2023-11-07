@@ -37,8 +37,8 @@ export default function ShowTable({tableFields, value}: ShowTableProps) {
                                 </TableCell>
                             ))}
                             <TableCell className="w-6">
-                                <Button type={"button"}
-                                        variant={"destructive"}
+                                <Button type={"button"} className="p-0"
+                                        variant={"ghost"}
                                         onClick={() => {
                                             //const updatedDiseases = diseases.filter((d) => d.id !== disease.id);
                                             //setDiseases(updatedDiseases);

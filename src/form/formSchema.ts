@@ -18,7 +18,7 @@ export const formSchema = z.object({
     diagnosedDiseases:
         z.array(
             diseaseSchema
-        ),
+        ).optional(),
     regularMedicines:
         z.array(
             medicineSchema

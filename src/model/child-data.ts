@@ -11,7 +11,7 @@ export interface ChildData {
     diagnosedDiseases: Disease[],
     hasDiagnosedDiseases: boolean
     regularMedicines?: Medicine[] | undefined,
-    hasRegularMedicines:boolean
+    hasRegularMedicines: boolean
     createdDate: string,
     modifiedDate: string
 }
@@ -22,6 +22,6 @@ export interface ChildDataInput {
     birthDate: Date,
     birthPlace: string,
     address: string,
-    diagnosedDiseases: Disease[],
-    regularMedicines?: Medicine[] | undefined,
+    diagnosedDiseases?: Disease[],
+    regularMedicines?: Medicine[],
 }
