@@ -1,12 +1,13 @@
-import {client} from "@/api/graphql/client";
-import {gql} from "@apollo/client";
+import {client, fullUrlClient} from "@/api/graphql/client";
+import {ApolloClient, gql} from "@apollo/client";
+import {ChildData} from "@/model/child-data";
 
-export default function getAllChildren() {
-    return client
+export default async function getAllChildren(): Promise<ChildData[]> {
+    let value = await fullUrlClient
     .query({
         query: gql`
             query {
-                children {
+                getAllChildren {
                     id
                     familyName
                     givenName
@@ -17,5 +18,6 @@ export default function getAllChildren() {
                 }
             }
         `,
-    })
+    });
+    return await value.data.getAllChildren;
 }

@@ -8,9 +8,9 @@ export interface ChildData {
     birthDate: Date,
     birthPlace: string,
     address: string,
-    diagnosedDiseases: Disease[],
+    diagnosedDiseases?: Disease[],
     hasDiagnosedDiseases: boolean
-    regularMedicines?: Medicine[] | undefined,
+    regularMedicines?: Medicine[],
     hasRegularMedicines: boolean
     createdDate: string,
     modifiedDate: string

@@ -19,22 +19,23 @@ import LoadingButton from "@/components/loading-button";
 
 interface ChildFormProps {
     onChildCreated: (child: ChildData) => void;
+    existingChild?: ChildData
 }
 
 
-function ChildForm({onChildCreated}: ChildFormProps) {
+function ChildForm({onChildCreated, existingChild}: ChildFormProps) {
 
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            familyName: "",
-            givenName: "",
-            birthDate: undefined,
-            birthPlace: "",
-            address: "",
-            diagnosedDiseases: undefined,
-            regularMedicines: undefined
+            familyName: existingChild?.familyName,
+            givenName: existingChild?.givenName,
+            birthDate: existingChild?.birthDate ? new Date(existingChild.birthDate) : undefined,
+            birthPlace: existingChild?.birthPlace,
+            address: existingChild?.address,
+            diagnosedDiseases: existingChild?.diagnosedDiseases,
+            regularMedicines: existingChild?.regularMedicines
         },
     })
 
