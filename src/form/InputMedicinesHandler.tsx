@@ -6,7 +6,7 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/
 import {toast} from "@/components/ui/use-toast"
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import * as z from "zod";
-import {medicineSchema} from "@/form/formSchema";
+import {getMedicineSchema, medicineSchema} from "@/form/formSchema";
 import {zodResolver} from "@hookform/resolvers/zod";
 import CalendarInput from "@/form/CalendarInput";
 import {handleSubmitStopPropagation} from "@/form/stopPropagation";
@@ -20,7 +20,7 @@ interface InputHandlerProps {
 export function InputMedicinesHandler({value, onChange}: InputHandlerProps) {
 
     const medicineForm = useForm<z.infer<typeof medicineSchema>>({
-        resolver: zodResolver(medicineSchema),
+        resolver: zodResolver(getMedicineSchema(value ?? [])),
         defaultValues: {
             name: "",
             dose: "",
@@ -30,17 +30,12 @@ export function InputMedicinesHandler({value, onChange}: InputHandlerProps) {
     const [isDialogOpen, setDialogOpen] = useState(false);
 
     function onMedicineSubmit(values: z.infer<typeof medicineSchema>) {
-        if (!(value ?? []).map(medicine => medicine.name).includes(values.name)) {
-            onChange([...value ?? [], values]);
-            toast({
-                title: "Medicine successfully added",
-                duration: 2000
-            })
-            setDialogOpen(false);
-        } else {
-            medicineForm.setFocus('name')
-            medicineForm.setError('name', {message: "Name already chosen"})
-        }
+        onChange([...value ?? [], values]);
+        toast({
+            title: "Medicine successfully added",
+            duration: 2000
+        })
+        setDialogOpen(false);
     }
 
     return (

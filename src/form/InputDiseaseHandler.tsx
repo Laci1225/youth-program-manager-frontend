@@ -7,7 +7,7 @@ import {toast} from "@/components/ui/use-toast";
 import CalendarInput from "@/form/CalendarInput";
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import * as z from "zod";
-import {diseaseSchema} from "@/form/formSchema";
+import {diseaseSchema, getDiseaseSchema} from "@/form/formSchema";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {handleSubmitStopPropagation} from "@/form/stopPropagation";
 import {Disease} from "@/model/disease";
@@ -20,27 +20,21 @@ interface InputHandlerProps {
 
 export function InputDiseaseHandler({value, onChange}: InputHandlerProps) {
     const diseaseForm = useForm<z.infer<typeof diseaseSchema>>({
-        resolver: zodResolver(diseaseSchema),
+        resolver: zodResolver(getDiseaseSchema(value ?? [])),
         defaultValues: {
             name: "",
-            diagnosedAt: undefined
-            // todo validateResolver
-        }
-    })
+            diagnosedAt: undefined,
+        },
+    });
     const [isDialogOpen, setDialogOpen] = useState(false);
 
     function onDiseaseSubmit(values: z.infer<typeof diseaseSchema>) {
-        if (!(value ?? []).map((disease) => disease.name).includes(values.name)) {
-            onChange([...(value ?? []), values]);
-            toast({
-                title: "Disease successfully added",
-                duration: 2000
-            });
-            setDialogOpen(false);
-        } else {
-            diseaseForm.setFocus('name')
-            diseaseForm.setError('name', {message: "Name already chosen"})
-        }
+        onChange([...(value ?? []), values]);
+        toast({
+            title: "Disease successfully added",
+            duration: 2000
+        });
+        setDialogOpen(false);
     }
 
     return (
