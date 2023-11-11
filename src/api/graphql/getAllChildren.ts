@@ -17,7 +17,7 @@ export default async function getAllChildren(): Promise<ChildData[]> {
                     hasRegularMedicines
                 }
             }
-        `,
+        `, fetchPolicy: "no-cache"
     });
     return await value.data.getAllChildren;
 }

@@ -15,6 +15,8 @@ import {format} from "date-fns";
 import getAllChildren from "@/api/graphql/getAllChildren";
 import Link from "next/link";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
+import deleteChild from "@/api/graphql/deleteChild";
+import {toast} from "@/components/ui/use-toast";
 
 
 export const getServerSideProps = (async () => {
@@ -24,13 +26,15 @@ export const getServerSideProps = (async () => {
             childrenData: children
         }
     };
-}) satisfies GetServerSideProps<{ childrenData: ChildData[] }>;
+}) satisfies GetServerSideProps<{
+    childrenData: ChildData[]
+}>;
 
 export default function Children({childrenData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const [children, setChildren] = useState<ChildData[]>([])
     useEffect(() => {
         setChildren(childrenData);
-    }, [])
+    }, [childrenData])
     const onChildCreated = (newChild: ChildData) => {
         setChildren(prevState => [...prevState, newChild])
     }
@@ -74,8 +78,17 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                                         </TableCell>
                                         <TableCell className="p-1 text-right">
                                             <Button type={"button"} variant={"destructive"}
-                                                    onClick={() => {
-                                                        const updatedChildren = children.filter((c) => c.id !== child.id);
+                                                    onClick={async (event) => {
+                                                        event.preventDefault()
+                                                        await deleteChild(child.id)
+                                                            .then((deletedChild) =>
+                                                                toast({
+                                                                    variant: "default",
+                                                                    title: "Child data deleted successfully",
+                                                                    description: `${deletedChild.givenName} ${deletedChild.familyName} deleted`
+                                                                })
+                                                            )
+                                                        const updatedChildren = children.filter(c => c.id !== child.id)
                                                         setChildren(updatedChildren);
                                                     }}><span className="material-icons-outlined">delete</span></Button>
                                         </TableCell>

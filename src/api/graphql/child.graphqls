@@ -47,8 +47,9 @@ input ChildInput {
 
 type Query {
     getAllChildren: [Child!]!
-    getChildById(id: String): Child!
+    getChildById(id: String!): Child!
 }
 type Mutation{
     addChild(child: ChildInput!): Child!
+    deleteChild(id: String!): Child!
 }
