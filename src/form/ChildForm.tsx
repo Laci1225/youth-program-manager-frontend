@@ -1,7 +1,7 @@
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 import {Input} from "@/components/ui/input";
-import {Button} from "@/components/ui/button";
-import React, {useState} from "react";
+import {Button, ButtonProps} from "@/components/ui/button";
+import React, {ReactNode, useState} from "react";
 import {useForm} from "react-hook-form"
 import * as z from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -20,10 +20,12 @@ import LoadingButton from "@/components/loading-button";
 interface ChildFormProps {
     onChildCreated: (child: ChildData) => void;
     existingChild?: ChildData
+    triggerName: ReactNode
+    triggerVariant?: ButtonProps["variant"]
 }
 
 
-function ChildForm({onChildCreated, existingChild}: ChildFormProps) {
+function ChildForm({onChildCreated, existingChild, triggerName, triggerVariant}: ChildFormProps) {
 
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof formSchema>>({
@@ -70,7 +72,8 @@ function ChildForm({onChildCreated, existingChild}: ChildFormProps) {
                 <Button onClick={() => {
                     setDialogOpen(true)
                     form.reset()
-                }}>+ Add</Button>
+                }} variant={triggerVariant}
+                >{triggerName}</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[800px] h-[90vh] shadow-muted-foreground">
                 <DialogHeader>
@@ -162,7 +165,8 @@ function ChildForm({onChildCreated, existingChild}: ChildFormProps) {
                                                 </FormControl>
                                                 <FormMessage/>
                                             </div>
-                                            <ShowTable tableFields={["Name", "Diagnosed at"]} {...field}/>
+                                            <ShowTable tableFields={["Name", "Diagnosed at"]} {...field}
+                                                       showDeleteButton={true}/>
                                         </FormItem>
                                     )}
                                 />
@@ -178,7 +182,8 @@ function ChildForm({onChildCreated, existingChild}: ChildFormProps) {
                                                 </FormControl>
                                                 <FormMessage/>
                                             </div>
-                                            <ShowTable tableFields={["Name", "Dose", "Taken since"]} {...field}/>
+                                            <ShowTable tableFields={["Name", "Dose", "Taken since"]} {...field}
+                                                       showDeleteButton={true}/>
                                         </FormItem>
                                     )}
                                 />

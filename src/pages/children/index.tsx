@@ -31,13 +31,6 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
     useEffect(() => {
         setChildren(childrenData);
     }, [])
-    /*useEffect(() => {
-        getAllChildren()
-            .then((result) => {
-                const children = result.data.getAllChildren
-                setChildren(children)
-            })
-    }, []);*/
     const onChildCreated = (newChild: ChildData) => {
         setChildren(prevState => [...prevState, newChild])
     }
@@ -45,7 +38,7 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
     return (
         <div className={"container w-4/6 py-28"}>
             <div className={"flex justify-between px-6 pb-6"}>Children
-                <ChildForm onChildCreated={onChildCreated}/>
+                <ChildForm onChildCreated={onChildCreated} triggerName={"+ Add"}/>
             </div>
             <Table className={"border border-gray-700 rounded"}>
                 <TableHeader>

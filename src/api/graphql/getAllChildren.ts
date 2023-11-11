@@ -1,5 +1,5 @@
-import {client, fullUrlClient} from "@/api/graphql/client";
-import {ApolloClient, gql} from "@apollo/client";
+import {fullUrlClient} from "@/api/graphql/client";
+import {gql} from "@apollo/client";
 import {ChildData} from "@/model/child-data";
 
 export default async function getAllChildren(): Promise<ChildData[]> {

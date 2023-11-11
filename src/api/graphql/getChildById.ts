@@ -1,4 +1,4 @@
-import {client, fullUrlClient} from "@/api/graphql/client";
+import {fullUrlClient} from "@/api/graphql/client";
 import {gql} from "@apollo/client";
 import {ChildData} from "@/model/child-data";
 
@@ -17,6 +17,11 @@ export default async function getChildById(childId: string): Promise<ChildData> 
                     diagnosedDiseases {
                         name
                         diagnosedAt
+                    }
+                    regularMedicines {
+                        name
+                        dose
+                        takenSince
                     }
                     hasDiagnosedDiseases
                     hasRegularMedicines

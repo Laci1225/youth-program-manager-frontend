@@ -1,24 +1,16 @@
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
 import {ChildData} from "@/model/child-data";
 import getChildById from "@/api/graphql/getChildById";
-import {notFound, redirect} from "next/navigation";
-import React, {Suspense, useState} from "react";
-import getAllChildren from "@/api/graphql/getAllChildren";
+import React from "react";
 import ChildForm from "@/form/ChildForm";
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
+import {Table, TableBody, TableCell, TableRow} from "@/components/ui/table";
 import Link from "next/link";
 import {format} from "date-fns";
 import {Toaster} from "@/components/ui/toaster";
 import ShowTable from "@/form/ShowTable";
 import {Label} from "@/components/ui/label";
-import {InputProps} from "@/components/ui/input";
 import {fieldAppearance} from "@/components/fieldAppearance";
-import {throws} from "assert";
-import {router} from "next/client";
 
-interface a extends InputProps {
-
-}
 
 export const getServerSideProps = (async (context) => {
     let childData;
@@ -40,7 +32,7 @@ export const getServerSideProps = (async (context) => {
         notFound: true
     };
 }) satisfies GetServerSideProps<{ selectedChild: ChildData }, { childId: string }>;
-export default function Child({selectedChild}: InferGetServerSidePropsType<typeof getServerSideProps>, {...props}: a) {
+export default function Child({selectedChild}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     return (
         <div className={"container w-4/6 py-10"}>
             <div className={"flex justify-between px-6 pb-6"}>
