@@ -17,6 +17,12 @@ import Link from "next/link";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
 import deleteChild from "@/api/graphql/deleteChild";
 import {toast} from "@/components/ui/use-toast";
+import {
+    DropdownMenu,
+    DropdownMenuContent, DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 
 
 export const getServerSideProps = (async () => {
@@ -51,7 +57,7 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                         <TableHead className="text-center">Birth Date</TableHead>
                         <TableHead className="text-center">Has diagnosed diseases</TableHead>
                         <TableHead className="text-center">Takes any medicines</TableHead>
-                        <TableHead className="p-1"></TableHead>
+                        <TableHead className="px-5"></TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -76,21 +82,38 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                                             <span className="material-icons-outlined">check_box</span> :
                                             <span className="material-icons-outlined">check_box_outline_blank</span>}
                                         </TableCell>
-                                        <TableCell className="p-1 text-right">
-                                            <Button type={"button"} variant={"destructive"}
-                                                    onClick={async (event) => {
-                                                        event.preventDefault()
-                                                        await deleteChild(child.id)
-                                                            .then((deletedChild) =>
-                                                                toast({
-                                                                    variant: "default",
-                                                                    title: "Child data deleted successfully",
-                                                                    description: `${deletedChild.givenName} ${deletedChild.familyName} deleted`
-                                                                })
-                                                            )
-                                                        const updatedChildren = children.filter(c => c.id !== child.id)
-                                                        setChildren(updatedChildren);
-                                                    }}><span className="material-icons-outlined">delete</span></Button>
+                                        <TableCell className="p-1 text-center">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger onClick={event => event.preventDefault()}>
+                                                    <span className="material-icons-outlined">more_horiz</span>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent className={"min-w-8"}>
+                                                    <DropdownMenuSeparator/>
+                                                    <DropdownMenuItem className={"justify-center"}>
+                                                        <Button variant={"ghost"}>
+                                                            <span className="material-icons-outlined">edit</span>
+                                                        </Button>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem className={"justify-center"}>
+                                                        <Button type={"button"} variant={"ghost"}
+                                                                onClick={async (event) => {
+                                                                    event.preventDefault()
+                                                                    await deleteChild(child.id)
+                                                                        .then((deletedChild) =>
+                                                                            toast({
+                                                                                variant: "default",
+                                                                                title: "Child data deleted successfully",
+                                                                                description: `${deletedChild.givenName} ${deletedChild.familyName} deleted`
+                                                                            })
+                                                                        )
+                                                                    const updatedChildren = children.filter(c => c.id !== child.id)
+                                                                    setChildren(updatedChildren);
+                                                                }}><span
+                                                            className="material-icons-outlined">delete</span>
+                                                        </Button>
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </TableCell>
                                     </Link>
                                 </TableRow>
