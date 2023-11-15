@@ -16,6 +16,9 @@ import {ScrollArea} from "@/components/ui/scroll-area"
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import {ChildData} from "@/model/child-data";
 import LoadingButton from "@/components/loading-button";
+import updateChild from "@/api/graphql/updateChild";
+import {Disease} from "@/model/disease";
+import {Medicine} from "@/model/medicine";
 
 interface ChildFormProps {
     onChildCreated: (child: ChildData) => void;
@@ -26,7 +29,22 @@ interface ChildFormProps {
 
 
 function ChildForm({onChildCreated, existingChild, triggerName, triggerVariant}: ChildFormProps) {
-
+    const parseDateInDisease = (array: Disease[] | undefined): Disease[] | undefined => {
+        return array?.map((item: Disease) => {
+            if (item.diagnosedAt) {
+                return {...item, diagnosedAt: new Date(item.diagnosedAt)};
+            }
+            return {...item};
+        });
+    }
+    const parseDateInMedicine = (array: Medicine[] | undefined): Medicine[] | undefined => {
+        return array?.map((item: Medicine) => {
+            if (item.takenSince) {
+                return {...item, takenSince: new Date(item.takenSince)};
+            }
+            return {...item};
+        });
+    }
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -36,8 +54,8 @@ function ChildForm({onChildCreated, existingChild, triggerName, triggerVariant}:
             birthDate: existingChild?.birthDate ? new Date(existingChild.birthDate) : undefined,
             birthPlace: existingChild?.birthPlace,
             address: existingChild?.address,
-            diagnosedDiseases: existingChild?.diagnosedDiseases,
-            regularMedicines: existingChild?.regularMedicines
+            diagnosedDiseases: parseDateInDisease(existingChild?.diagnosedDiseases),
+            regularMedicines: parseDateInMedicine(existingChild?.regularMedicines)
         },
     })
 
@@ -45,12 +63,16 @@ function ChildForm({onChildCreated, existingChild, triggerName, triggerVariant}:
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         setIsSubmitting(true)
-
+        if (existingChild) {
+            updateChild(existingChild.id, values)
+                .then((result) => {
+                    console.log(result)
+                    //refresh();
+                })
+        }
         addChild(values)
             .then((result) => {
-                const addedChild = result.data.addChild;
-
-                onChildCreated(addedChild)
+                onChildCreated(result)
                 toast({
                     title: "The child is successfully added",
                     description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,
@@ -190,7 +212,7 @@ function ChildForm({onChildCreated, existingChild, triggerName, triggerVariant}:
                             </div>
                         </ScrollArea>
                         <DialogFooter>
-                            <LoadingButton type="submit" isLoading={isSubmitting}/>
+                            <LoadingButton type="submit" isLoading={isSubmitting} existingChild={existingChild}/>
                         </DialogFooter>
                     </form>
                 </Form>

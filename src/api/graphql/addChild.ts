@@ -1,9 +1,9 @@
 import {client} from "@/api/graphql/client";
 import {gql} from "@apollo/client";
-import {ChildDataInput} from "@/model/child-data";
+import {ChildData, ChildDataInput} from "@/model/child-data";
 
-export default function addChild(values: ChildDataInput) {
-    return client
+export default async function addChild(values: ChildDataInput): Promise<ChildData> {
+    let value = await client
     .mutate({
         mutation: gql`
             mutation AddChild($child: ChildInput!) {
@@ -46,4 +46,5 @@ export default function addChild(values: ChildDataInput) {
             },
         },
     })
+    return value.data.addChild
 }

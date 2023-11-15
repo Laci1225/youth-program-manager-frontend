@@ -11,7 +11,9 @@ interface ShowTableProps {
     showDeleteButton: boolean
 }
 
-function isStrictDate(value: string) {
+export function isStrictDate(value: string | Date) {
+    if (value instanceof Date)
+        return true
     const parsedDate = parseISO(value);
     return isValid(parsedDate);
 }

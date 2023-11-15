@@ -31,8 +31,27 @@ export const getServerSideProps = (async (context) => {
     return {
         notFound: true
     };
-}) satisfies GetServerSideProps<{ selectedChild: ChildData }, { childId: string }>;
+}) satisfies GetServerSideProps<{
+    selectedChild: ChildData
+}, {
+    childId: string
+}>;
 export default function Child({selectedChild}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    /* const deepCopy = (obj) => JSON.parse(JSON.stringify(obj));
+
+     let selectedChildCopy = deepCopy(selectedChild);
+
+     selectedChildCopy = {
+         ...selectedChildCopy,
+         diagnosedDiseases: selectedChildCopy.diagnosedDiseases?.map((values) => {
+             if (values.diagnosedAt) values.diagnosedAt = new Date(values.diagnosedAt);
+             return values;
+         }),
+         regularMedicines: selectedChildCopy.regularMedicines?.map((values) => {
+             if (values.takenSince) values.takenSince = new Date(values.takenSince);
+             return values;
+         }),
+     }*/
     return (
         <div className={"container w-4/6 py-10"}>
             <div className={"flex justify-between px-6 pb-6"}>
