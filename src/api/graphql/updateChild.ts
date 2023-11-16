@@ -27,7 +27,7 @@ export default async function updateChild(childId: string, childData: ChildDataI
                     hasRegularMedicines
                 }
             }
-        `,
+        `, fetchPolicy: "no-cache",
         variables: {
             id: childId,
             child: childData

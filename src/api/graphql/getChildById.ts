@@ -27,7 +27,7 @@ export default async function getChildById(childId: string): Promise<ChildData> 
                     hasRegularMedicines
                 }
             }
-        `,
+        `, fetchPolicy: "no-cache",
         variables: {
             id: childId,
         },

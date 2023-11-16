@@ -11,8 +11,18 @@ export default async function getAllChildren(): Promise<ChildData[]> {
                     id
                     familyName
                     givenName
+                    birthPlace
                     birthDate
                     address
+                    diagnosedDiseases {
+                        name
+                        diagnosedAt
+                    }
+                    regularMedicines {
+                        name
+                        dose
+                        takenSince
+                    }
                     hasDiagnosedDiseases
                     hasRegularMedicines
                 }

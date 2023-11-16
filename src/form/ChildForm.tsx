@@ -66,26 +66,38 @@ function ChildForm({onChildCreated, existingChild, triggerName, triggerVariant}:
         if (existingChild) {
             updateChild(existingChild.id, values)
                 .then((result) => {
-                    console.log(result)
-                    //refresh();
-                })
-        }
-        addChild(values)
-            .then((result) => {
-                onChildCreated(result)
+                    onChildCreated(result)
+                    toast({
+                        title: "The child is successfully updated",
+                        description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} updated`,
+                    })
+                    setDialogOpen(false)
+                }).catch(reason => {
                 toast({
-                    title: "The child is successfully added",
-                    description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,
+                    variant: "destructive",
+                    title: reason.toString(),
                 })
-                setDialogOpen(false)
-            }).catch(reason => {
-            toast({
-                variant: "destructive",
-                title: reason.toString(),
+            }).finally(() => {
+                setIsSubmitting(false)
             })
-        }).finally(() => {
-            setIsSubmitting(false)
-        })
+        } else {
+            addChild(values)
+                .then((result) => {
+                    onChildCreated(result)
+                    toast({
+                        title: "The child is successfully added",
+                        description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,
+                    })
+                    setDialogOpen(false)
+                }).catch(reason => {
+                toast({
+                    variant: "destructive",
+                    title: reason.toString(),
+                })
+            }).finally(() => {
+                setIsSubmitting(false)
+            })
+        }
     }
 
     return (
@@ -93,7 +105,7 @@ function ChildForm({onChildCreated, existingChild, triggerName, triggerVariant}:
             <DialogTrigger asChild>
                 <Button onClick={() => {
                     setDialogOpen(true)
-                    form.reset()
+                    existingChild || form.reset()
                 }} variant={triggerVariant}
                 >{triggerName}</Button>
             </DialogTrigger>
