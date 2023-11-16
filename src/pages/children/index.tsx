@@ -44,6 +44,12 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
     const onChildCreated = (newChild: ChildData) => {
         setChildren(prevState => [...prevState, newChild])
     }
+    const onChildUpdated = (updatedChild: ChildData) => {
+        const updatedChildren = children.map((child) =>
+            child.id === updatedChild.id ? updatedChild : child
+        );
+        setChildren(updatedChildren)
+    }
 
     return (
         <div className={"container w-4/6 py-28"}>
@@ -87,16 +93,18 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                                                 <DropdownMenuTrigger onClick={event => event.preventDefault()}>
                                                     <span className="material-icons-outlined">more_horiz</span>
                                                 </DropdownMenuTrigger>
-                                                <DropdownMenuContent className={"min-w-8"}
-                                                                     onClick={event => event.preventDefault()}>
+                                                <DropdownMenuContent className={"min-w-8"}>
                                                     <DropdownMenuSeparator/>
                                                     <DropdownMenuItem className={"justify-center"}>
-                                                        <ChildForm existingChild={child}
-                                                                   triggerVariant={"ghost"}
-                                                                   triggerName={<span
-                                                                       className="material-icons-outlined">edit</span>}
-                                                                   onChildCreated={() => {
-                                                                   }}/>
+                                                        <Button type={"button"} variant={"ghost"}
+                                                                onClick={event => event.stopPropagation()}>
+                                                            <ChildForm existingChild={child}
+                                                                       triggerVariant={"ghost"}
+                                                                       triggerName={<span
+                                                                           className="material-icons-outlined">edit</span>}
+                                                                       onChildCreated={onChildUpdated}
+                                                            />
+                                                        </Button>
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem className={"justify-center"}>
                                                         <Button type={"button"} variant={"ghost"}
