@@ -1,83 +1,72 @@
-import {useForm, UseFormReturn} from "react-hook-form";
-import React from "react";
+import {useForm} from "react-hook-form";
+import React, {useState} from "react";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
-import {Form, FormControl, FormField, FormItem, FormLabel} from "@/components/ui/form";
-import {useToast} from "@/components/ui/use-toast"
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
+import {toast} from "@/components/ui/use-toast"
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import * as z from "zod";
-import {medicineSchema} from "@/form/formSchema";
+import {getMedicineSchema, medicineSchema} from "@/form/formSchema";
 import {zodResolver} from "@hookform/resolvers/zod";
 import CalendarInput from "@/form/CalendarInput";
 import {handleSubmitStopPropagation} from "@/form/stopPropagation";
+import {Medicine} from "@/model/medicine";
 
 interface InputHandlerProps {
-    form:
-        UseFormReturn<{
-            familyName: string;
-            givenName: string;
-            birthDate: Date;
-            birthPlace: string;
-            address: string;
-            diseases: {
-                name: string;
-                diagnosedAt: Date;
-            }[];
-            medicines?: {
-                name: string;
-                dose: string;
-                takenSince?: any;
-            }[] | undefined;
-        }>
+    value?: Medicine[];
+    onChange: (newValue: Medicine[]) => void
 }
 
-export function InputMedicinesHandler({form,}: InputHandlerProps) {
+export function InputMedicinesHandler({value, onChange}: InputHandlerProps) {
 
     const medicineForm = useForm<z.infer<typeof medicineSchema>>({
-        resolver: zodResolver(medicineSchema),
+        resolver: zodResolver(getMedicineSchema(value ?? [])),
         defaultValues: {
             name: "",
             dose: "",
             takenSince: undefined
         }
     })
+    const [isDialogOpen, setDialogOpen] = useState(false);
 
     function onMedicineSubmit(values: z.infer<typeof medicineSchema>) {
-        form.setValue("medicines", [...(form.getValues("medicines") ?? []), values], {shouldValidate: true})
-        console.log(form.getValues("medicines"))
+        onChange([...value ?? [], values]);
         toast({
             title: "Medicine successfully added",
-            //description: medicineName +" "+ medicineDose +" "+ medicineTakenSince,
+            duration: 2000
         })
+        setDialogOpen(false);
     }
 
-    const {toast} = useToast()
     return (
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-                <div className={"w-full"}>
-                    <Button className={"w-full h-full"} type={"button"} inputMode={"none"}
-                            variant={"ghost"}>
-                        Add a regular medicine
-                    </Button>
-                </div>
+                <Button type={"button"}
+                        variant={"default"}
+                        onClick={() => {
+                            setDialogOpen(true)
+                            medicineForm.reset()
+                        }}>
+                    Add a regular medicine
+                </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[800px] h-full overflow-auto">
+            <DialogContent className="sm:max-w-[500px] overflow-auto">
                 <DialogHeader>
-                    <DialogTitle>Edit profile</DialogTitle>
+                    <DialogTitle>Create a medicine</DialogTitle>
                 </DialogHeader>
                 <Form {...medicineForm}>
                     <form onSubmit={handleSubmitStopPropagation(medicineForm)(onMedicineSubmit)}>
-                        <div className="grid w-full items-center gap-4">
+                        <div className="grid w-full items-center">
                             <FormField
                                 control={medicineForm.control}
                                 name={`name`}
                                 render={({field}) => (
                                     <FormItem>
-                                        <FormLabel>Name</FormLabel>
+                                        <FormLabel>Name*</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Name" {...field}/>
                                         </FormControl>
+                                        <FormMessage/>
                                     </FormItem>
                                 )}
                             />
@@ -86,10 +75,11 @@ export function InputMedicinesHandler({form,}: InputHandlerProps) {
                                 name={`dose`}
                                 render={({field}) => (
                                     <FormItem>
-                                        <FormLabel>Dose</FormLabel>
+                                        <FormLabel>Dose*</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Dose" {...field}/>
                                         </FormControl>
+                                        <FormMessage/>
                                     </FormItem>
                                 )}
                             />
@@ -101,8 +91,9 @@ export function InputMedicinesHandler({form,}: InputHandlerProps) {
                                         <FormItem>
                                             <FormLabel>Taken since</FormLabel>
                                             <FormControl>
-                                                <CalendarInput {...field}/>
+                                                <CalendarInput {...field} shownYear={2016}/>
                                             </FormControl>
+                                            <FormMessage/>
                                         </FormItem>
                                     )
                                 }}

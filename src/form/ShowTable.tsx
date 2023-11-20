@@ -37,19 +37,19 @@ export default function ShowTable({tableFields, value}: ShowTableProps) {
                                 </TableCell>
                             ))}
                             <TableCell className="w-6">
-                                <Button type={"button"}
-                                        variant={"destructive"}
+                                <Button type={"button"} className="p-0"
+                                        variant={"ghost"}
                                         onClick={() => {
                                             //const updatedDiseases = diseases.filter((d) => d.id !== disease.id);
                                             //setDiseases(updatedDiseases);
-                                        }}>Remove</Button>
+                                        }}><span className="material-icons-outlined">delete</span></Button>
                             </TableCell>
                         </TableRow>
                     ))) : (
                     <TableRow>
-                        <TableCell className="w-1/3">Nothing</TableCell>
-                        <TableCell className="w-1/3">added</TableCell>
-                        <TableCell className="w-1/3">yet</TableCell>
+                        <TableCell className={"text-center text-gray-400"} colSpan={tableFields.length}>
+                            Nothing added yet
+                        </TableCell>
                     </TableRow>
                 )}
             </TableBody>
