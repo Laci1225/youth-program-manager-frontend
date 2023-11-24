@@ -10,6 +10,7 @@ import {Toaster} from "@/components/ui/toaster";
 import ShowTable from "@/form/ShowTable";
 import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
+import {Button} from "@/components/ui/button";
 
 
 export const getServerSideProps = (async (context) => {
@@ -50,15 +51,17 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
 
     return (
         <div className={"container w-4/6 py-10"}>
-            <div className={"flex justify-between px-6 pb-6"}>
-                <Link href={"/"}><span className="material-icons-outlined">arrow_back</span></Link>
+            <div className={"flex justify-between px-6 pb-6 items-center"}>
+                <Button asChild variant="ghost" size="icon">
+                    <Link href={"/"}><span className="material-icons-outlined">arrow_back</span></Link>
+                </Button>
                 <div>Child details</div>
                 <div><ChildForm onChildCreated={onChildUpdated} existingChild={existingChild}
                                 triggerName={<span className="material-icons-outlined">edit</span>}
                                 triggerVariant={"ghost"}/>
                 </div>
             </div>
-            <Table className={"border border-gray-700 rounded"}>
+            <Table>
                 <TableBody>
                     <TableRow key={0} className={"hover:bg-gray-200 "}>
                         <TableCell className="text-left px-10">

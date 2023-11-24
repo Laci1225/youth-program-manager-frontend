@@ -96,15 +96,12 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                                                 <DropdownMenuContent className={"min-w-8"}>
                                                     <DropdownMenuSeparator/>
                                                     <DropdownMenuItem className={"justify-center"}>
-                                                        <Button type={"button"} variant={"ghost"}
-                                                                onClick={event => event.stopPropagation()}>
-                                                            <ChildForm existingChild={child}
-                                                                       triggerVariant={"ghost"}
-                                                                       triggerName={<span
-                                                                           className="material-icons-outlined">edit</span>}
-                                                                       onChildCreated={onChildUpdated}
-                                                            />
-                                                        </Button>
+                                                        <ChildForm existingChild={child}
+                                                                   triggerVariant={"ghost"}
+                                                                   triggerName={<span
+                                                                       className="material-icons-outlined">edit</span>}
+                                                                   onChildCreated={onChildUpdated}
+                                                        />
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem className={"justify-center"}>
                                                         <Button type={"button"} variant={"ghost"}
