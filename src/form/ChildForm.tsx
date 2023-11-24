@@ -166,7 +166,7 @@ function ChildForm({onChildCreated, existingChild, triggerName, triggerVariant}:
                                                 <FormMessage/>
                                             </div>
                                             <ShowTable tableFields={["Name", "Diagnosed at"]} {...field}
-                                                       showDeleteButton={true}/>
+                                                       showDeleteButton/>
                                         </FormItem>
                                     )}
                                 />
@@ -183,7 +183,7 @@ function ChildForm({onChildCreated, existingChild, triggerName, triggerVariant}:
                                                 <FormMessage/>
                                             </div>
                                             <ShowTable tableFields={["Name", "Dose", "Taken since"]} {...field}
-                                                       showDeleteButton={true}/>
+                                                       showDeleteButton/>
                                         </FormItem>
                                     )}
                                 />

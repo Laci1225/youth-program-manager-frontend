@@ -7,7 +7,7 @@ import {
     TableRow
 } from "@/components/ui/table";
 import {Button} from "@/components/ui/button";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {ChildData} from "@/model/child-data";
 import ChildForm from "@/form/ChildForm";
 import {Toaster} from "@/components/ui/toaster";
@@ -15,10 +15,11 @@ import {format} from "date-fns";
 import getAllChildren from "@/api/graphql/getAllChildren";
 import Link from "next/link";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
+import {serverSideClient} from "@/api/graphql/client";
 
 
 export const getServerSideProps = (async () => {
-    const children = await getAllChildren()
+    const children = await getAllChildren(serverSideClient)
     return {
         props: {
             childrenData: children
@@ -27,10 +28,7 @@ export const getServerSideProps = (async () => {
 }) satisfies GetServerSideProps<{ childrenData: ChildData[] }>;
 
 export default function Children({childrenData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    const [children, setChildren] = useState<ChildData[]>([])
-    useEffect(() => {
-        setChildren(childrenData);
-    }, [])
+    const [children, setChildren] = useState<ChildData[]>(childrenData)
     const onChildCreated = (newChild: ChildData) => {
         setChildren(prevState => [...prevState, newChild])
     }

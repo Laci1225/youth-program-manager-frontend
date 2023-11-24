@@ -1,9 +1,9 @@
-import {client} from "@/api/graphql/client";
+import {clientSideClient} from "@/api/graphql/client";
 import {gql} from "@apollo/client";
 import {ChildDataInput} from "@/model/child-data";
 
 export default function addChild(values: ChildDataInput) {
-    return client
+    return clientSideClient
     .mutate({
         mutation: gql`
             mutation AddChild($child: ChildInput!) {
