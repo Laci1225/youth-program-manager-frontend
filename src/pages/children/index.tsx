@@ -50,7 +50,7 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
     return (
         <div className={"container w-4/6 py-28"}>
             <div className={"flex justify-between px-6 pb-6"}>Children
-                <ChildForm onChildCreated={onChildCreated} triggerName={"+ Add"}/>
+                <ChildForm onChildModified={onChildCreated} triggerName={"+ Add"}/>
             </div>
             <Table className={"border border-gray-700 rounded"}>
                 <TableHeader>
@@ -96,7 +96,7 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                                                                    triggerVariant={"ghost"}
                                                                    triggerName={<span
                                                                        className="material-icons-outlined">edit</span>}
-                                                                   onChildCreated={onChildUpdated}
+                                                                   onChildModified={onChildUpdated}
                                                         />
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem className={"justify-center"}>

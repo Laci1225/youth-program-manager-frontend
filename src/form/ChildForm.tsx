@@ -21,14 +21,14 @@ import {Disease} from "@/model/disease";
 import {Medicine} from "@/model/medicine";
 
 interface ChildFormProps {
-    onChildCreated: (child: ChildData) => void;
+    onChildModified: (child: ChildData) => void;
     existingChild?: ChildData
     triggerName: ReactNode
     triggerVariant?: ButtonProps["variant"]
 }
 
 
-function ChildForm({onChildCreated, existingChild, triggerName, triggerVariant}: ChildFormProps) {
+function ChildForm({onChildModified, existingChild, triggerName, triggerVariant}: ChildFormProps) {
     const parseDateInDisease = (array: Disease[] | undefined): Disease[] | undefined => {
         return array?.map((item: Disease) => {
             if (item.diagnosedAt) {
@@ -66,7 +66,7 @@ function ChildForm({onChildCreated, existingChild, triggerName, triggerVariant}:
         if (existingChild) {
             updateChild(existingChild.id, values)
                 .then((result) => {
-                    onChildCreated(result)
+                    onChildModified(result)
                     toast({
                         title: "The child is successfully updated",
                         description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} updated`,
@@ -83,7 +83,7 @@ function ChildForm({onChildCreated, existingChild, triggerName, triggerVariant}:
         } else {
             addChild(values)
                 .then((result) => {
-                    onChildCreated(result)
+                    onChildModified(result)
                     toast({
                         title: "The child is successfully added",
                         description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,
@@ -102,7 +102,7 @@ function ChildForm({onChildCreated, existingChild, triggerName, triggerVariant}:
 
     return (
         <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
+            <DialogTrigger onClick={event => event.preventDefault()}>
                 <Button onClick={() => {
                     setDialogOpen(true)
                     existingChild || form.reset()

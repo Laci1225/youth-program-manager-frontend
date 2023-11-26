@@ -1,7 +1,7 @@
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
 import {ChildData} from "@/model/child-data";
 import getChildById from "@/api/graphql/getChildById";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import ChildForm from "@/form/ChildForm";
 import Link from "next/link";
 import {format} from "date-fns";
@@ -38,12 +38,7 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
 
     const onChildUpdated = (newChild: ChildData) => {
         setExistingChild(newChild)
-        //  window.location.reload();
     }
-    useEffect(() => {
-        setExistingChild(selectedChild);
-    }, [selectedChild])
-
 
     return (
         <div className={"container w-4/6 py-10"}>
@@ -55,7 +50,7 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                     Child details
                 </div>
                 <div>
-                    <ChildForm onChildCreated={onChildUpdated}
+                    <ChildForm onChildModified={onChildUpdated}
                                existingChild={existingChild}
                                triggerName={<span className="material-icons-outlined">edit</span>}
                                triggerVariant={"ghost"}/>
@@ -65,24 +60,24 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                 <div className="mb-6">
                     <Label>Full Name:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {selectedChild.givenName} {selectedChild.familyName}
+                        {existingChild.givenName} {existingChild.familyName}
                     </div>
                 </div>
                 <div className="mb-6">
                     <Label>Birth date and place:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {format(new Date(selectedChild.birthDate), "P")} {selectedChild.birthPlace}
+                        {format(new Date(existingChild.birthDate), "P")} {existingChild.birthPlace}
                     </div>
                 </div>
                 <div className="mb-6">
                     <Label>Address:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {selectedChild.address}
+                        {existingChild.address}
                     </div>
                 </div>
-                <ShowTable tableFields={["Name", "Diagnosed at"]} value={selectedChild.diagnosedDiseases}
+                <ShowTable tableFields={["Name", "Diagnosed at"]} value={existingChild.diagnosedDiseases}
                            showDeleteButton={false}/>
-                <ShowTable tableFields={["Name", "Dose", "Taken since"]} value={selectedChild.regularMedicines}
+                <ShowTable tableFields={["Name", "Dose", "Taken since"]} value={existingChild.regularMedicines}
                            showDeleteButton={false}/>
             </div>
             <Toaster/>
