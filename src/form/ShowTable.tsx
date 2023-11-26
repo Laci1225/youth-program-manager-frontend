@@ -25,10 +25,10 @@ export default function ShowTable({tableFields, value, showDeleteButton}: ShowTa
                 <TableRow>
                     {
                         tableFields.map(value => (
-                            <TableHead key={value}>{value}</TableHead>
+                            <TableHead key={value} className={"text-center"}>{value}</TableHead>
                         ))
                     }
-                    <TableHead className="w-5"></TableHead>
+                    {showDeleteButton && <TableHead className="w-5"></TableHead>}
                 </TableRow>
             </TableHeader>
             <TableBody>{
@@ -36,7 +36,7 @@ export default function ShowTable({tableFields, value, showDeleteButton}: ShowTa
                     value.map((field: Disease | Medicine, index: number) => (
                         <TableRow key={index}>
                             {Object.values(field).map((value) => (
-                                <TableCell key={value}>
+                                <TableCell key={value} className={"text-center"}>
                                     {isStrictDate(value) ? (
                                         <>{format(new Date(value), "P")}</>
                                     ) : (
@@ -49,8 +49,6 @@ export default function ShowTable({tableFields, value, showDeleteButton}: ShowTa
                                     <Button type={"button"} className="p-0"
                                             variant={"ghost"}
                                             onClick={() => {
-                                                //const updatedDiseases = diseases.filter((d) => d.id !== disease.id);
-                                                //setDiseases(updatedDiseases);
                                             }}><span className="material-icons-outlined">delete</span></Button>
                                 </TableCell>
                             }

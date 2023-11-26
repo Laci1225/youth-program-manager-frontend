@@ -7,7 +7,7 @@ import {
     TableRow
 } from "@/components/ui/table";
 import {Button} from "@/components/ui/button";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {ChildData} from "@/model/child-data";
 import ChildForm from "@/form/ChildForm";
 import {Toaster} from "@/components/ui/toaster";
@@ -23,24 +23,20 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import {serverSideClient} from "@/api/graphql/client";
 
 
 export const getServerSideProps = (async () => {
-    const children = await getAllChildren()
+    const children = await getAllChildren(serverSideClient)
     return {
         props: {
             childrenData: children
         }
     };
-}) satisfies GetServerSideProps<{
-    childrenData: ChildData[]
-}>;
+}) satisfies GetServerSideProps<{ childrenData: ChildData[] }>;
 
 export default function Children({childrenData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    const [children, setChildren] = useState<ChildData[]>([])
-    useEffect(() => {
-        setChildren(childrenData);
-    }, [childrenData])
+    const [children, setChildren] = useState<ChildData[]>(childrenData)
     const onChildCreated = (newChild: ChildData) => {
         setChildren(prevState => [...prevState, newChild])
     }
