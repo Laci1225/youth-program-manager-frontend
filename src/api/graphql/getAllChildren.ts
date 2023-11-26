@@ -1,12 +1,13 @@
-import {client} from "@/api/graphql/client";
-import {gql} from "@apollo/client";
+import {ApolloClient, NormalizedCacheObject} from '@apollo/client';
+import {clientSideClient} from '@/api/graphql/client';
+import {gql} from '@apollo/client';
+import {ChildData} from '@/model/child-data';
 
-export default function getAllChildren() {
-    return client
-    .query({
+export default async function getAllChildren(client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<ChildData[]> {
+    let value = await client.query({
         query: gql`
             query {
-                children {
+                getAllChildren {
                     id
                     familyName
                     givenName
@@ -17,5 +18,6 @@ export default function getAllChildren() {
                 }
             }
         `,
-    })
+    });
+    return await value.data.getAllChildren;
 }

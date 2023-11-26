@@ -1,26 +1,32 @@
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import React from "react";
-import {format} from "date-fns";
+import {format, isValid, parseISO} from "date-fns";
 import {Button} from "@/components/ui/button";
 import {Disease} from "@/model/disease";
 import {Medicine} from "@/model/medicine";
 
 interface ShowTableProps {
     tableFields: string[],
-    value: any;
+    value: any[] | undefined;
+    showDeleteButton: boolean
 }
 
-export default function ShowTable({tableFields, value}: ShowTableProps) {
+function isStrictDate(value: string) {
+    const parsedDate = parseISO(value);
+    return isValid(parsedDate);
+}
+
+export default function ShowTable({tableFields, value, showDeleteButton}: ShowTableProps) {
     return (<div className={"w-full"}>
         <Table className={"w-full border border-gray-200"}>
             <TableHeader>
                 <TableRow>
                     {
                         tableFields.map(value => (
-                            <TableHead key={value}>{value}</TableHead>
+                            <TableHead key={value} className={"text-center"}>{value}</TableHead>
                         ))
                     }
-                    <TableHead className="w-5"></TableHead>
+                    {showDeleteButton && <TableHead className="w-5"></TableHead>}
                 </TableRow>
             </TableHeader>
             <TableBody>{
@@ -28,22 +34,22 @@ export default function ShowTable({tableFields, value}: ShowTableProps) {
                     value.map((field: Disease | Medicine, index: number) => (
                         <TableRow key={index}>
                             {Object.values(field).map((value) => (
-                                <TableCell key={value}>
-                                    {value instanceof Date ? (
-                                        <>{format(value, "P")}</>
+                                <TableCell key={value} className={"text-center"}>
+                                    {isStrictDate(value) ? (
+                                        <>{format(new Date(value), "P")}</>
                                     ) : (
                                         <>{value}</>
                                     )}
                                 </TableCell>
                             ))}
-                            <TableCell className="w-6">
-                                <Button type={"button"} className="p-0"
-                                        variant={"ghost"}
-                                        onClick={() => {
-                                            //const updatedDiseases = diseases.filter((d) => d.id !== disease.id);
-                                            //setDiseases(updatedDiseases);
-                                        }}><span className="material-icons-outlined">delete</span></Button>
-                            </TableCell>
+                            {showDeleteButton &&
+                                <TableCell className="w-6">
+                                    <Button type={"button"} className="p-0"
+                                            variant={"ghost"}
+                                            onClick={() => {
+                                            }}><span className="material-icons-outlined">delete</span></Button>
+                                </TableCell>
+                            }
                         </TableRow>
                     ))) : (
                     <TableRow>

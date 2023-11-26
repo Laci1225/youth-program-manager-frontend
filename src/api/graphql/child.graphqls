@@ -1,5 +1,14 @@
 scalar LocalDateTime
 
+type Disease{
+    name: String!
+    diagnosedAt: LocalDateTime
+}
+type Medicine{
+    name: String!
+    dose: String!
+    takenSince: LocalDateTime
+}
 type Child {
     id: ID!
     familyName: String!
@@ -7,44 +16,38 @@ type Child {
     birthDate: LocalDateTime!
     birthPlace:String!
     address: String!
-    diagnosedDiseases: [Diseases!]!
-    regularMedicines: [Medicines!]
+    diagnosedDiseases: [Disease!]!
+    regularMedicines: [Medicine!]
     hasDiagnosedDiseases: Boolean!
     hasRegularMedicines: Boolean!
     createdDate: LocalDateTime
     modifiedDate: LocalDateTime
 }
+
+input DiseaseInput{
+    name: String!
+    diagnosedAt: LocalDateTime!
+}
+
+input MedicineInput{
+    name: String!
+    dose: String!
+    takenSince: LocalDateTime
+}
+
 input ChildInput {
     familyName: String!
     givenName: String!
     birthDate: LocalDateTime!
     birthPlace:String!
     address: String!
-    diagnosedDiseases: [DiseasesInput!]!
-    regularMedicines: [MedicinesInput!]
-}
-
-type Diseases{
-    name: String!
-    diagnosedAt: LocalDateTime
-}
-type Medicines{
-    name: String!
-    dose: String!
-    takenSince: LocalDateTime
-}
-input DiseasesInput{
-    name: String!
-    diagnosedAt: LocalDateTime!
-}
-input MedicinesInput{
-    name: String!
-    dose: String!
-    takenSince: LocalDateTime
+    diagnosedDiseases: [DiseaseInput!]
+    regularMedicines: [MedicineInput!]
 }
 
 type Query {
-    children: [Child!]!
+    getAllChildren: [Child!]!
+    getChildById(id: String): Child!
 }
 type Mutation{
     addChild(child: ChildInput!): Child!

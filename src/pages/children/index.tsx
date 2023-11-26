@@ -7,34 +7,28 @@ import {
     TableRow
 } from "@/components/ui/table";
 import {Button} from "@/components/ui/button";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {ChildData} from "@/model/child-data";
 import ChildForm from "@/form/ChildForm";
 import {Toaster} from "@/components/ui/toaster";
 import {format} from "date-fns";
 import getAllChildren from "@/api/graphql/getAllChildren";
+import Link from "next/link";
+import {GetServerSideProps, InferGetServerSidePropsType} from "next";
+import {serverSideClient} from "@/api/graphql/client";
 
-/*
+
 export const getServerSideProps = (async () => {
+    const children = await getAllChildren(serverSideClient)
+    return {
+        props: {
+            childrenData: children
+        }
+    };
+}) satisfies GetServerSideProps<{ childrenData: ChildData[] }>;
 
-        return {
-            props: {
-                children
-            }
-        };
-}) satisfies GetServerSideProps<{ children: ChildData[] }>;
-
-export default function Seasons({children}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-*/
-export default function Children() {
-    const [children, setChildren] = useState<ChildData[]>([])
-    useEffect(() => {
-        getAllChildren()
-            .then((result) => {
-                const children = result.data.children
-                setChildren(children)
-            })
-    }, []);
+export default function Children({childrenData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const [children, setChildren] = useState<ChildData[]>(childrenData)
     const onChildCreated = (newChild: ChildData) => {
         setChildren(prevState => [...prevState, newChild])
     }
@@ -42,7 +36,7 @@ export default function Children() {
     return (
         <div className={"container w-4/6 py-28"}>
             <div className={"flex justify-between px-6 pb-6"}>Children
-                <ChildForm onChildCreated={onChildCreated}/>
+                <ChildForm onChildCreated={onChildCreated} triggerName={"+ Add"}/>
             </div>
             <Table className={"border border-gray-700 rounded"}>
                 <TableHeader>
@@ -58,29 +52,32 @@ export default function Children() {
                     {
                         children && children.length !== 0 ? (
                             children.map((child) => (
-                                <TableRow key={child.id}>
-                                    <TableCell className="text-center">
-                                        {child.givenName} {child.familyName}
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        {format(new Date(child.birthDate), "P")}
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        {child.hasDiagnosedDiseases ?
+                                <TableRow key={child.id} className={"hover:bg-gray-200"}>
+                                    <Link key={child.id} href={`children/${child.id}`} className="contents">
+                                        <TableCell className="text-center">
+                                            {child.givenName} {child.familyName}
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            {format(new Date(child.birthDate), "P")}
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            {child.hasDiagnosedDiseases ?
+                                                <span className="material-icons-outlined">check_box</span> :
+                                                <span
+                                                    className="material-icons-outlined">check_box_outline_blank</span>}
+                                        </TableCell>
+                                        <TableCell className="text-center">{child.hasRegularMedicines ?
                                             <span className="material-icons-outlined">check_box</span> :
                                             <span className="material-icons-outlined">check_box_outline_blank</span>}
-                                    </TableCell>
-                                    <TableCell className="text-center">{child.hasRegularMedicines ?
-                                        <span className="material-icons-outlined">check_box</span> :
-                                        <span className="material-icons-outlined">check_box_outline_blank</span>}
-                                    </TableCell>
-                                    <TableCell className="p-1 text-right">
-                                        <Button type={"button"} variant={"destructive"}
-                                                onClick={() => {
-                                                    const updatedChildren = children.filter((c) => c.id !== child.id);
-                                                    setChildren(updatedChildren);
-                                                }}><span className="material-icons-outlined">delete</span></Button>
-                                    </TableCell>
+                                        </TableCell>
+                                        <TableCell className="p-1 text-right">
+                                            <Button type={"button"} variant={"destructive"}
+                                                    onClick={() => {
+                                                        const updatedChildren = children.filter((c) => c.id !== child.id);
+                                                        setChildren(updatedChildren);
+                                                    }}><span className="material-icons-outlined">delete</span></Button>
+                                        </TableCell>
+                                    </Link>
                                 </TableRow>
                             ))) : (
                             <TableRow>
