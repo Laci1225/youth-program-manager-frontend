@@ -17,7 +17,7 @@ export default function CalendarInput({value, onChange, shownYear}: CalendarInpu
     return (
         <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
             <PopoverTrigger className={cn(
-                fieldAppearance +
+                fieldAppearance,
                 !value && "text-muted-foreground"
             )} type={"button"} onClick={() => setIsPopoverOpen(true)}>
                 <div className="flex">

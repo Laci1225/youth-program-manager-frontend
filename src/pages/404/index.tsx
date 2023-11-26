@@ -7,11 +7,10 @@ export default function Custom404() {
             <div className="p-4">
                 <h1>404 - Page Not Found</h1>
             </div>
-            <Link href="/">
-                <Button>
+            <Button asChild>
+                <Link href="/">
                     Back to the main page
-
-                </Button>
-            </Link>
+                </Link>
+            </Button>
         </div>)
 }

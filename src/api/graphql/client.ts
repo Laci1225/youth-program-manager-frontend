@@ -1,12 +1,12 @@
 import {ApolloClient, InMemoryCache} from "@apollo/client";
 
-export const client = new ApolloClient({
+export const clientSideClient = new ApolloClient({
     uri: '/graphql',
     cache: new InMemoryCache({
         addTypename: false
     }),
 });
-export const fullUrlClient = new ApolloClient({
+export const serverSideClient = new ApolloClient({
     uri: 'http://localhost:8080/graphql',
     cache: new InMemoryCache({
         addTypename: false
