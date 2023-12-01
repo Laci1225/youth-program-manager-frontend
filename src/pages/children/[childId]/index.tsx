@@ -10,6 +10,10 @@ import ShowTable from "@/form/ShowTable";
 import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
 import {serverSideClient} from "@/api/graphql/client";
+import deleteChild from "@/api/graphql/deleteChild";
+import {toast} from "@/components/ui/use-toast";
+import {Button} from "@/components/ui/button";
+import {useRouter} from "next/router";
 
 
 export const getServerSideProps = (async (context) => {
@@ -33,6 +37,21 @@ export const getServerSideProps = (async (context) => {
     };
 }) satisfies GetServerSideProps<{ selectedChild: ChildData }, { childId: string }>;
 export default function Child({selectedChild}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const router = useRouter();
+    const handleDelete = async (event) => {
+        event.preventDefault();
+        try {
+            const deletedChild = await deleteChild(selectedChild.id);
+            toast({
+                variant: "default",
+                title: "Child data deleted successfully",
+                description: `${deletedChild.givenName} ${deletedChild.familyName} deleted`
+            });
+            router.push('/children');
+        } catch (error) {
+            console.error('Deletion failed', error);
+        }
+    };
     return (
         <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
             <div className={"flex justify-between px-6 pb-6"}>
@@ -48,6 +67,10 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                                existingChild={selectedChild}
                                triggerName={<span className="material-icons-outlined">edit</span>}
                                triggerVariant={"ghost"}/>
+                    <Button type={"button"} variant={"ghost"}
+                            onClick={handleDelete}><span
+                        className="material-icons-outlined">delete</span>
+                    </Button>
                 </div>
             </div>
             <div className="border border-gray-200 rounded p-4">

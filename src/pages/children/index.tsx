@@ -60,8 +60,9 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                     {
                         children && children.length !== 0 ? (
                             children.map((child) => (
-                                <TableRow key={child.id} className={"hover:bg-gray-200"}>
-                                    <Link key={child.id} href={`children/${child.id}`} className="contents">
+                                <Link key={child.id} href={`children/${child.id}`}
+                                      className="contents">
+                                    <TableRow key={child.id} className={"hover:bg-gray-200"}>
                                         <TableCell className="text-center">
                                             {child.givenName} {child.familyName}
                                         </TableCell>
@@ -76,7 +77,8 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                                         </TableCell>
                                         <TableCell className="text-center">{child.hasRegularMedicines ?
                                             <span className="material-icons-outlined">check_box</span> :
-                                            <span className="material-icons-outlined">check_box_outline_blank</span>}
+                                            <span
+                                                className="material-icons-outlined">check_box_outline_blank</span>}
                                         </TableCell>
                                         <TableCell className="p-1 text-center">
                                             <DropdownMenu>
@@ -111,8 +113,8 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
                                         </TableCell>
-                                    </Link>
-                                </TableRow>
+                                    </TableRow>
+                                </Link>
                             ))) : (
                             <TableRow>
                                 <TableCell colSpan={5}>Nothing added</TableCell>
