@@ -6,6 +6,17 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import {Button} from "@/components/ui/button";
 import React, {useState} from "react";
 import {ChildData} from "@/model/child-data";
@@ -92,23 +103,49 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                                                             <span className="material-icons-outlined">edit</span>
                                                         </Button>
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem className={"justify-center"}>
-                                                        <Button type={"button"} variant={"ghost"}
-                                                                onClick={async (event) => {
-                                                                    event.preventDefault()
-                                                                    await deleteChild(child.id)
-                                                                        .then((deletedChild) =>
-                                                                            toast({
-                                                                                variant: "default",
-                                                                                title: "Child data deleted successfully",
-                                                                                description: `${deletedChild.givenName} ${deletedChild.familyName} deleted`
-                                                                            })
-                                                                        )
-                                                                    const updatedChildren = children.filter(c => c.id !== child.id)
-                                                                    setChildren(updatedChildren);
-                                                                }}><span
-                                                            className="material-icons-outlined">delete</span>
-                                                        </Button>
+                                                    <DropdownMenuItem className={"justify-center"}
+                                                                      onClick={e => e.preventDefault()}>
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger asChild>
+                                                                <Button type={"button"} variant={"destructive"}>
+                                                                    <span
+                                                                        className="material-icons-outlined">delete</span>
+                                                                </Button>
+                                                            </AlertDialogTrigger>
+                                                            <AlertDialogContent>
+                                                                <AlertDialogHeader>
+                                                                    <AlertDialogTitle>Are you absolutely
+                                                                        sure?</AlertDialogTitle>
+                                                                    <AlertDialogDescription>
+                                                                        This action cannot be undone. This will
+                                                                        permanently delete your
+                                                                        account and remove your data from our servers.
+                                                                    </AlertDialogDescription>
+                                                                </AlertDialogHeader>
+                                                                <AlertDialogFooter>
+                                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                    <AlertDialogAction
+                                                                        onClick={async () => {
+                                                                            await deleteChild(child.id)
+                                                                                .then((deletedChild) => {
+                                                                                        toast({
+                                                                                            variant: "default",
+                                                                                            title: "Child data deleted successfully",
+                                                                                            description: `${deletedChild.givenName} ${deletedChild.familyName} deleted`
+                                                                                        })
+                                                                                        const updatedChildren = children.filter(c => c.id !== child.id)
+                                                                                        setChildren(updatedChildren);
+                                                                                    }
+                                                                                ).catch(error => {
+                                                                                    if (error.response && error.response.status === 400) {
+                                                                                        alert("Dont have permission to do that")
+                                                                                    }
+                                                                                });
+                                                                        }
+                                                                        }>Continue</AlertDialogAction>
+                                                                </AlertDialogFooter>
+                                                            </AlertDialogContent>
+                                                        </AlertDialog>
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>

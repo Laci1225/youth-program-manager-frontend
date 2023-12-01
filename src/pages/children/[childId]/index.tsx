@@ -14,6 +14,17 @@ import deleteChild from "@/api/graphql/deleteChild";
 import {toast} from "@/components/ui/use-toast";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 
 export const getServerSideProps = (async (context) => {
@@ -38,7 +49,7 @@ export const getServerSideProps = (async (context) => {
 }) satisfies GetServerSideProps<{ selectedChild: ChildData }, { childId: string }>;
 export default function Child({selectedChild}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter();
-    const handleDelete = async (event) => {
+    const handleDelete = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.preventDefault();
         try {
             const deletedChild = await deleteChild(selectedChild.id);
@@ -67,10 +78,29 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                                existingChild={selectedChild}
                                triggerName={<span className="material-icons-outlined">edit</span>}
                                triggerVariant={"ghost"}/>
-                    <Button type={"button"} variant={"ghost"}
-                            onClick={handleDelete}><span
-                        className="material-icons-outlined">delete</span>
-                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button type={"button"} variant={"destructive"}>
+                                <span className="material-icons-outlined">delete</span>
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely
+                                    sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will
+                                    permanently delete your
+                                    account and remove your data from our servers.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={handleDelete}>Continue</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             </div>
             <div className="border border-gray-200 rounded p-4">
