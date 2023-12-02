@@ -16,6 +16,13 @@ import getAllChildren from "@/api/graphql/getAllChildren";
 import Link from "next/link";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
 import {serverSideClient} from "@/api/graphql/client";
+import {
+    DropdownMenu,
+    DropdownMenuContent, DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import DeleteChild from "@/components/deleteChild";
 
 
 export const getServerSideProps = (async () => {
@@ -32,7 +39,6 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
     const onChildCreated = (newChild: ChildData) => {
         setChildren(prevState => [...prevState, newChild])
     }
-
     return (
         <div className={"container w-4/6 py-28"}>
             <div className={"flex justify-between px-6 pb-6"}>Children
@@ -45,15 +51,16 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                         <TableHead className="text-center">Birth Date</TableHead>
                         <TableHead className="text-center">Has diagnosed diseases</TableHead>
                         <TableHead className="text-center">Takes any medicines</TableHead>
-                        <TableHead className="p-1"></TableHead>
+                        <TableHead className="px-5"></TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {
                         children && children.length !== 0 ? (
                             children.map((child) => (
-                                <TableRow key={child.id} className={"hover:bg-gray-200"}>
-                                    <Link key={child.id} href={`children/${child.id}`} className="contents">
+                                <Link key={child.id} href={`children/${child.id}`}
+                                      className="contents">
+                                    <TableRow key={child.id} className={"hover:bg-gray-200"}>
                                         <TableCell className="text-center">
                                             {child.givenName} {child.familyName}
                                         </TableCell>
@@ -68,17 +75,32 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                                         </TableCell>
                                         <TableCell className="text-center">{child.hasRegularMedicines ?
                                             <span className="material-icons-outlined">check_box</span> :
-                                            <span className="material-icons-outlined">check_box_outline_blank</span>}
+                                            <span
+                                                className="material-icons-outlined">check_box_outline_blank</span>}
                                         </TableCell>
-                                        <TableCell className="p-1 text-right">
-                                            <Button type={"button"} variant={"destructive"}
-                                                    onClick={() => {
-                                                        const updatedChildren = children.filter((c) => c.id !== child.id);
-                                                        setChildren(updatedChildren);
-                                                    }}><span className="material-icons-outlined">delete</span></Button>
+                                        <TableCell className="p-1 text-center">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger onClick={event => event.preventDefault()}>
+                                                    <span className="material-icons-outlined">more_horiz</span>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent className={"min-w-8"}>
+                                                    <DropdownMenuSeparator/>
+                                                    <DropdownMenuItem className={"justify-center"}>
+                                                        <Button variant={"ghost"}>
+                                                            <span className="material-icons-outlined">edit</span>
+                                                        </Button>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem className={"justify-center"}
+                                                                      onClick={e => e.preventDefault()}>
+                                                        <DeleteChild child={child} setChildren={setChildren}>
+                                                            {children}
+                                                        </DeleteChild>
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </TableCell>
-                                    </Link>
-                                </TableRow>
+                                    </TableRow>
+                                </Link>
                             ))) : (
                             <TableRow>
                                 <TableCell colSpan={5}>Nothing added</TableCell>

@@ -10,6 +10,7 @@ import ShowTable from "@/form/ShowTable";
 import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
 import {serverSideClient} from "@/api/graphql/client";
+import DeleteChild from "@/components/deleteChild";
 
 
 export const getServerSideProps = (async (context) => {
@@ -48,6 +49,7 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                                existingChild={selectedChild}
                                triggerName={<span className="material-icons-outlined">edit</span>}
                                triggerVariant={"ghost"}/>
+                    <DeleteChild child={selectedChild}/>
                 </div>
             </div>
             <div className="border border-gray-200 rounded p-4">

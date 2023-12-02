@@ -17,7 +17,7 @@ export default async function getAllChildren(client: ApolloClient<NormalizedCach
                     hasRegularMedicines
                 }
             }
-        `,
+        `, fetchPolicy: "no-cache"
     });
     return await value.data.getAllChildren;
 }
