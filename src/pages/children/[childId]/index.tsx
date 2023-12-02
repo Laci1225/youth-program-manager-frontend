@@ -10,7 +10,7 @@ import ShowTable from "@/form/ShowTable";
 import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
 import {serverSideClient} from "@/api/graphql/client";
-import {Button} from "@/components/ui/button";
+import DeleteChild from "@/components/deleteChild";
 
 
 export const getServerSideProps = (async (context) => {
@@ -41,11 +41,11 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
     }
 
     return (
-        <div className={"container w-4/6 py-10"}>
-            <div className={"flex justify-between px-6 pb-6 items-center"}>
-                <Button asChild variant="ghost" size="icon">
-                    <Link href={"/"}><span className="material-icons-outlined">arrow_back</span></Link>
-                </Button>
+        <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
+            <div className={"flex justify-between px-6 pb-6"}>
+                <Link href={"/"}>
+                    <span className="material-icons-outlined">arrow_back</span>
+                </Link>
                 <div>
                     Child details
                 </div>
@@ -54,30 +54,31 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                                existingChild={existingChild}
                                triggerName={<span className="material-icons-outlined">edit</span>}
                                triggerVariant={"ghost"}/>
+                    <DeleteChild child={selectedChild}/>
                 </div>
             </div>
             <div className="border border-gray-200 rounded p-4">
                 <div className="mb-6">
                     <Label>Full Name:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {existingChild.givenName} {existingChild.familyName}
+                        {selectedChild.givenName} {selectedChild.familyName}
                     </div>
                 </div>
                 <div className="mb-6">
                     <Label>Birth date and place:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {format(new Date(existingChild.birthDate), "P")} {existingChild.birthPlace}
+                        {format(new Date(selectedChild.birthDate), "P")} {selectedChild.birthPlace}
                     </div>
                 </div>
                 <div className="mb-6">
                     <Label>Address:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {existingChild.address}
+                        {selectedChild.address}
                     </div>
                 </div>
-                <ShowTable tableFields={["Name", "Diagnosed at"]} value={existingChild.diagnosedDiseases}
+                <ShowTable tableFields={["Name", "Diagnosed at"]} value={selectedChild.diagnosedDiseases}
                            showDeleteButton={false}/>
-                <ShowTable tableFields={["Name", "Dose", "Taken since"]} value={existingChild.regularMedicines}
+                <ShowTable tableFields={["Name", "Dose", "Taken since"]} value={selectedChild.regularMedicines}
                            showDeleteButton={false}/>
             </div>
             <Toaster/>

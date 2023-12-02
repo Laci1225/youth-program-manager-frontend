@@ -15,6 +15,7 @@ import {format} from "date-fns";
 import getAllChildren from "@/api/graphql/getAllChildren";
 import Link from "next/link";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
+import {serverSideClient} from "@/api/graphql/client";
 import deleteChild from "@/api/graphql/deleteChild";
 import {toast} from "@/components/ui/use-toast";
 import {
@@ -23,7 +24,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import {serverSideClient} from "@/api/graphql/client";
+import DeleteChild from "@/components/deleteChild";
 
 
 export const getServerSideProps = (async () => {
@@ -66,8 +67,9 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                     {
                         children && children.length !== 0 ? (
                             children.map((child) => (
-                                <TableRow key={child.id} className={"hover:bg-gray-200"}>
-                                    <Link key={child.id} href={`children/${child.id}`} className="contents">
+                                <Link key={child.id} href={`children/${child.id}`}
+                                      className="contents">
+                                    <TableRow key={child.id} className={"hover:bg-gray-200"}>
                                         <TableCell className="text-center">
                                             {child.givenName} {child.familyName}
                                         </TableCell>
@@ -99,29 +101,17 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                                                                    onChildModified={onChildUpdated}
                                                         />
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem className={"justify-center"}>
-                                                        <Button type={"button"} variant={"ghost"}
-                                                                onClick={async (event) => {
-                                                                    event.preventDefault()
-                                                                    await deleteChild(child.id)
-                                                                        .then((deletedChild) =>
-                                                                            toast({
-                                                                                variant: "default",
-                                                                                title: "Child data deleted successfully",
-                                                                                description: `${deletedChild.givenName} ${deletedChild.familyName} deleted`
-                                                                            })
-                                                                        )
-                                                                    const updatedChildren = children.filter(c => c.id !== child.id)
-                                                                    setChildren(updatedChildren);
-                                                                }}><span
-                                                            className="material-icons-outlined">delete</span>
-                                                        </Button>
+                                                    <DropdownMenuItem className={"justify-center"}
+                                                                      onClick={e => e.preventDefault()}>
+                                                        <DeleteChild child={child} setChildren={setChildren}>
+                                                            {children}
+                                                        </DeleteChild>
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
                                         </TableCell>
-                                    </Link>
-                                </TableRow>
+                                    </TableRow>
+                                </Link>
                             ))) : (
                             <TableRow>
                                 <TableCell colSpan={5}>Nothing added</TableCell>
