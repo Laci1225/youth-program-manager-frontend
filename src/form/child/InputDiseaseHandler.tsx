@@ -7,7 +7,7 @@ import {toast} from "@/components/ui/use-toast";
 import CalendarInput from "@/form/CalendarInput";
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import * as z from "zod";
-import {diseaseSchema, getDiseaseSchema} from "@/form/formSchema";
+import {diseaseSchema, getDiseaseSchema} from "@/form/child/childSchema";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {handleSubmitStopPropagation} from "@/form/stopPropagation";
 import {Disease} from "@/model/disease";

@@ -1,0 +1,18 @@
+type Parent {
+    id: ID!
+    familyName: String!
+    givenName: String!
+    phoneNumbers:[String]!
+    address: String
+}
+
+input ParentInput {
+    familyName: String!
+    givenName: String!
+    phoneNumbers:[String]!
+    address: String
+}
+
+extend type Mutation{
+    addParent(parent: ParentInput!): Parent!
+}

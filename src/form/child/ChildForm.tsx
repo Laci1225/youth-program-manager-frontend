@@ -5,11 +5,11 @@ import React, {ReactNode, useState} from "react";
 import {useForm} from "react-hook-form"
 import * as z from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
-import {formSchema} from "@/form/formSchema";
-import {InputDiseaseHandler} from "@/form/InputDiseaseHandler";
-import {InputMedicinesHandler} from "@/form/InputMedicinesHandler";
+import {childSchema} from "@/form/child/childSchema";
+import {InputDiseaseHandler} from "@/form/child/InputDiseaseHandler";
+import {InputMedicinesHandler} from "@/form/child/InputMedicinesHandler";
 import {toast} from "@/components/ui/use-toast";
-import addChild from "@/api/graphql/addChild";
+import addChild from "@/api/graphql/child/addChild";
 import CalendarInput from "@/form/CalendarInput";
 import ShowTable from "@/form/ShowTable";
 import {ScrollArea} from "@/components/ui/scroll-area"
@@ -28,8 +28,8 @@ interface ChildFormProps {
 function ChildForm({onChildCreated, existingChild, triggerName, triggerVariant}: ChildFormProps) {
 
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const form = useForm<z.infer<typeof childSchema>>({
+        resolver: zodResolver(childSchema),
         defaultValues: {
             familyName: existingChild?.familyName,
             givenName: existingChild?.givenName,
@@ -43,7 +43,7 @@ function ChildForm({onChildCreated, existingChild, triggerName, triggerVariant}:
 
     const [isDialogOpen, setDialogOpen] = useState(false);
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
+    function onSubmit(values: z.infer<typeof childSchema>) {
         setIsSubmitting(true)
 
         addChild(values)

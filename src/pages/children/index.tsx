@@ -20,14 +20,14 @@ import {
 import {Button} from "@/components/ui/button";
 import React, {useState} from "react";
 import {ChildData} from "@/model/child-data";
-import ChildForm from "@/form/ChildForm";
+import ChildForm from "@/form/child/ChildForm";
 import {Toaster} from "@/components/ui/toaster";
 import {format} from "date-fns";
-import getAllChildren from "@/api/graphql/getAllChildren";
+import getAllChildren from "@/api/graphql/child/getAllChildren";
 import Link from "next/link";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
-import {serverSideClient} from "@/api/graphql/client";
-import deleteChild from "@/api/graphql/deleteChild";
+import {serverSideClient} from "@/api/graphql/child/client";
+import deleteChild from "@/api/graphql/child/deleteChild";
 import {toast} from "@/components/ui/use-toast";
 import {
     DropdownMenu,

@@ -6,7 +6,7 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/
 import {toast} from "@/components/ui/use-toast"
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import * as z from "zod";
-import {getMedicineSchema, medicineSchema} from "@/form/formSchema";
+import {getMedicineSchema, medicineSchema} from "@/form/child/childSchema";
 import {zodResolver} from "@hookform/resolvers/zod";
 import CalendarInput from "@/form/CalendarInput";
 import {handleSubmitStopPropagation} from "@/form/stopPropagation";
