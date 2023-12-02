@@ -10,21 +10,7 @@ import ShowTable from "@/form/ShowTable";
 import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
 import {serverSideClient} from "@/api/graphql/client";
-import deleteChild from "@/api/graphql/deleteChild";
-import {toast} from "@/components/ui/use-toast";
-import {Button} from "@/components/ui/button";
-import {useRouter} from "next/router";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+import DeleteChild from "@/components/deleteChild";
 
 
 export const getServerSideProps = (async (context) => {
@@ -48,21 +34,6 @@ export const getServerSideProps = (async (context) => {
     };
 }) satisfies GetServerSideProps<{ selectedChild: ChildData }, { childId: string }>;
 export default function Child({selectedChild}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    const router = useRouter();
-    const handleDelete = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        event.preventDefault();
-        try {
-            const deletedChild = await deleteChild(selectedChild.id);
-            toast({
-                variant: "default",
-                title: "Child data deleted successfully",
-                description: `${deletedChild.givenName} ${deletedChild.familyName} deleted`
-            });
-            router.push('/children');
-        } catch (error) {
-            console.error('Deletion failed', error);
-        }
-    };
     return (
         <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
             <div className={"flex justify-between px-6 pb-6"}>
@@ -78,29 +49,7 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                                existingChild={selectedChild}
                                triggerName={<span className="material-icons-outlined">edit</span>}
                                triggerVariant={"ghost"}/>
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button type={"button"} variant={"destructive"}>
-                                <span className="material-icons-outlined">delete</span>
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you absolutely
-                                    sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This action cannot be undone. This will
-                                    permanently delete your
-                                    account and remove your data from our servers.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                    onClick={handleDelete}>Continue</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                    <DeleteChild child={selectedChild}/>
                 </div>
             </div>
             <div className="border border-gray-200 rounded p-4">

@@ -6,17 +6,6 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import {Button} from "@/components/ui/button";
 import React, {useState} from "react";
 import {ChildData} from "@/model/child-data";
@@ -27,14 +16,13 @@ import getAllChildren from "@/api/graphql/getAllChildren";
 import Link from "next/link";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
 import {serverSideClient} from "@/api/graphql/client";
-import deleteChild from "@/api/graphql/deleteChild";
-import {toast} from "@/components/ui/use-toast";
 import {
     DropdownMenu,
     DropdownMenuContent, DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import DeleteChild from "@/components/deleteChild";
 
 
 export const getServerSideProps = (async () => {
@@ -51,7 +39,6 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
     const onChildCreated = (newChild: ChildData) => {
         setChildren(prevState => [...prevState, newChild])
     }
-
     return (
         <div className={"container w-4/6 py-28"}>
             <div className={"flex justify-between px-6 pb-6"}>Children
@@ -105,47 +92,9 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem className={"justify-center"}
                                                                       onClick={e => e.preventDefault()}>
-                                                        <AlertDialog>
-                                                            <AlertDialogTrigger asChild>
-                                                                <Button type={"button"} variant={"destructive"}>
-                                                                    <span
-                                                                        className="material-icons-outlined">delete</span>
-                                                                </Button>
-                                                            </AlertDialogTrigger>
-                                                            <AlertDialogContent>
-                                                                <AlertDialogHeader>
-                                                                    <AlertDialogTitle>Are you absolutely
-                                                                        sure?</AlertDialogTitle>
-                                                                    <AlertDialogDescription>
-                                                                        This action cannot be undone. This will
-                                                                        permanently delete your
-                                                                        account and remove your data from our servers.
-                                                                    </AlertDialogDescription>
-                                                                </AlertDialogHeader>
-                                                                <AlertDialogFooter>
-                                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                                    <AlertDialogAction
-                                                                        onClick={async () => {
-                                                                            await deleteChild(child.id)
-                                                                                .then((deletedChild) => {
-                                                                                        toast({
-                                                                                            variant: "default",
-                                                                                            title: "Child data deleted successfully",
-                                                                                            description: `${deletedChild.givenName} ${deletedChild.familyName} deleted`
-                                                                                        })
-                                                                                        const updatedChildren = children.filter(c => c.id !== child.id)
-                                                                                        setChildren(updatedChildren);
-                                                                                    }
-                                                                                ).catch(error => {
-                                                                                    if (error.response && error.response.status === 400) {
-                                                                                        alert("Dont have permission to do that")
-                                                                                    }
-                                                                                });
-                                                                        }
-                                                                        }>Continue</AlertDialogAction>
-                                                                </AlertDialogFooter>
-                                                            </AlertDialogContent>
-                                                        </AlertDialog>
+                                                        <DeleteChild child={child} setChildren={setChildren}>
+                                                            {children}
+                                                        </DeleteChild>
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
