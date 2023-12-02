@@ -102,7 +102,7 @@ function ChildForm({onChildModified, existingChild, triggerName, triggerVariant}
 
     return (
         <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger onClick={event => event.preventDefault()}>
+            <DialogTrigger asChild onClick={event => event.preventDefault()}>
                 <Button onClick={() => {
                     setDialogOpen(true)
                     existingChild || form.reset()

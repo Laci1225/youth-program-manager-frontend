@@ -6,7 +6,6 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table";
-import {Button} from "@/components/ui/button";
 import React, {useState} from "react";
 import {ChildData} from "@/model/child-data";
 import ChildForm from "@/form/ChildForm";
@@ -16,8 +15,6 @@ import getAllChildren from "@/api/graphql/getAllChildren";
 import Link from "next/link";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
 import {serverSideClient} from "@/api/graphql/client";
-import deleteChild from "@/api/graphql/deleteChild";
-import {toast} from "@/components/ui/use-toast";
 import {
     DropdownMenu,
     DropdownMenuContent, DropdownMenuItem,
@@ -93,7 +90,7 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent className={"min-w-8"}>
                                                     <DropdownMenuSeparator/>
-                                                    <DropdownMenuItem className={"justify-center"}>
+                                                    <DropdownMenuItem className={"justify-center"} asChild>
                                                         <ChildForm existingChild={child}
                                                                    triggerVariant={"ghost"}
                                                                    triggerName={<span
