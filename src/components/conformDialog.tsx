@@ -5,26 +5,20 @@ import {
     AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
-import {Button} from "@/components/ui/button";
-import React, {ReactNode} from "react";
+import React from "react";
 
 interface ConformDialogProps {
-    buttonName: string | ReactNode
     dialogTitle: string
     dialogDescription: string
     onClickAction: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => Promise<void>
+    isOpen: boolean
+    onOpenChange: (open: boolean) => void;
 }
 
-export default function ConformDialog({buttonName, dialogTitle, dialogDescription, onClickAction}: ConformDialogProps) {
+export default function ConformDialog({isOpen, onOpenChange, dialogTitle, dialogDescription, onClickAction}: ConformDialogProps) {
     return (
-        <AlertDialog>
-            <AlertDialogTrigger asChild>
-                <Button type={"button"} variant={"destructive"}>
-                    {buttonName}
-                </Button>
-            </AlertDialogTrigger>
+        <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>

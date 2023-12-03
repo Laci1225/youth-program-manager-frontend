@@ -11,7 +11,7 @@ import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
 import {serverSideClient} from "@/api/graphql/client";
 import DeleteChild from "@/components/deleteChild";
-import {Pencil} from "lucide-react";
+import {Pencil, Trash} from "lucide-react";
 
 
 export const getServerSideProps = (async (context) => {
@@ -38,6 +38,8 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
     const [existingChild, setExistingChild] = useState<ChildData>(selectedChild)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [editedChild, setEditedChild] = useState<ChildData | null>(null)
+    const [deletedChild, setDeletedChild] = useState<ChildData>()
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
     const onChildUpdated = (newChild: ChildData) => {
         setExistingChild(newChild)
@@ -46,6 +48,11 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
     function handleEditClick(child: ChildData) {
         setIsEditDialogOpen(true)
         setEditedChild(child)
+    }
+
+    function handleDeleteClick(child: ChildData) {
+        setIsDeleteDialogOpen(true)
+        setDeletedChild(child)
     }
 
     return (
@@ -66,7 +73,14 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                         <Pencil/>
                         <span>Edit</span>
                     </div>
-                    <DeleteChild child={selectedChild}/>
+                    <div className={" flex flex-row items-center hover:cursor-pointer px-5"}
+                         onClick={(event) => {
+                             event.preventDefault()
+                             handleDeleteClick(existingChild)
+                         }}>
+                        <Trash/>
+                        <span>Delete</span>
+                    </div>
                 </div>
             </div>
             <div className="border border-gray-200 rounded p-4">
@@ -98,6 +112,9 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                        onChildModified={onChildUpdated}
                        onOpenChange={setIsEditDialogOpen}
             />
+            <DeleteChild child={deletedChild}
+                         isOpen={isDeleteDialogOpen}
+                         onOpenChange={setIsDeleteDialogOpen}/>
         </div>
     )
 

@@ -21,7 +21,7 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import DeleteChild from "@/components/deleteChild";
-import {Pencil, PlusSquare} from "lucide-react"
+import {Pencil, PlusSquare, Trash} from "lucide-react"
 import {useRouter} from "next/router";
 import {Button} from "@/components/ui/button";
 
@@ -49,12 +49,20 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
         }
     }
 
+
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [editedChild, setEditedChild] = useState<ChildData | null>(null)
+    const [deletedChild, setDeletedChild] = useState<ChildData>()
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
     function handleEditClick(child: ChildData | null) {
         setIsEditDialogOpen(true)
         setEditedChild(child)
+    }
+
+    function handleDeleteClick(child: ChildData) {
+        setIsDeleteDialogOpen(true)
+        setDeletedChild(child)
     }
 
     return (
@@ -121,11 +129,10 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                                                                   onClick={event => {
                                                                       event.preventDefault()
                                                                       event.stopPropagation()
-
+                                                                      handleDeleteClick(child)
                                                                   }}>
-                                                    <DeleteChild child={child} setChildren={setChildren}>
-                                                        {children}
-                                                    </DeleteChild>
+                                                    <Trash/>
+                                                    <span>Delete</span>
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
@@ -140,10 +147,18 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
             </Table>
             <Toaster/>
 
-            <ChildForm existingChild={editedChild ?? undefined} isOpen={isEditDialogOpen}
+            <ChildForm existingChild={editedChild ?? undefined}
+                       isOpen={isEditDialogOpen}
                        onChildModified={onChildModified}
                        onOpenChange={setIsEditDialogOpen}
             />
+            <DeleteChild child={deletedChild}
+                         isOpen={isDeleteDialogOpen}
+                         onOpenChange={setIsDeleteDialogOpen}
+                         setChildren={setChildren}
+            >
+                {children}
+            </DeleteChild>
         </div>
     )
 }
