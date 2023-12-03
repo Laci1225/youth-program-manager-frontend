@@ -70,15 +70,16 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                              event.preventDefault()
                              handleEditClick(existingChild)
                          }}>
-                        <Pencil/>
+                        <Pencil className={"mx-1"}/>
                         <span>Edit</span>
                     </div>
-                    <div className={" flex flex-row items-center hover:cursor-pointer px-5"}
-                         onClick={(event) => {
-                             event.preventDefault()
-                             handleDeleteClick(existingChild)
-                         }}>
-                        <Trash/>
+                    <div
+                        className={"flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"}
+                        onClick={(event) => {
+                            event.preventDefault()
+                            handleDeleteClick(existingChild)
+                        }}>
+                        <Trash className={"mx-1"}/>
                         <span>Delete</span>
                     </div>
                 </div>

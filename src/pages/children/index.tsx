@@ -116,22 +116,24 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent className={"min-w-8"}>
                                                 <DropdownMenuSeparator/>
-                                                <DropdownMenuItem className={"justify-center  hover:cursor-pointer"}
-                                                                  onClick={(event) => {
-                                                                      event.preventDefault()
-                                                                      event.stopPropagation()
-                                                                      handleEditClick(child)
-                                                                  }}>
-                                                    <Pencil/>
+                                                <DropdownMenuItem
+                                                    className={"justify-center hover:cursor-pointer"}
+                                                    onClick={(event) => {
+                                                        event.preventDefault()
+                                                        event.stopPropagation()
+                                                        handleEditClick(child)
+                                                    }}>
+                                                    <Pencil className={"mx-1"}/>
                                                     <span>Edit</span>
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem className={"justify-center"}
-                                                                  onClick={event => {
-                                                                      event.preventDefault()
-                                                                      event.stopPropagation()
-                                                                      handleDeleteClick(child)
-                                                                  }}>
-                                                    <Trash/>
+                                                <DropdownMenuItem
+                                                    className={"justify-center hover:cursor-pointer p-2 mx-5 bg-red-600 text-white"}
+                                                    onClick={event => {
+                                                        event.preventDefault()
+                                                        event.stopPropagation()
+                                                        handleDeleteClick(child)
+                                                    }}>
+                                                    <Trash className={"mx-1"}/>
                                                     <span>Delete</span>
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
