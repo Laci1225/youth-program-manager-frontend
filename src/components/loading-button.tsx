@@ -15,7 +15,7 @@ function LoadingButton({isLoading, existingChild, ...props}: LoadingButtonProps)
         {isLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
         ) : (
-            existingChild ? "Update" : "Create"
+            props.value
         )}
     </Button>
 }

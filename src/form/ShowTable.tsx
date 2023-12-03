@@ -1,21 +1,15 @@
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import React from "react";
-import {format, isValid, parseISO} from "date-fns";
+import {format} from "date-fns";
 import {Button} from "@/components/ui/button";
 import {Disease} from "@/model/disease";
 import {Medicine} from "@/model/medicine";
+import {isStrictDate} from "@/utils/date";
 
 interface ShowTableProps {
     tableFields: string[],
     value: any[] | undefined;
     showDeleteButton: boolean
-}
-
-export function isStrictDate(value: string | Date) {
-    if (value instanceof Date)
-        return true
-    const parsedDate = parseISO(value);
-    return isValid(parsedDate);
 }
 
 export default function ShowTable({tableFields, value, showDeleteButton}: ShowTableProps) {

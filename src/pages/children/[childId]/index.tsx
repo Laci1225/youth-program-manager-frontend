@@ -12,6 +12,7 @@ import {fieldAppearance} from "@/components/fieldAppearance";
 import {serverSideClient} from "@/api/graphql/client";
 import DeleteChild from "@/components/deleteChild";
 import {Pencil, Trash} from "lucide-react";
+import {useRouter} from "next/router";
 
 
 export const getServerSideProps = (async (context) => {
@@ -35,24 +36,23 @@ export const getServerSideProps = (async (context) => {
     };
 }) satisfies GetServerSideProps<{ selectedChild: ChildData }, { childId: string }>;
 export default function Child({selectedChild}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    const [existingChild, setExistingChild] = useState<ChildData>(selectedChild)
+    const [child, setChild] = useState<ChildData>(selectedChild)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-    const [editedChild, setEditedChild] = useState<ChildData | null>(null)
-    const [deletedChild, setDeletedChild] = useState<ChildData>()
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-
+    const router = useRouter()
     const onChildUpdated = (newChild: ChildData) => {
-        setExistingChild(newChild)
+        setChild(newChild)
+    }
+    const onChildDeleted = () => {
+        router.push("/children")
     }
 
-    function handleEditClick(child: ChildData) {
+    function handleEditClick() {
         setIsEditDialogOpen(true)
-        setEditedChild(child)
     }
 
-    function handleDeleteClick(child: ChildData) {
+    function handleDeleteClick() {
         setIsDeleteDialogOpen(true)
-        setDeletedChild(child)
     }
 
     return (
@@ -68,7 +68,7 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                     <div className={" flex flex-row items-center hover:cursor-pointer px-5"}
                          onClick={(event) => {
                              event.preventDefault()
-                             handleEditClick(existingChild)
+                             handleEditClick()
                          }}>
                         <Pencil className={"mx-1"}/>
                         <span>Edit</span>
@@ -77,7 +77,7 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                         className={"flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"}
                         onClick={(event) => {
                             event.preventDefault()
-                            handleDeleteClick(existingChild)
+                            handleDeleteClick()
                         }}>
                         <Trash className={"mx-1"}/>
                         <span>Delete</span>
@@ -88,34 +88,37 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                 <div className="mb-6">
                     <Label>Full Name:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {existingChild.givenName} {existingChild.familyName}
+                        {child.givenName} {child.familyName}
                     </div>
                 </div>
                 <div className="mb-6">
                     <Label>Birth date and place:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {format(new Date(existingChild.birthDate), "P")} {existingChild.birthPlace}
+                        {format(new Date(child.birthDate), "P")} {child.birthPlace}
                     </div>
                 </div>
                 <div className="mb-6">
                     <Label>Address:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {existingChild.address}
+                        {child.address}
                     </div>
                 </div>
-                <ShowTable tableFields={["Name", "Diagnosed at"]} value={existingChild.diagnosedDiseases}
+                <ShowTable tableFields={["Name", "Diagnosed at"]} value={child.diagnosedDiseases}
                            showDeleteButton={false}/>
-                <ShowTable tableFields={["Name", "Dose", "Taken since"]} value={existingChild.regularMedicines}
+                <ShowTable tableFields={["Name", "Dose", "Taken since"]} value={child.regularMedicines}
                            showDeleteButton={false}/>
             </div>
             <Toaster/>
-            <ChildForm existingChild={editedChild ?? undefined} isOpen={isEditDialogOpen}
+            <ChildForm existingChild={child ?? undefined}
+                       isOpen={isEditDialogOpen}
                        onChildModified={onChildUpdated}
                        onOpenChange={setIsEditDialogOpen}
             />
-            <DeleteChild child={deletedChild}
+            <DeleteChild child={child}
                          isOpen={isDeleteDialogOpen}
-                         onOpenChange={setIsDeleteDialogOpen}/>
+                         onOpenChange={setIsDeleteDialogOpen}
+                         onSuccess={onChildDeleted}
+            />
         </div>
     )
 

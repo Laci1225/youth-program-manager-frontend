@@ -38,15 +38,19 @@ export const getServerSideProps = (async () => {
 export default function Children({childrenData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
     const [children, setChildren] = useState<ChildData[]>(childrenData)
-    const onChildModified = (modifiedChild: ChildData) => {
+    const onChildSaved = (savedChild: ChildData) => {
         if (editedChild) {
             const modifiedChildren = children.map((child) =>
-                child.id === modifiedChild.id ? modifiedChild : child
+                child.id === savedChild.id ? savedChild : child
             );
             setChildren(modifiedChildren)
         } else {
-            setChildren(prevState => [...prevState, modifiedChild])
+            setChildren(prevState => [...prevState, savedChild])
         }
+    }
+    const onChildDeleted = (child: ChildData) => {
+        const updatedChildren = children.filter(c => c.id !== child.id);
+        setChildren(updatedChildren);
     }
 
 
@@ -151,16 +155,14 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
 
             <ChildForm existingChild={editedChild ?? undefined}
                        isOpen={isEditDialogOpen}
-                       onChildModified={onChildModified}
+                       onChildModified={onChildSaved}
                        onOpenChange={setIsEditDialogOpen}
             />
             <DeleteChild child={deletedChild}
                          isOpen={isDeleteDialogOpen}
                          onOpenChange={setIsDeleteDialogOpen}
-                         setChildren={setChildren}
-            >
-                {children}
-            </DeleteChild>
+                         onSuccess={onChildDeleted}
+            />
         </div>
     )
 }

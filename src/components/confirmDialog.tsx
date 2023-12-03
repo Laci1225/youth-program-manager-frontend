@@ -9,23 +9,23 @@ import {
 import React from "react";
 
 interface ConformDialogProps {
-    dialogTitle: string
-    dialogDescription: string
-    onClickAction: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => Promise<void>
+    title: string
+    description: string
+    onContinue: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
     isOpen: boolean
     onOpenChange: (open: boolean) => void;
 }
 
-export default function ConformDialog({isOpen, onOpenChange, dialogTitle, dialogDescription, onClickAction}: ConformDialogProps) {
+export default function ConfirmDialog({isOpen, onOpenChange, title, description, onContinue}: ConformDialogProps) {
     return (
         <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>
-                        {dialogTitle}
+                        {title}
                     </AlertDialogTitle>
                     <AlertDialogDescription>
-                        {dialogDescription}
+                        {description}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -33,7 +33,7 @@ export default function ConformDialog({isOpen, onOpenChange, dialogTitle, dialog
                         Cancel
                     </AlertDialogCancel>
                     <AlertDialogAction
-                        onClick={onClickAction}>Continue
+                        onClick={onContinue}>Continue
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

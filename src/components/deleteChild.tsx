@@ -2,19 +2,16 @@ import {ChildData} from "@/model/child-data";
 import deleteChild from "@/api/graphql/deleteChild";
 import {toast} from "@/components/ui/use-toast";
 import React from "react";
-import ConformDialog from "@/components/conformDialog";
-import {useRouter} from "next/router";
+import ConfirmDialog from "@/components/confirmDialog";
 
 interface deleteChildProps {
     child?: ChildData,
-    children?: ChildData[]
-    setChildren?: React.Dispatch<React.SetStateAction<ChildData[]>>
+    onSuccess: (deletedChild: ChildData) => void
     isOpen: boolean
     onOpenChange: (open: boolean) => void;
 }
 
-export default function DeleteChild({child, isOpen, onOpenChange, children, setChildren}: deleteChildProps) {
-    const router = useRouter()
+export default function DeleteChild({child, isOpen, onOpenChange, onSuccess}: deleteChildProps) {
     const handleDelete = async () => {
         if (child) {
             try {
@@ -24,11 +21,7 @@ export default function DeleteChild({child, isOpen, onOpenChange, children, setC
                     title: "Child data deleted successfully",
                     description: `${deletedChild.givenName} ${deletedChild.familyName} deleted`
                 });
-                if (children && setChildren) {
-                    const updatedChildren = children.filter(c => c.id !== child.id);
-                    setChildren(updatedChildren);
-                } else
-                    router.push('/children');
+                onSuccess(deletedChild)
             } catch (error) {
                 toast({
                     variant: "destructive",
@@ -44,12 +37,12 @@ export default function DeleteChild({child, isOpen, onOpenChange, children, setC
         }
     }
     return (
-        <ConformDialog
+        <ConfirmDialog
             isOpen={isOpen}
             onOpenChange={onOpenChange}
-            dialogTitle={"Are you absolutely sure?"}
-            dialogDescription={"This action cannot be undone. This will permanently delete your" +
+            title={"Are you absolutely sure?"}
+            description={"This action cannot be undone. This will permanently delete your" +
                 " account and remove your data from our servers."}
-            onClickAction={handleDelete}/>
+            onContinue={handleDelete}/>
     )
 }

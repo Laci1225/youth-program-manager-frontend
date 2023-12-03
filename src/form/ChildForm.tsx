@@ -16,8 +16,7 @@ import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "@/
 import {ChildData} from "@/model/child-data";
 import LoadingButton from "@/components/loading-button";
 import updateChild from "@/api/graphql/updateChild";
-import {Disease} from "@/model/disease";
-import {Medicine} from "@/model/medicine";
+import {parseDateInDisease, parseDateInMedicine} from "@/utils/child";
 
 interface ChildFormProps {
     onChildModified: (child: ChildData) => void;
@@ -33,22 +32,6 @@ function ChildForm({
                        isOpen,
                        onOpenChange
                    }: ChildFormProps) {
-    const parseDateInDisease = (array: Disease[] | undefined): Disease[] | undefined => {
-        return array?.map((item: Disease) => {
-            if (item.diagnosedAt) {
-                return {...item, diagnosedAt: new Date(item.diagnosedAt)};
-            }
-            return {...item};
-        });
-    }
-    const parseDateInMedicine = (array: Medicine[] | undefined): Medicine[] | undefined => {
-        return array?.map((item: Medicine) => {
-            if (item.takenSince) {
-                return {...item, takenSince: new Date(item.takenSince)};
-            }
-            return {...item};
-        });
-    }
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -230,7 +213,9 @@ function ChildForm({
                             </div>
                         </ScrollArea>
                         <DialogFooter>
-                            <LoadingButton type="submit" isLoading={isSubmitting} existingChild={existingChild}/>
+                            <LoadingButton type="submit" value={existingChild ? "Update" : "Create"}
+                                           isLoading={isSubmitting}
+                                           existingChild={existingChild}/>
                         </DialogFooter>
                     </form>
                 </Form>
