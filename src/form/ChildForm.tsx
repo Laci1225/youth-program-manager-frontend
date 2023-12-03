@@ -1,7 +1,6 @@
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 import {Input} from "@/components/ui/input";
-import {Button, ButtonProps} from "@/components/ui/button";
-import React, {ReactNode, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useForm} from "react-hook-form"
 import * as z from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -13,7 +12,7 @@ import addChild from "@/api/graphql/addChild";
 import CalendarInput from "@/form/CalendarInput";
 import ShowTable from "@/form/ShowTable";
 import {ScrollArea} from "@/components/ui/scroll-area"
-import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {ChildData} from "@/model/child-data";
 import LoadingButton from "@/components/loading-button";
 import updateChild from "@/api/graphql/updateChild";
@@ -23,12 +22,17 @@ import {Medicine} from "@/model/medicine";
 interface ChildFormProps {
     onChildModified: (child: ChildData) => void;
     existingChild?: ChildData
-    triggerName: ReactNode
-    triggerVariant?: ButtonProps["variant"]
+    isOpen: boolean
+    onOpenChange: (open: boolean) => void;
 }
 
 
-function ChildForm({onChildModified, existingChild, triggerName, triggerVariant}: ChildFormProps) {
+function ChildForm({
+                       onChildModified,
+                       existingChild,
+                       isOpen,
+                       onOpenChange
+                   }: ChildFormProps) {
     const parseDateInDisease = (array: Disease[] | undefined): Disease[] | undefined => {
         return array?.map((item: Disease) => {
             if (item.diagnosedAt) {
@@ -59,8 +63,6 @@ function ChildForm({onChildModified, existingChild, triggerName, triggerVariant}
         },
     })
 
-    const [isDialogOpen, setDialogOpen] = useState(false);
-
     function onSubmit(values: z.infer<typeof formSchema>) {
         setIsSubmitting(true)
         if (existingChild) {
@@ -71,7 +73,7 @@ function ChildForm({onChildModified, existingChild, triggerName, triggerVariant}
                         title: "The child is successfully updated",
                         description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} updated`,
                     })
-                    setDialogOpen(false)
+                    onOpenChange(false)
                 }).catch(reason => {
                 toast({
                     variant: "destructive",
@@ -88,7 +90,7 @@ function ChildForm({onChildModified, existingChild, triggerName, triggerVariant}
                         title: "The child is successfully added",
                         description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,
                     })
-                    setDialogOpen(false)
+                    onOpenChange(false)
                 }).catch(reason => {
                 toast({
                     variant: "destructive",
@@ -100,15 +102,19 @@ function ChildForm({onChildModified, existingChild, triggerName, triggerVariant}
         }
     }
 
+    useEffect(() => {
+        form.reset({
+            familyName: existingChild?.familyName ?? "",
+            givenName: existingChild?.givenName ?? "",
+            birthDate: existingChild?.birthDate ? new Date(existingChild.birthDate) : undefined,
+            birthPlace: existingChild?.birthPlace ?? "",
+            address: existingChild?.address ?? "",
+            diagnosedDiseases: existingChild ? parseDateInDisease(existingChild?.diagnosedDiseases) : [],
+            regularMedicines: existingChild ? parseDateInMedicine(existingChild?.regularMedicines) : []
+        })
+    }, [existingChild]);
     return (
-        <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild onClick={event => event.preventDefault()}>
-                <Button onClick={() => {
-                    setDialogOpen(true)
-                    existingChild || form.reset()
-                }} variant={triggerVariant}
-                >{triggerName}</Button>
-            </DialogTrigger>
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[800px] h-[90vh] shadow-muted-foreground">
                 <DialogHeader>
                     <DialogTitle>Create a child</DialogTitle>

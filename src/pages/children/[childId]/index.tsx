@@ -11,6 +11,7 @@ import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
 import {serverSideClient} from "@/api/graphql/client";
 import DeleteChild from "@/components/deleteChild";
+import {Pencil} from "lucide-react";
 
 
 export const getServerSideProps = (async (context) => {
@@ -35,9 +36,16 @@ export const getServerSideProps = (async (context) => {
 }) satisfies GetServerSideProps<{ selectedChild: ChildData }, { childId: string }>;
 export default function Child({selectedChild}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const [existingChild, setExistingChild] = useState<ChildData>(selectedChild)
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+    const [editedChild, setEditedChild] = useState<ChildData | null>(null)
 
     const onChildUpdated = (newChild: ChildData) => {
         setExistingChild(newChild)
+    }
+
+    function handleEditClick(child: ChildData) {
+        setIsEditDialogOpen(true)
+        setEditedChild(child)
     }
 
     return (
@@ -49,11 +57,15 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                 <div>
                     Child details
                 </div>
-                <div>
-                    <ChildForm onChildModified={onChildUpdated}
-                               existingChild={existingChild}
-                               triggerName={<span className="material-icons-outlined">edit</span>}
-                               triggerVariant={"ghost"}/>
+                <div className={"flex"}>
+                    <div className={" flex flex-row items-center hover:cursor-pointer px-5"}
+                         onClick={(event) => {
+                             event.preventDefault()
+                             handleEditClick(existingChild)
+                         }}>
+                        <Pencil/>
+                        <span>Edit</span>
+                    </div>
                     <DeleteChild child={selectedChild}/>
                 </div>
             </div>
@@ -82,6 +94,10 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                            showDeleteButton={false}/>
             </div>
             <Toaster/>
+            <ChildForm existingChild={editedChild ?? undefined} isOpen={isEditDialogOpen}
+                       onChildModified={onChildUpdated}
+                       onOpenChange={setIsEditDialogOpen}
+            />
         </div>
     )
 
