@@ -12,7 +12,9 @@ input ParentInput {
     phoneNumbers:[String]!
     address: String
 }
-
+extend type Query {
+    getAllParents: [Parent!]!
+}
 extend type Mutation{
     addParent(parent: ParentInput!): Parent!
 }

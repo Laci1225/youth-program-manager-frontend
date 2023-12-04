@@ -6,5 +6,5 @@ export const parentSchema = z.object({
     phoneNumbers: z.array(
         z.string().min(2, 'Birth Place must be at least 2 characters.')
     ),
-    address: z.string().min(2, 'Address must be at least 2 characters.'),
+    address: z.string().min(2, 'Address must be at least 2 characters.').optional()
 })

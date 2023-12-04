@@ -11,6 +11,7 @@ import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTr
 import LoadingButton from "@/components/loading-button";
 import {parentSchema} from "@/form/parent/parentSchema";
 import addParent from "@/api/graphql/parent/addParent";
+import {InputPhoneNumbersHandler} from "@/form/parent/InputPhoneNumbersHandler";
 
 interface ParentFormProps {
     onParentCreated: (parent: ParentData) => void;
@@ -35,11 +36,11 @@ function ParentForm({onParentCreated, triggerName, triggerVariant}: ParentFormPr
 
     function onSubmit(values: z.infer<typeof parentSchema>) {
         setIsSubmitting(true)
-
+        console.log(values)
         addParent(values)
             .then((result) => {
                 const addedParent = result.data.addParent;
-
+                console.log(addedParent)
                 onParentCreated(addedParent)
                 toast({
                     title: "The parent is successfully added",
@@ -109,7 +110,7 @@ function ParentForm({onParentCreated, triggerName, triggerVariant}: ParentFormPr
                                         <FormItem className="flex-1">
                                             <FormLabel>Phone numbers*</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Phone numbers" {...field} />
+                                                <InputPhoneNumbersHandler {...field}/>
                                             </FormControl>
                                             <FormMessage/>
                                         </FormItem>

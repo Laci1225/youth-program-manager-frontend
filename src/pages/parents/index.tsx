@@ -8,17 +8,29 @@ import {
 } from "@/components/ui/table";
 import React, {useState} from "react";
 import {Toaster} from "@/components/ui/toaster";
-import Link from "next/link";
 import ParentForm from "@/form/parent/ParentForm";
+import {serverSideClient} from "@/api/graphql/child/client";
+import {GetServerSideProps, InferGetServerSidePropsType} from "next";
+import getAllParents from "@/api/graphql/parent/getAllParents";
 
-export default function Parents() {
-    const [parents, setParents] = useState<ParentData[]>()
+export const getServerSideProps = (async () => {
+    const parents = await getAllParents(serverSideClient)
+    return {
+        props: {
+            parentsData: parents
+        }
+    };
+}) satisfies GetServerSideProps<{ parentsData: ParentData[] }>;
 
+export default function Parents({parentsData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const [parents, setParents] = useState<ParentData[]>(parentsData)
+    const onParentCreated = (newParent: ParentData) => {
+        setParents(prevState => [...prevState, newParent])
+    }
     return (
         <div className={"container w-4/6 py-28"}>
             <div className={"flex justify-between px-6 pb-6"}>Parents
-                <ParentForm triggerName={"+ Add"} onParentCreated={() => {
-                }}/>
+                <ParentForm triggerName={"+ Add"} onParentCreated={onParentCreated}/>
             </div>
             <Table className={"border border-gray-700 rounded"}>
                 <TableHeader>
@@ -33,22 +45,19 @@ export default function Parents() {
                     {
                         parents && parents.length !== 0 ? (
                             parents.map((parent) => (
-                                <Link key={parent.id} href={`parents/${parent.id}`}
-                                      className="contents">
-                                    <TableRow key={parent.id} className={"hover:bg-gray-200"}>
-                                        <TableCell className="text-center">
-                                            {parent.givenName} {parent.familyName}
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            {}
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            {}
-                                        </TableCell>
-                                        <TableCell className="p-1 text-center">
-                                        </TableCell>
-                                    </TableRow>
-                                </Link>
+                                <TableRow key={parent.id} className={"hover:bg-gray-200"}>
+                                    <TableCell className="text-center">
+                                        {parent.givenName} {parent.familyName}
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        {parent.phoneNumbers.map(value => value)}
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        {parent.address}
+                                    </TableCell>
+                                    <TableCell className="p-1 text-center">
+                                    </TableCell>
+                                </TableRow>
                             ))) : (
                             <TableRow>
                                 <TableCell colSpan={4}>Nothing added</TableCell>

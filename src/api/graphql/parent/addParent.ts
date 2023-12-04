@@ -5,7 +5,7 @@ export default function addParent(values: ParentDataInput) {
     return clientSideClient
     .mutate({
         mutation: gql`
-            mutation AddParent($oarent: ParentInput!) {
+            mutation AddParent($parent: ParentInput!) {
                 addParent(parent: $parent) {
                     familyName
                     givenName
@@ -15,11 +15,11 @@ export default function addParent(values: ParentDataInput) {
             }
         `,
         variables: {
-            child: {
+            parent: {
                 familyName: values.familyName,
                 givenName: values.givenName,
                 phoneNumbers: values.phoneNumbers,
-                address: values.address,
+                address: values?.address,
             },
         },
     })
