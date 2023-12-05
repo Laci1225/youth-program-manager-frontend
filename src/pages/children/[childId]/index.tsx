@@ -1,7 +1,7 @@
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
 import {ChildData} from "@/model/child-data";
 import getChildById from "@/api/graphql/child/getChildById";
-import React from "react";
+import React, {useState} from "react";
 import ChildForm from "@/form/child/ChildForm";
 import Link from "next/link";
 import {format} from "date-fns";
@@ -10,10 +10,9 @@ import ShowTable from "@/form/ShowTable";
 import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
 import {serverSideClient} from "@/api/graphql/client";
-import deleteChild from "@/api/graphql/child/deleteChild";
-import {toast} from "@/components/ui/use-toast";
-import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
+import {Pencil, Trash} from "lucide-react";
+import DeleteChild from "@/components/deleteChild";
 
 
 export const getServerSideProps = (async (context) => {

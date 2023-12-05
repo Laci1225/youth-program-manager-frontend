@@ -1,7 +1,7 @@
 import {toast} from "@/components/ui/use-toast";
 import React from "react";
 import deleteParent from "@/api/graphql/parent/deleteParent";
-import ConfirmDialog from "@/components/conformDialog";
+import ConfirmDialog from "@/components/confirmDialog";
 
 interface deleteParentProps {
     parent?: ParentData,
@@ -18,20 +18,23 @@ export default function DeleteParent({parent, isOpen, onOpenChange, onSuccess}: 
                 toast({
                     variant: "default",
                     title: "Parent data deleted successfully",
-                    description: `${deletedParent.givenName} ${deletedParent.familyName} deleted`
+                    description: `${deletedParent.givenName} ${deletedParent.familyName} deleted`,
+                    duration: 2000
                 });
                 onSuccess(deletedParent)
             } catch (error) {
                 toast({
                     variant: "destructive",
                     title: "Error occurred: " + error,
-                    description: `Parent data with name: ${parent.givenName} ${parent.familyName} could not be deleted`
+                    description: `Parent data with name: ${parent.givenName} ${parent.familyName} could not be deleted`,
+                    duration: 2000
                 });
             }
         } else {
             toast({
                 variant: "destructive",
                 title: "Error occurred: parent not found",
+                duration: 2000
             });
         }
     }

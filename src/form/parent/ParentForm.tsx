@@ -42,12 +42,14 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange}: Pa
                     toast({
                         title: "The parent is successfully updated",
                         description: `A parent with name: ${form.getValues("givenName")} ${form.getValues("familyName")} updated`,
+                        duration: 2000
                     })
                     onOpenChange(false)
                 }).catch(reason => {
                 toast({
                     variant: "destructive",
                     title: reason.toString(),
+                    duration: 2000
                 })
             }).finally(() => {
                 setIsSubmitting(false)
@@ -59,12 +61,14 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange}: Pa
                     toast({
                         title: "The parent is successfully added",
                         description: `A parent with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,
+                        duration: 2000
                     })
                     onOpenChange(false)
                 }).catch(reason => {
                 toast({
                     variant: "destructive",
                     title: reason.toString(),
+                    duration: 2000
                 })
             }).finally(() => {
                 setIsSubmitting(false)

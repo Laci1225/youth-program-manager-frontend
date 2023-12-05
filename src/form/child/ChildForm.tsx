@@ -55,12 +55,14 @@ function ChildForm({
                     toast({
                         title: "The child is successfully updated",
                         description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} updated`,
+                        duration: 2000
                     })
                     onOpenChange(false)
                 }).catch(reason => {
                 toast({
                     variant: "destructive",
                     title: reason.toString(),
+                    duration: 2000
                 })
             }).finally(() => {
                 setIsSubmitting(false)
@@ -72,12 +74,14 @@ function ChildForm({
                     toast({
                         title: "The child is successfully added",
                         description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,
+                        duration: 2000
                     })
                     onOpenChange(false)
                 }).catch(reason => {
                 toast({
                     variant: "destructive",
                     title: reason.toString(),
+                    duration: 2000
                 })
             }).finally(() => {
                 setIsSubmitting(false)

@@ -5,14 +5,28 @@ import {Button} from "@/components/ui/button";
 import {Disease} from "@/model/disease";
 import {Medicine} from "@/model/medicine";
 import {isStrictDate} from "@/utils/date";
+import {toast} from "@/components/ui/use-toast";
 
 interface ShowTableProps {
     tableFields: string[],
     value: any[] | undefined;
     showDeleteButton: boolean
+    onChange?: (...event: any[]) => void;
 }
 
-export default function ShowTable({tableFields, value, showDeleteButton}: ShowTableProps) {
+export default function ShowTable({tableFields, value, showDeleteButton, onChange}: ShowTableProps) {
+    const handleDelete = (index: number) => {
+        if (value && onChange) {
+            value.filter(i => i.id !== index)
+            const updatedValue = [...value];
+            updatedValue.splice(index, 1);
+            onChange(updatedValue);
+            toast({
+                title: "Successfully deleted",
+                duration: 2000
+            });
+        }
+    };
     return (<div className={"w-full"}>
         <Table className={"w-full border border-gray-200"}>
             <TableHeader>
@@ -42,8 +56,9 @@ export default function ShowTable({tableFields, value, showDeleteButton}: ShowTa
                                 <TableCell className="w-6">
                                     <Button type={"button"} className="p-0"
                                             variant={"ghost"}
-                                            onClick={() => {
-                                            }}><span className="material-icons-outlined">delete</span></Button>
+                                            onClick={() => handleDelete(index)}>
+                                        <span className="material-icons-outlined">delete</span>
+                                    </Button>
                                 </TableCell>
                             }
                         </TableRow>

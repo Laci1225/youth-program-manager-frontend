@@ -1,5 +1,5 @@
 import {ChildData} from "@/model/child-data";
-import deleteChild from "@/api/graphql/deleteChild";
+import deleteChild from "@/api/graphql/child/deleteChild";
 import {toast} from "@/components/ui/use-toast";
 import React from "react";
 import ConfirmDialog from "@/components/confirmDialog";
@@ -19,20 +19,23 @@ export default function DeleteChild({child, isOpen, onOpenChange, onSuccess}: de
                 toast({
                     variant: "default",
                     title: "Child data deleted successfully",
-                    description: `${deletedChild.givenName} ${deletedChild.familyName} deleted`
+                    description: `${deletedChild.givenName} ${deletedChild.familyName} deleted`,
+                    duration: 2000
                 });
                 onSuccess(deletedChild)
             } catch (error) {
                 toast({
                     variant: "destructive",
                     title: "Error occurred: " + error,
-                    description: `Child data with name: ${child.givenName} ${child.familyName} could not be deleted`
+                    description: `Child data with name: ${child.givenName} ${child.familyName} could not be deleted`,
+                    duration: 2000
                 });
             }
         } else {
             toast({
                 variant: "destructive",
                 title: "Error occurred: child not found",
+                duration: 2000
             });
         }
     }
