@@ -5,33 +5,27 @@ import {
     AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
-import {Button} from "@/components/ui/button";
-import React, {ReactNode} from "react";
+import React from "react";
 
 interface ConformDialogProps {
-    buttonName: string | ReactNode
-    dialogTitle: string
-    dialogDescription: string
-    onClickAction: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => Promise<void>
+    title: string
+    description: string
+    onContinue: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
+    isOpen: boolean
+    onOpenChange: (open: boolean) => void;
 }
 
-export default function ConformDialog({buttonName, dialogTitle, dialogDescription, onClickAction}: ConformDialogProps) {
+export default function ConfirmDialog({isOpen, onOpenChange, title, description, onContinue}: ConformDialogProps) {
     return (
-        <AlertDialog>
-            <AlertDialogTrigger asChild>
-                <Button type={"button"} variant={"destructive"}>
-                    {buttonName}
-                </Button>
-            </AlertDialogTrigger>
+        <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>
-                        {dialogTitle}
+                        {title}
                     </AlertDialogTitle>
                     <AlertDialogDescription>
-                        {dialogDescription}
+                        {description}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -39,7 +33,7 @@ export default function ConformDialog({buttonName, dialogTitle, dialogDescriptio
                         Cancel
                     </AlertDialogCancel>
                     <AlertDialogAction
-                        onClick={onClickAction}>Continue
+                        onClick={onContinue}>Continue
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
