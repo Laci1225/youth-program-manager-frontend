@@ -14,6 +14,8 @@ input ParentInput {
 }
 extend type Query {
     getAllParents: [Parent!]!
+    getParentById(id: String!): Parent!
+
 }
 extend type Mutation{
     addParent(parent: ParentInput!): Parent!

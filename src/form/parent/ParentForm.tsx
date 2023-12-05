@@ -1,77 +1,84 @@
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 import {Input} from "@/components/ui/input";
-import {Button, ButtonProps} from "@/components/ui/button";
-import React, {ReactNode, useState} from "react";
+import React, {useState} from "react";
 import {useForm} from "react-hook-form"
 import * as z from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
 import {toast} from "@/components/ui/use-toast";
 import {ScrollArea} from "@/components/ui/scroll-area"
-import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import LoadingButton from "@/components/loading-button";
 import {parentSchema} from "@/form/parent/parentSchema";
 import addParent from "@/api/graphql/parent/addParent";
 import {InputPhoneNumbersHandler} from "@/form/parent/InputPhoneNumbersHandler";
 
 interface ParentFormProps {
-    onParentCreated: (parent: ParentData) => void;
-    triggerName: ReactNode
-    triggerVariant?: ButtonProps["variant"]
+    onParentModified: (parent: ParentData) => void;
+    existingParent?: ParentData
+    isOpen: boolean
+    onOpenChange: (open: boolean) => void;
 }
 
-function ParentForm({onParentCreated, triggerName, triggerVariant}: ParentFormProps) {
+function ParentForm({onParentModified, existingParent, isOpen, onOpenChange}: ParentFormProps) {
 
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof parentSchema>>({
         resolver: zodResolver(parentSchema),
         defaultValues: {
-            familyName: undefined,
-            givenName: undefined,
-            phoneNumbers: undefined,
-            address: undefined,
+            familyName: existingParent?.familyName,
+            givenName: existingParent?.givenName,
+            phoneNumbers: existingParent?.phoneNumbers,
+            address: existingParent?.address,
         },
     })
 
-    const [isDialogOpen, setDialogOpen] = useState(false);
-
     function onSubmit(values: z.infer<typeof parentSchema>) {
         setIsSubmitting(true)
-        console.log(values)
-        addParent(values)
-            .then((result) => {
-                const addedParent = result.data.addParent;
-                console.log(addedParent)
-                onParentCreated(addedParent)
+        if (existingParent) {
+            /*updateChild(existingChild.id, values)
+                .then((result) => {
+                    onChildModified(result)
+                    toast({
+                        title: "The child is successfully updated",
+                        description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} updated`,
+                    })
+                    onOpenChange(false)
+                }).catch(reason => {
                 toast({
-                    title: "The parent is successfully added",
-                    description: `A parent with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,
+                    variant: "destructive",
+                    title: reason.toString(),
                 })
-                setDialogOpen(false)
-            }).catch(reason => {
-            toast({
-                variant: "destructive",
-                title: reason.toString(),
+            }).finally(() => {
+                setIsSubmitting(false)
+            })*/
+        } else {
+            addParent(values)
+                .then((result) => {
+                    onParentModified(result)
+                    toast({
+                        title: "The parent is successfully added",
+                        description: `A parent with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,
+                    })
+                    onOpenChange(false)
+                }).catch(reason => {
+                toast({
+                    variant: "destructive",
+                    title: reason.toString(),
+                })
+            }).finally(() => {
+                setIsSubmitting(false)
             })
-        }).finally(() => {
-            setIsSubmitting(false)
-        })
+        }
     }
 
     return (
-        <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-                <Button onClick={() => {
-                    setDialogOpen(true)
-                    form.reset()
-                }} variant={triggerVariant}
-                >{triggerName}</Button>
-            </DialogTrigger>
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[800px] h-[90vh] shadow-muted-foreground">
                 <DialogHeader>
                     <DialogTitle>Create a parent</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.log(errors))}
+                    <form onSubmit={form.handleSubmit(onSubmit)}
                           className="flex justify-center flex-col space-y-4 mx-4">
                         <ScrollArea className="h-[70vh]">
                             <div className="mx-4">

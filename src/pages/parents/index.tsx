@@ -12,12 +12,21 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
+import {
+    DropdownMenu,
+    DropdownMenuContent, DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 import React, {useState} from "react";
 import {Toaster} from "@/components/ui/toaster";
 import ParentForm from "@/form/parent/ParentForm";
-import {serverSideClient} from "@/api/graphql/child/client";
+import {serverSideClient} from "@/api/graphql/client";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
 import getAllParents from "@/api/graphql/parent/getAllParents";
+import {Pencil, PlusSquare, Trash} from "lucide-react";
+import {Button} from "@/components/ui/button";
+import {useRouter} from "next/router";
 
 export const getServerSideProps = (async () => {
     const parents = await getAllParents(serverSideClient)
@@ -29,14 +38,48 @@ export const getServerSideProps = (async () => {
 }) satisfies GetServerSideProps<{ parentsData: ParentData[] }>;
 
 export default function Parents({parentsData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const router = useRouter()
     const [parents, setParents] = useState<ParentData[]>(parentsData)
-    const onParentCreated = (newParent: ParentData) => {
-        setParents(prevState => [...prevState, newParent])
+    const onCParentSaved = (savedParent: ParentData) => {
+        if (editedParent) {
+            const modifiedParents = parents.map((parent) =>
+                parent.id === savedParent.id ? savedParent : parent
+            );
+            setParents(modifiedParents)
+        } else {
+            setParents(prevState => [...prevState, savedParent])
+        }
     }
+    const onParentDeleted = (parent: ParentData) => {
+        const updatedParents = parents.filter(p => p.id !== parent.id);
+        setParents(updatedParents);
+    }
+    const [editedParent, setEditedParent] = useState<ParentData | null>(null)
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+    const [deletedParent, setDeletedParent] = useState<ParentData>()
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+
+    function handleEditClick(parent: ParentData | null) {
+        setIsEditDialogOpen(true)
+        setEditedParent(parent)
+    }
+
+    function handleDeleteClick(parent: ParentData) {
+        setIsDeleteDialogOpen(true)
+        setDeletedParent(parent)
+    }
+
     return (
         <div className={"container w-4/6 py-28"}>
-            <div className={"flex justify-between px-6 pb-6"}>Parents
-                <ParentForm triggerName={"+ Create"} onParentCreated={onParentCreated}/>
+            <div className={"flex justify-between px-6 pb-6"}>
+                <span>Children</span>
+                <Button onClick={(event) => {
+                    event.preventDefault()
+                    handleEditClick(null)
+                }}>
+                    <PlusSquare/>
+                    <span>Create</span>
+                </Button>
             </div>
             <Table className={"border border-gray-700 rounded"}>
                 <TableHeader>
@@ -50,7 +93,8 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
                     {
                         parents && parents.length !== 0 ? (
                             parents.map((parent) => (
-                                <TableRow key={parent.id} className={"hover:bg-gray-200"}>
+                                <TableRow key={parent.id} className={"hover:bg-gray-300 hover:cursor-pointer"}
+                                          onClick={() => router.push(`parents/${parent.id}`)}>
                                     <TableCell className="text-center">
                                         {parent.givenName} {parent.familyName}
                                     </TableCell>
@@ -76,6 +120,34 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
                                             : (<>{parent.phoneNumbers[0]}</>)}
                                     </TableCell>
                                     <TableCell className="p-1 text-center">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger onClick={event => event.preventDefault()}>
+                                                <span className="material-icons-outlined">more_horiz</span>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent className={"min-w-8"}>
+                                                <DropdownMenuSeparator/>
+                                                <DropdownMenuItem
+                                                    className={"justify-center hover:cursor-pointer"}
+                                                    onClick={(event) => {
+                                                        event.preventDefault()
+                                                        event.stopPropagation()
+                                                        handleEditClick(parent)
+                                                    }}>
+                                                    <Pencil className={"mx-1"}/>
+                                                    <span>Edit</span>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    className={"justify-center hover:cursor-pointer p-2 mx-5 bg-red-600 text-white"}
+                                                    onClick={event => {
+                                                        event.preventDefault()
+                                                        event.stopPropagation()
+                                                        handleDeleteClick(parent)
+                                                    }}>
+                                                    <Trash className={"mx-1"}/>
+                                                    <span>Delete</span>
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </TableCell>
                                 </TableRow>
                             ))) : (
@@ -86,6 +158,16 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
                 </TableBody>
             </Table>
             <Toaster/>
+            <ParentForm existingParent={editedParent ?? undefined}
+                        isOpen={isEditDialogOpen}
+                        onParentModified={onCParentSaved}
+                        onOpenChange={setIsEditDialogOpen}
+            />
+            {/*<DeleteChild parent={deletedParent}
+                         isOpen={isDeleteDialogOpen}
+                         onOpenChange={setIsDeleteDialogOpen}
+                         onSuccess={onParentDeleted}
+            />*/}
         </div>
     )
 }

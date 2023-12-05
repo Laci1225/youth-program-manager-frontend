@@ -1,4 +1,4 @@
-import {clientSideClient} from "@/api/graphql/child/client";
+import {clientSideClient} from "@/api/graphql/client";
 import {ApolloClient, gql, NormalizedCacheObject} from "@apollo/client";
 import {ChildData} from "@/model/child-data";
 

@@ -2,8 +2,6 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/c
 import React from "react";
 import {format, isValid, parseISO} from "date-fns";
 import {Button} from "@/components/ui/button";
-import {Disease} from "@/model/disease";
-import {Medicine} from "@/model/medicine";
 
 interface ShowTableProps {
     tableFields: string[],
@@ -31,7 +29,7 @@ export default function ShowTable({tableFields, value, showDeleteButton}: ShowTa
             </TableHeader>
             <TableBody>{
                 value && value?.length !== 0 ? (
-                    value.map((field: Disease | Medicine, index: number) => (
+                    value.map((field: object, index: number) => (
                         <TableRow key={index}>
                             {Object.values(field).map((value) => (
                                 <TableCell key={value} className={"text-center"}>

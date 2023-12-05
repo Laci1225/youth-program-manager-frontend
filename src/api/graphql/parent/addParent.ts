@@ -1,4 +1,4 @@
-import {clientSideClient} from "@/api/graphql/child/client";
+import {clientSideClient} from "@/api/graphql/client";
 import {gql} from "@apollo/client";
 
 export default function addParent(values: ParentDataInput) {
@@ -22,5 +22,5 @@ export default function addParent(values: ParentDataInput) {
                 address: values?.address,
             },
         },
-    })
+    }).then(value => value.data.addParent)
 }

@@ -9,7 +9,7 @@ import {Toaster} from "@/components/ui/toaster";
 import ShowTable from "@/form/ShowTable";
 import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
-import {serverSideClient} from "@/api/graphql/child/client";
+import {serverSideClient} from "@/api/graphql/client";
 import deleteChild from "@/api/graphql/child/deleteChild";
 import {toast} from "@/components/ui/use-toast";
 import {Button} from "@/components/ui/button";
