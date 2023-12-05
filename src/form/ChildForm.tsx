@@ -100,7 +100,7 @@ function ChildForm({
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[800px] h-[90vh] shadow-muted-foreground">
                 <DialogHeader>
-                    <DialogTitle>Create a child</DialogTitle>
+                    <DialogTitle>{existingChild ? "Update" : "Create"} a child</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)}
@@ -213,9 +213,9 @@ function ChildForm({
                             </div>
                         </ScrollArea>
                         <DialogFooter>
-                            <LoadingButton type="submit" value={existingChild ? "Update" : "Create"}
-                                           isLoading={isSubmitting}
-                                           existingChild={existingChild}/>
+                            <LoadingButton isLoading={isSubmitting}>
+                                {existingChild ? "Update" : "Create"}
+                            </LoadingButton>
                         </DialogFooter>
                     </form>
                 </Form>
