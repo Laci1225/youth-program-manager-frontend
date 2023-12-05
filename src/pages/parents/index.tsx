@@ -27,6 +27,7 @@ import getAllParents from "@/api/graphql/parent/getAllParents";
 import {Pencil, PlusSquare, Trash} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
+import DeleteParent from "@/form/parent/DeleteParent";
 
 export const getServerSideProps = (async () => {
     const parents = await getAllParents(serverSideClient)
@@ -163,11 +164,11 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
                         onParentModified={onCParentSaved}
                         onOpenChange={setIsEditDialogOpen}
             />
-            {/*<DeleteChild parent={deletedParent}
-                         isOpen={isDeleteDialogOpen}
-                         onOpenChange={setIsDeleteDialogOpen}
-                         onSuccess={onParentDeleted}
-            />*/}
+            <DeleteParent parent={deletedParent}
+                          isOpen={isDeleteDialogOpen}
+                          onOpenChange={setIsDeleteDialogOpen}
+                          onSuccess={onParentDeleted}
+            />
         </div>
     )
 }

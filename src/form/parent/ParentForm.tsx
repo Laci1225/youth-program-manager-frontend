@@ -11,6 +11,7 @@ import LoadingButton from "@/components/loading-button";
 import {parentSchema} from "@/form/parent/parentSchema";
 import addParent from "@/api/graphql/parent/addParent";
 import {InputPhoneNumbersHandler} from "@/form/parent/InputPhoneNumbersHandler";
+import updateParent from "@/api/graphql/parent/updateParent";
 
 interface ParentFormProps {
     onParentModified: (parent: ParentData) => void;
@@ -35,12 +36,12 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange}: Pa
     function onSubmit(values: z.infer<typeof parentSchema>) {
         setIsSubmitting(true)
         if (existingParent) {
-            /*updateChild(existingChild.id, values)
+            updateParent(existingParent.id, values)
                 .then((result) => {
-                    onChildModified(result)
+                    onParentModified(result)
                     toast({
-                        title: "The child is successfully updated",
-                        description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} updated`,
+                        title: "The parent is successfully updated",
+                        description: `A parent with name: ${form.getValues("givenName")} ${form.getValues("familyName")} updated`,
                     })
                     onOpenChange(false)
                 }).catch(reason => {
@@ -50,7 +51,7 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange}: Pa
                 })
             }).finally(() => {
                 setIsSubmitting(false)
-            })*/
+            })
         } else {
             addParent(values)
                 .then((result) => {

@@ -9,6 +9,7 @@ import {useRouter} from "next/router";
 import ParentForm from "@/form/parent/ParentForm";
 import {serverSideClient} from "@/api/graphql/client";
 import getParentById from "@/api/graphql/parent/getParentById";
+import DeleteParent from "@/form/parent/DeleteParent";
 
 
 export const getServerSideProps = (async (context) => {
@@ -40,7 +41,7 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
         setParent(newParent)
     }
     const onParentDeleted = () => {
-        router.push("/parent")
+        router.push("/parents")
     }
 
     function handleEditClick() {
@@ -110,11 +111,11 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                         onParentModified={onParentUpdated}
                         onOpenChange={setIsEditDialogOpen}
             />
-            {/*<DeleteParent parent={parent}
+            <DeleteParent parent={parent}
                           isOpen={isDeleteDialogOpen}
                           onOpenChange={setIsDeleteDialogOpen}
                           onSuccess={onParentDeleted}
-            />*/}
+            />
         </div>
     )
 

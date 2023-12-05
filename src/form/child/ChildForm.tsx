@@ -45,12 +45,9 @@ function ChildForm({onChildCreated, existingChild, triggerName, triggerVariant}:
 
     function onSubmit(values: z.infer<typeof childSchema>) {
         setIsSubmitting(true)
-
         addChild(values)
             .then((result) => {
-                const addedChild = result.data.addChild;
-
-                onChildCreated(addedChild)
+                onChildCreated(result)
                 toast({
                     title: "The child is successfully added",
                     description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,

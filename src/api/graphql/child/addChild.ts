@@ -45,5 +45,5 @@ export default function addChild(values: ChildDataInput) {
                 })),
             },
         },
-    })
+    }).then(value => value.data.addChild)
 }
