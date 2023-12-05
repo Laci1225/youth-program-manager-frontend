@@ -1,6 +1,6 @@
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 import {Input} from "@/components/ui/input";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useForm} from "react-hook-form"
 import * as z from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -71,6 +71,15 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange}: Pa
             })
         }
     }
+
+    useEffect(() => {
+        form.reset({
+            familyName: existingParent?.familyName ?? "",
+            givenName: existingParent?.givenName ?? "",
+            phoneNumbers: existingParent?.phoneNumbers,
+            address: existingParent?.address ?? "",
+        })
+    }, [existingParent])
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
