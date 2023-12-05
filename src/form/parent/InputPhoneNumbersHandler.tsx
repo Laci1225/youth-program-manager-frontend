@@ -3,13 +3,15 @@ import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {fieldAppearance} from "@/components/fieldAppearance";
 import {PlusSquare, XSquare} from "lucide-react";
+import {FieldError, Merge} from "react-hook-form";
 
 interface InputHandlerProps {
     value?: string[];
     onChange: (newValue: String[]) => void
+    errors: Merge<FieldError, (FieldError | undefined)[]>
 }
 
-export function InputPhoneNumbersHandler({value, onChange}: InputHandlerProps) {
+export function InputPhoneNumbersHandler({value, onChange, errors}: InputHandlerProps) {
     const [phoneNumbers, setPhoneNumbers] = useState(value || ['']);
 
     const handlePhoneNumberChange = (index: number, newValue: string) => {
@@ -29,30 +31,35 @@ export function InputPhoneNumbersHandler({value, onChange}: InputHandlerProps) {
             onChange(newPhoneNumbers.filter(Boolean));
         }
     };
-
     return (
         <>
             {phoneNumbers.map((phoneNumber, index) => (
-                <div key={index} style={{display: 'flex', alignItems: 'center'}}>
-                    <Input
-                        placeholder={index === 0 ? "Mandatory Phone number" : "Optional Phone number"}
-                        value={phoneNumber}
-                        onChange={(e) => handlePhoneNumberChange(index, e.target.value)}
-                    />
-                    {index !== 0 && (
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => removePhoneNumberField(index)}
-                            style={{marginLeft: '8px'}}
-                        >
-                            <XSquare/>
-                        </Button>
-                    )}
+                <div key={index}>
+                    <div className={"flex items-center"}>
+                        <Input
+                            placeholder={index === 0 ? "Scheme: +36200000000" : "Optional Phone number"}
+                            required={index === 0}
+                            value={phoneNumber}
+                            onChange={(e) => handlePhoneNumberChange(index, e.target.value)}
+                        />
+                        {index !== 0 && (
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() => removePhoneNumberField(index)}
+                                style={{marginLeft: '8px'}}
+                            >
+                                <XSquare/>
+                            </Button>
+                        )}
+                    </div>
+                    <div className={"text-sm font-medium text-destructive mt-2"}>
+                        {errors[index]?.message}
+                    </div>
                 </div>
             ))}
             <Button
-                className={fieldAppearance + "text-left"}
+                className={fieldAppearance}
                 type={"button"}
                 variant={"ghost"}
                 onClick={addPhoneNumberField}

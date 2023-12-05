@@ -71,7 +71,7 @@ function ParentForm({onParentCreated, triggerName, triggerVariant}: ParentFormPr
                     <DialogTitle>Create a parent</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)}
+                    <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.log(errors))}
                           className="flex justify-center flex-col space-y-4 mx-4">
                         <ScrollArea className="h-[70vh]">
                             <div className="mx-4">
@@ -110,9 +110,10 @@ function ParentForm({onParentCreated, triggerName, triggerVariant}: ParentFormPr
                                         <FormItem className="flex-1">
                                             <FormLabel>Phone numbers*</FormLabel>
                                             <FormControl>
-                                                <InputPhoneNumbersHandler {...field}/>
+                                                <InputPhoneNumbersHandler {...field}
+                                                                          errors={form.formState.errors.phoneNumbers || []}
+                                                />
                                             </FormControl>
-                                            <FormMessage/>
                                         </FormItem>
                                     )}
                                 />

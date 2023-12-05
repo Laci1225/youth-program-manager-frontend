@@ -30,7 +30,7 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
     return (
         <div className={"container w-4/6 py-28"}>
             <div className={"flex justify-between px-6 pb-6"}>Parents
-                <ParentForm triggerName={"+ Add"} onParentCreated={onParentCreated}/>
+                <ParentForm triggerName={"+ Create"} onParentCreated={onParentCreated}/>
             </div>
             <Table className={"border border-gray-700 rounded"}>
                 <TableHeader>
@@ -50,10 +50,13 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
                                         {parent.givenName} {parent.familyName}
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        {parent.phoneNumbers.map(value => value)}
+                                        {parent.phoneNumbers.length > 1
+                                            ? (<>{parent.phoneNumbers[0]} + {parent.phoneNumbers.length - 1} phone
+                                                number(s)</>)
+                                            : (<>{parent.phoneNumbers[0]}</>)}
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        {parent.address}
+                                        {parent.address ?? "Not added"}
                                     </TableCell>
                                     <TableCell className="p-1 text-center">
                                     </TableCell>
