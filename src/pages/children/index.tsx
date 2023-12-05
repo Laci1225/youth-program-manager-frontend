@@ -6,18 +6,6 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import {Button} from "@/components/ui/button";
 import React, {useState} from "react";
 import {ChildData} from "@/model/child-data";
 import ChildForm from "@/form/child/ChildForm";
@@ -35,6 +23,10 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import DeleteChild from "@/components/deleteChild";
+import {Pencil, PlusSquare, Trash} from "lucide-react"
+import {useRouter} from "next/router";
+import {Button} from "@/components/ui/button";
 
 
 export const getServerSideProps = (async () => {
@@ -47,15 +39,50 @@ export const getServerSideProps = (async () => {
 }) satisfies GetServerSideProps<{ childrenData: ChildData[] }>;
 
 export default function Children({childrenData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const router = useRouter()
     const [children, setChildren] = useState<ChildData[]>(childrenData)
-    const onChildCreated = (newChild: ChildData) => {
-        setChildren(prevState => [...prevState, newChild])
+    const onChildSaved = (savedChild: ChildData) => {
+        if (editedChild) {
+            const modifiedChildren = children.map((child) =>
+                child.id === savedChild.id ? savedChild : child
+            );
+            setChildren(modifiedChildren)
+        } else {
+            setChildren(prevState => [...prevState, savedChild])
+        }
+    }
+    const onChildDeleted = (child: ChildData) => {
+        const updatedChildren = children.filter(c => c.id !== child.id);
+        setChildren(updatedChildren);
+    }
+
+
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+    const [editedChild, setEditedChild] = useState<ChildData | null>(null)
+    const [deletedChild, setDeletedChild] = useState<ChildData>()
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+
+    function handleEditClick(child: ChildData | null) {
+        setIsEditDialogOpen(true)
+        setEditedChild(child)
+    }
+
+    function handleDeleteClick(child: ChildData) {
+        setIsDeleteDialogOpen(true)
+        setDeletedChild(child)
     }
 
     return (
         <div className={"container w-4/6 py-28"}>
-            <div className={"flex justify-between px-6 pb-6"}>Children
-                <ChildForm onChildCreated={onChildCreated} triggerName={"+ Add"}/>
+            <div className={"flex justify-between px-6 pb-6"}>
+                <span>Children</span>
+                <Button onClick={(event) => {
+                    event.preventDefault()
+                    handleEditClick(null)
+                }}>
+                    <PlusSquare/>
+                    <span>Add</span>
+                </Button>
             </div>
             <Table className={"border border-gray-700 rounded"}>
                 <TableHeader>
@@ -71,87 +98,55 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                     {
                         children && children.length !== 0 ? (
                             children.map((child) => (
-                                <Link key={child.id} href={`children/${child.id}`}
-                                      className="contents">
-                                    <TableRow key={child.id} className={"hover:bg-gray-200"}>
-                                        <TableCell className="text-center">
-                                            {child.givenName} {child.familyName}
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            {format(new Date(child.birthDate), "P")}
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            {child.hasDiagnosedDiseases ?
-                                                <span className="material-icons-outlined">check_box</span> :
-                                                <span
-                                                    className="material-icons-outlined">check_box_outline_blank</span>}
-                                        </TableCell>
-                                        <TableCell className="text-center">{child.hasRegularMedicines ?
+                                <TableRow key={child.id} className={"hover:bg-gray-300 hover:cursor-pointer"}
+                                          onClick={() => router.push(`children/${child.id}`)}>
+                                    <TableCell className="text-center">
+                                        {child.givenName} {child.familyName}
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        {format(new Date(child.birthDate), "P")}
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        {child.hasDiagnosedDiseases ?
                                             <span className="material-icons-outlined">check_box</span> :
                                             <span
                                                 className="material-icons-outlined">check_box_outline_blank</span>}
-                                        </TableCell>
-                                        <TableCell className="p-1 text-center">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger onClick={event => event.preventDefault()}>
-                                                    <span className="material-icons-outlined">more_horiz</span>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent className={"min-w-8"}>
-                                                    <DropdownMenuSeparator/>
-                                                    <DropdownMenuItem className={"justify-center"}>
-                                                        <Button variant={"ghost"}>
-                                                            <span className="material-icons-outlined">edit</span>
-                                                        </Button>
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem className={"justify-center"}
-                                                                      onClick={e => e.preventDefault()}>
-                                                        <AlertDialog>
-                                                            <AlertDialogTrigger asChild>
-                                                                <Button type={"button"} variant={"destructive"}>
-                                                                    <span
-                                                                        className="material-icons-outlined">delete</span>
-                                                                </Button>
-                                                            </AlertDialogTrigger>
-                                                            <AlertDialogContent>
-                                                                <AlertDialogHeader>
-                                                                    <AlertDialogTitle>Are you absolutely
-                                                                        sure?</AlertDialogTitle>
-                                                                    <AlertDialogDescription>
-                                                                        This action cannot be undone. This will
-                                                                        permanently delete your
-                                                                        account and remove your data from our servers.
-                                                                    </AlertDialogDescription>
-                                                                </AlertDialogHeader>
-                                                                <AlertDialogFooter>
-                                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                                    <AlertDialogAction
-                                                                        onClick={async () => {
-                                                                            await deleteChild(child.id)
-                                                                                .then((deletedChild) => {
-                                                                                        toast({
-                                                                                            variant: "default",
-                                                                                            title: "Child data deleted successfully",
-                                                                                            description: `${deletedChild.givenName} ${deletedChild.familyName} deleted`
-                                                                                        })
-                                                                                        const updatedChildren = children.filter(c => c.id !== child.id)
-                                                                                        setChildren(updatedChildren);
-                                                                                    }
-                                                                                ).catch(error => {
-                                                                                    if (error.response && error.response.status === 400) {
-                                                                                        alert("Dont have permission to do that")
-                                                                                    }
-                                                                                });
-                                                                        }
-                                                                        }>Continue</AlertDialogAction>
-                                                                </AlertDialogFooter>
-                                                            </AlertDialogContent>
-                                                        </AlertDialog>
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </TableCell>
-                                    </TableRow>
-                                </Link>
+                                    </TableCell>
+                                    <TableCell className="text-center">{child.hasRegularMedicines ?
+                                        <span className="material-icons-outlined">check_box</span> :
+                                        <span className="material-icons-outlined">check_box_outline_blank</span>}
+                                    </TableCell>
+                                    <TableCell className="p-1 text-center">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger onClick={event => event.preventDefault()}>
+                                                <span className="material-icons-outlined">more_horiz</span>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent className={"min-w-8"}>
+                                                <DropdownMenuSeparator/>
+                                                <DropdownMenuItem
+                                                    className={"justify-center hover:cursor-pointer"}
+                                                    onClick={(event) => {
+                                                        event.preventDefault()
+                                                        event.stopPropagation()
+                                                        handleEditClick(child)
+                                                    }}>
+                                                    <Pencil className={"mx-1"}/>
+                                                    <span>Edit</span>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    className={"justify-center hover:cursor-pointer p-2 mx-5 bg-red-600 text-white"}
+                                                    onClick={event => {
+                                                        event.preventDefault()
+                                                        event.stopPropagation()
+                                                        handleDeleteClick(child)
+                                                    }}>
+                                                    <Trash className={"mx-1"}/>
+                                                    <span>Delete</span>
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </TableCell>
+                                </TableRow>
                             ))) : (
                             <TableRow>
                                 <TableCell colSpan={5}>Nothing added</TableCell>
@@ -160,6 +155,17 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                 </TableBody>
             </Table>
             <Toaster/>
+
+            <ChildForm existingChild={editedChild ?? undefined}
+                       isOpen={isEditDialogOpen}
+                       onChildModified={onChildSaved}
+                       onOpenChange={setIsEditDialogOpen}
+            />
+            <DeleteChild child={deletedChild}
+                         isOpen={isDeleteDialogOpen}
+                         onOpenChange={setIsDeleteDialogOpen}
+                         onSuccess={onChildDeleted}
+            />
         </div>
     )
 }

@@ -14,17 +14,6 @@ import deleteChild from "@/api/graphql/child/deleteChild";
 import {toast} from "@/components/ui/use-toast";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 
 
 export const getServerSideProps = (async (context) => {
@@ -48,21 +37,25 @@ export const getServerSideProps = (async (context) => {
     };
 }) satisfies GetServerSideProps<{ selectedChild: ChildData }, { childId: string }>;
 export default function Child({selectedChild}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    const router = useRouter();
-    const handleDelete = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        event.preventDefault();
-        try {
-            const deletedChild = await deleteChild(selectedChild.id);
-            toast({
-                variant: "default",
-                title: "Child data deleted successfully",
-                description: `${deletedChild.givenName} ${deletedChild.familyName} deleted`
-            });
-            router.push('/children');
-        } catch (error) {
-            console.error('Deletion failed', error);
-        }
-    };
+    const [child, setChild] = useState<ChildData>(selectedChild)
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+    const router = useRouter()
+    const onChildUpdated = (newChild: ChildData) => {
+        setChild(newChild)
+    }
+    const onChildDeleted = () => {
+        router.push("/children")
+    }
+
+    function handleEditClick() {
+        setIsEditDialogOpen(true)
+    }
+
+    function handleDeleteClick() {
+        setIsDeleteDialogOpen(true)
+    }
+
     return (
         <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
             <div className={"flex justify-between px-6 pb-6"}>
@@ -72,62 +65,61 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                 <div>
                     Child details
                 </div>
-                <div>
-                    <ChildForm onChildCreated={() => {
-                    }}
-                               existingChild={selectedChild}
-                               triggerName={<span className="material-icons-outlined">edit</span>}
-                               triggerVariant={"ghost"}/>
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button type={"button"} variant={"destructive"}>
-                                <span className="material-icons-outlined">delete</span>
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you absolutely
-                                    sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This action cannot be undone. This will
-                                    permanently delete your
-                                    account and remove your data from our servers.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                    onClick={handleDelete}>Continue</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                <div className={"flex"}>
+                    <div className={" flex flex-row items-center hover:cursor-pointer px-5"}
+                         onClick={(event) => {
+                             event.preventDefault()
+                             handleEditClick()
+                         }}>
+                        <Pencil className={"mx-1"}/>
+                        <span>Edit</span>
+                    </div>
+                    <div
+                        className={"flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"}
+                        onClick={(event) => {
+                            event.preventDefault()
+                            handleDeleteClick()
+                        }}>
+                        <Trash className={"mx-1"}/>
+                        <span>Delete</span>
+                    </div>
                 </div>
             </div>
             <div className="border border-gray-200 rounded p-4">
                 <div className="mb-6">
                     <Label>Full Name:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {selectedChild.givenName} {selectedChild.familyName}
+                        {child.givenName} {child.familyName}
                     </div>
                 </div>
                 <div className="mb-6">
                     <Label>Birth date and place:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {format(new Date(selectedChild.birthDate), "P")} {selectedChild.birthPlace}
+                        {format(new Date(child.birthDate), "P")} {child.birthPlace}
                     </div>
                 </div>
                 <div className="mb-6">
                     <Label>Address:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {selectedChild.address}
+                        {child.address}
                     </div>
                 </div>
-                <ShowTable tableFields={["Name", "Diagnosed at"]} value={selectedChild.diagnosedDiseases}
+                <ShowTable tableFields={["Name", "Diagnosed at"]} value={child.diagnosedDiseases}
                            showDeleteButton={false}/>
-                <ShowTable tableFields={["Name", "Dose", "Taken since"]} value={selectedChild.regularMedicines}
+                <ShowTable tableFields={["Name", "Dose", "Taken since"]} value={child.regularMedicines}
                            showDeleteButton={false}/>
             </div>
             <Toaster/>
+            <ChildForm existingChild={child ?? undefined}
+                       isOpen={isEditDialogOpen}
+                       onChildModified={onChildUpdated}
+                       onOpenChange={setIsEditDialogOpen}
+            />
+            <DeleteChild child={child}
+                         isOpen={isDeleteDialogOpen}
+                         onOpenChange={setIsDeleteDialogOpen}
+                         onSuccess={onChildDeleted}
+            />
         </div>
     )
 

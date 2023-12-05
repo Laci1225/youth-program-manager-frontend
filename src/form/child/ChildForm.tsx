@@ -1,7 +1,6 @@
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 import {Input} from "@/components/ui/input";
-import {Button, ButtonProps} from "@/components/ui/button";
-import React, {ReactNode, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useForm} from "react-hook-form"
 import * as z from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -13,20 +12,26 @@ import addChild from "@/api/graphql/child/addChild";
 import CalendarInput from "@/form/CalendarInput";
 import ShowTable from "@/form/ShowTable";
 import {ScrollArea} from "@/components/ui/scroll-area"
-import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {ChildData} from "@/model/child-data";
 import LoadingButton from "@/components/loading-button";
+import updateChild from "@/api/graphql/updateChild";
+import {parseDateInDisease, parseDateInMedicine} from "@/utils/child";
 
 interface ChildFormProps {
-    onChildCreated: (child: ChildData) => void;
+    onChildModified: (child: ChildData) => void;
     existingChild?: ChildData
-    triggerName: ReactNode
-    triggerVariant?: ButtonProps["variant"]
+    isOpen: boolean
+    onOpenChange: (open: boolean) => void;
 }
 
 
-function ChildForm({onChildCreated, existingChild, triggerName, triggerVariant}: ChildFormProps) {
-
+function ChildForm({
+                       onChildModified,
+                       existingChild,
+                       isOpen,
+                       onOpenChange
+                   }: ChildFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof childSchema>>({
         resolver: zodResolver(childSchema),
@@ -36,45 +41,66 @@ function ChildForm({onChildCreated, existingChild, triggerName, triggerVariant}:
             birthDate: existingChild?.birthDate ? new Date(existingChild.birthDate) : undefined,
             birthPlace: existingChild?.birthPlace,
             address: existingChild?.address,
-            diagnosedDiseases: existingChild?.diagnosedDiseases,
-            regularMedicines: existingChild?.regularMedicines
+            diagnosedDiseases: parseDateInDisease(existingChild?.diagnosedDiseases),
+            regularMedicines: parseDateInMedicine(existingChild?.regularMedicines)
         },
     })
 
-    const [isDialogOpen, setDialogOpen] = useState(false);
-
     function onSubmit(values: z.infer<typeof childSchema>) {
         setIsSubmitting(true)
-        addChild(values)
-            .then((result) => {
-                onChildCreated(result)
+        if (existingChild) {
+            updateChild(existingChild.id, values)
+                .then((result) => {
+                    onChildModified(result)
+                    toast({
+                        title: "The child is successfully updated",
+                        description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} updated`,
+                    })
+                    onOpenChange(false)
+                }).catch(reason => {
                 toast({
-                    title: "The child is successfully added",
-                    description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,
+                    variant: "destructive",
+                    title: reason.toString(),
                 })
-                setDialogOpen(false)
-            }).catch(reason => {
-            toast({
-                variant: "destructive",
-                title: reason.toString(),
+            }).finally(() => {
+                setIsSubmitting(false)
             })
-        }).finally(() => {
-            setIsSubmitting(false)
-        })
+        } else {
+            addChild(values)
+                .then((result) => {
+                    onChildModified(result)
+                    toast({
+                        title: "The child is successfully added",
+                        description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,
+                    })
+                    onOpenChange(false)
+                }).catch(reason => {
+                toast({
+                    variant: "destructive",
+                    title: reason.toString(),
+                })
+            }).finally(() => {
+                setIsSubmitting(false)
+            })
+        }
     }
 
+    useEffect(() => {
+        form.reset({
+            familyName: existingChild?.familyName ?? "",
+            givenName: existingChild?.givenName ?? "",
+            birthDate: existingChild?.birthDate ? new Date(existingChild.birthDate) : undefined,
+            birthPlace: existingChild?.birthPlace ?? "",
+            address: existingChild?.address ?? "",
+            diagnosedDiseases: existingChild ? parseDateInDisease(existingChild?.diagnosedDiseases) : [],
+            regularMedicines: existingChild ? parseDateInMedicine(existingChild?.regularMedicines) : []
+        })
+    }, [existingChild]);
     return (
-        <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-                <Button onClick={() => {
-                    setDialogOpen(true)
-                    form.reset()
-                }} variant={triggerVariant}
-                >{triggerName}</Button>
-            </DialogTrigger>
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[800px] h-[90vh] shadow-muted-foreground">
                 <DialogHeader>
-                    <DialogTitle>Create a child</DialogTitle>
+                    <DialogTitle>{existingChild ? "Update" : "Create"} a child</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)}
@@ -187,7 +213,9 @@ function ChildForm({onChildCreated, existingChild, triggerName, triggerVariant}:
                             </div>
                         </ScrollArea>
                         <DialogFooter>
-                            <LoadingButton type="submit" isLoading={isSubmitting}/>
+                            <LoadingButton isLoading={isSubmitting}>
+                                {existingChild ? "Update" : "Create"}
+                            </LoadingButton>
                         </DialogFooter>
                     </form>
                 </Form>
