@@ -12,7 +12,8 @@ import {fieldAppearance} from "@/components/fieldAppearance";
 import {serverSideClient} from "@/api/graphql/client";
 import {useRouter} from "next/router";
 import {Pencil, Trash} from "lucide-react";
-import DeleteChild from "@/components/deleteChild";
+import DeleteData from "@/components/deleteData";
+import deleteChild from "@/api/graphql/child/deleteChild";
 
 
 export const getServerSideProps = (async (context) => {
@@ -114,12 +115,14 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                        onChildModified={onChildUpdated}
                        onOpenChange={setIsEditDialogOpen}
             />
-            <DeleteChild child={child}
-                         isOpen={isDeleteDialogOpen}
-                         onOpenChange={setIsDeleteDialogOpen}
-                         onSuccess={onChildDeleted}
+            <DeleteData data={child}
+                        isOpen={isDeleteDialogOpen}
+                        onOpenChange={setIsDeleteDialogOpen}
+                        onSuccess={onChildDeleted}
+                        deleteFunction={deleteChild}
+                        dataType={"Child"}
+
             />
         </div>
     )
-
 }

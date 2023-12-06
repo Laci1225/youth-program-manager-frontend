@@ -89,10 +89,10 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange}: Pa
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[800px] h-[90vh] shadow-muted-foreground">
                 <DialogHeader>
-                    <DialogTitle>Create a parent</DialogTitle>
+                    <DialogTitle>{existingParent ? "Update" : "Create"} a parent</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)}
+                    <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.log(errors))}
                           className="flex justify-center flex-col space-y-4 mx-4">
                         <ScrollArea className="h-[70vh]">
                             <div className="mx-4">
@@ -135,6 +135,8 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange}: Pa
                                                                           errors={form.formState.errors.phoneNumbers || []}
                                                 />
                                             </FormControl>
+                                            <FormMessage
+                                                hidden={typeof form.formState.errors.phoneNumbers?.message === 'undefined'}/>
                                         </FormItem>
                                     )}
                                 />
@@ -143,7 +145,7 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange}: Pa
                                     name="address"
                                     render={({field}) => (
                                         <FormItem className={"flex-1"}>
-                                            <FormLabel>Address*</FormLabel>
+                                            <FormLabel>Address</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="Address" {...field} />
                                             </FormControl>
@@ -154,7 +156,9 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange}: Pa
                             </div>
                         </ScrollArea>
                         <DialogFooter>
-                            <LoadingButton type="submit" isLoading={isSubmitting}/>
+                            <LoadingButton isLoading={isSubmitting}>
+                                {existingParent ? "Update" : "Create"}
+                            </LoadingButton>
                         </DialogFooter>
                     </form>
                 </Form>

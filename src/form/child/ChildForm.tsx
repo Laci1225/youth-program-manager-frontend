@@ -15,7 +15,7 @@ import {ScrollArea} from "@/components/ui/scroll-area"
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {ChildData} from "@/model/child-data";
 import LoadingButton from "@/components/loading-button";
-import updateChild from "@/api/graphql/updateChild";
+import updateChild from "@/api/graphql/child/updateChild";
 import {parseDateInDisease, parseDateInMedicine} from "@/utils/child";
 
 interface ChildFormProps {

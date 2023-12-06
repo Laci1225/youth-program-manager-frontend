@@ -9,7 +9,8 @@ import {useRouter} from "next/router";
 import ParentForm from "@/form/parent/ParentForm";
 import {serverSideClient} from "@/api/graphql/client";
 import getParentById from "@/api/graphql/parent/getParentById";
-import DeleteParent from "@/form/parent/DeleteParent";
+import deleteParent from "@/api/graphql/parent/deleteParent";
+import DeleteData from "@/components/deleteData";
 
 
 export const getServerSideProps = (async (context) => {
@@ -101,7 +102,7 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                 <div className="mb-6">
                     <Label>Address:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {parent.address}
+                        {parent.address ?? <div className={"text-gray-400"}>Not added yet </div>}
                     </div>
                 </div>
             </div>
@@ -111,12 +112,13 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                         onParentModified={onParentUpdated}
                         onOpenChange={setIsEditDialogOpen}
             />
-            <DeleteParent parent={parent}
-                          isOpen={isDeleteDialogOpen}
-                          onOpenChange={setIsDeleteDialogOpen}
-                          onSuccess={onParentDeleted}
+            <DeleteData data={parent}
+                        isOpen={isDeleteDialogOpen}
+                        onOpenChange={setIsDeleteDialogOpen}
+                        onSuccess={onParentDeleted}
+                        deleteFunction={deleteParent}
+                        dataType={"Parent"}
             />
         </div>
     )
-
 }
