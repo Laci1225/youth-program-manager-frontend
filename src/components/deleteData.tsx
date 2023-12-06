@@ -2,37 +2,33 @@ import {toast} from "@/components/ui/use-toast";
 import React from "react";
 import ConfirmDialog from "@/components/confirmDialog";
 
-interface PersonData {
-    id: string;
-    givenName: string;
-    familyName: string;
-}
-
 interface DeleteDataProps<T> {
-    data?: T,
+    entityId?: string,
+    entityLabel: string,
     onSuccess: (deletedData: T) => void,
     isOpen: boolean,
     onOpenChange: (open: boolean) => void,
     deleteFunction: (id: string) => Promise<T>,
-    dataType: string
+    entityType: string
 }
 
-export default function DeleteData<T extends PersonData>({
-                                                             data,
-                                                             isOpen,
-                                                             onOpenChange,
-                                                             onSuccess,
-                                                             deleteFunction,
-                                                             dataType
-                                                         }: DeleteDataProps<T>) {
+export default function DeleteData<T>({
+                                          entityId,
+                                          entityLabel,
+                                          isOpen,
+                                          onOpenChange,
+                                          onSuccess,
+                                          deleteFunction,
+                                          entityType
+                                      }: DeleteDataProps<T>) {
     const handleDelete = async () => {
-        if (data) {
+        if (entityId) {
             try {
-                const deletedData = await deleteFunction(data.id);
+                const deletedData = await deleteFunction(entityId);
                 toast({
                     variant: "default",
-                    title: `${dataType} data deleted successfully`,
-                    description: `${deletedData.givenName} ${deletedData.familyName} deleted`,
+                    title: `${entityType} data deleted successfully`,
+                    description: `${entityLabel} deleted`,
                     duration: 2000
                 });
                 onSuccess(deletedData)
@@ -40,7 +36,7 @@ export default function DeleteData<T extends PersonData>({
                 toast({
                     variant: "destructive",
                     title: "Error occurred: " + error,
-                    description: `${dataType} data with name: ${data.givenName} ${data.familyName} could not be deleted`,
+                    description: `${entityType} data with name: ${entityLabel} could not be deleted`,
                     duration: 2000
                 });
             }

@@ -17,10 +17,7 @@ interface ShowTableProps {
 export default function ShowTable({tableFields, value, showDeleteButton, onChange}: ShowTableProps) {
     const handleDelete = (index: number) => {
         if (value && onChange) {
-            value.filter(i => i.id !== index)
-            const updatedValue = [...value];
-            updatedValue.splice(index, 1);
-            onChange(updatedValue);
+            onChange(value.filter((_, i) => i !== index));
             toast({
                 title: "Successfully deleted",
                 duration: 2000
