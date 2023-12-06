@@ -1,5 +1,6 @@
 import {clientSideClient} from "@/api/graphql/client";
 import {gql} from "@apollo/client";
+import {ParentDataInput} from "@/model/parent-data";
 
 export default function addParent(values: ParentDataInput) {
     return clientSideClient

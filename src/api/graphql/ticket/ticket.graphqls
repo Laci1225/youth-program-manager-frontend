@@ -1,0 +1,26 @@
+type Ticket {
+    id: ID!
+    name: String!
+    description: String!
+    price: Float!
+    numberOfParticipants: Int!
+    standardValidityPeriod: Int!
+}
+
+input TicketInput {
+    name: String!
+    description: String!
+    price: Float!
+    numberOfParticipants: Int!
+    standardValidityPeriod: Int!
+}
+extend type Query {
+    getAllTickets: [Ticket!]!
+    getTicketById(id: String!): Ticket!
+
+}
+extend type Mutation{
+    addTicket(ticket: TicketInput!): Ticket!
+    updateTicket(id: String!, ticket: TicketInput!): Ticket!
+    deleteTicket(id: String!): Ticket!
+}

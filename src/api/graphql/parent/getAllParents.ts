@@ -1,6 +1,7 @@
 import {ApolloClient, NormalizedCacheObject} from '@apollo/client';
 import {clientSideClient} from '@/api/graphql/client';
 import {gql} from '@apollo/client';
+import {ParentData} from "@/model/parent-data";
 
 export default async function getAllParents(client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<ParentData[]> {
     let value = await client.query({

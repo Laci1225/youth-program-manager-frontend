@@ -1,4 +1,4 @@
-interface ParentData {
+export interface ParentData {
     id: string
     givenName: string,
     familyName: string,
@@ -6,7 +6,7 @@ interface ParentData {
     address?: string
 }
 
-interface ParentDataInput {
+export interface ParentDataInput {
     givenName: string,
     familyName: string,
     phoneNumbers: string[],

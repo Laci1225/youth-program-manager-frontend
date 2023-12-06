@@ -20,62 +20,61 @@ import {
 } from "@/components/ui/dropdown-menu";
 import React, {useState} from "react";
 import {Toaster} from "@/components/ui/toaster";
-import ParentForm from "@/form/parent/ParentForm";
 import {serverSideClient} from "@/api/graphql/client";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
-import getAllParents from "@/api/graphql/parent/getAllParents";
+import getAllTickets from "@/api/graphql/ticket/getAllTickets";
 import {Pencil, PlusSquare, Trash} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
-import deleteParent from "@/api/graphql/parent/deleteParent";
 import DeleteData from "@/components/deleteData";
-import {ParentData} from "@/model/parent-data";
+import {TicketData} from "@/model/ticket-data";
+import TicketForm from "@/form/ticket/TicketForm";
 
 export const getServerSideProps = (async () => {
-    const parents = await getAllParents(serverSideClient)
+    const tickets = await getAllTickets(serverSideClient)
     return {
         props: {
-            parentsData: parents
+            ticketsData: tickets
         }
     };
-}) satisfies GetServerSideProps<{ parentsData: ParentData[] }>;
+}) satisfies GetServerSideProps<{ ticketsData: TicketData[] }>;
 
-export default function Parents({parentsData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
-    const [parents, setParents] = useState<ParentData[]>(parentsData)
-    const onCParentSaved = (savedParent: ParentData) => {
-        if (editedParent) {
-            const modifiedParents = parents.map((parent) =>
-                parent.id === savedParent.id ? savedParent : parent
+    const [tickets, setTickets] = useState<TicketData[]>(ticketsData)
+    const onCTicketSaved = (savedTicket: TicketData) => {
+        if (editedTicket) {
+            const modifiedTickets = tickets.map((ticket) =>
+                ticket.id === savedTicket.id ? savedTicket : ticket
             );
-            setParents(modifiedParents)
+            setTickets(modifiedTickets)
         } else {
-            setParents(prevState => [...prevState, savedParent])
+            setTickets(prevState => [...prevState, savedTicket])
         }
     }
-    const onParentDeleted = (parent: ParentData) => {
-        const updatedParents = parents.filter(p => p.id !== parent.id);
-        setParents(updatedParents);
+    const onTicketDeleted = (ticket: TicketData) => {
+        const updatedTickets = tickets.filter(p => p.id !== ticket.id);
+        setTickets(updatedTickets);
     }
-    const [editedParent, setEditedParent] = useState<ParentData | null>(null)
+    const [editedTicket, setEditedTicket] = useState<TicketData | null>(null)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-    const [deletedParent, setDeletedParent] = useState<ParentData>()
+    const [deletedTicket, setDeletedTicket] = useState<TicketData>()
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-    function handleEditClick(parent: ParentData | null) {
+    function handleEditClick(ticket: TicketData | null) {
         setIsEditDialogOpen(true)
-        setEditedParent(parent)
+        setEditedTicket(ticket)
     }
 
-    function handleDeleteClick(parent: ParentData) {
+    function handleDeleteClick(ticket: TicketData) {
         setIsDeleteDialogOpen(true)
-        setDeletedParent(parent)
+        setDeletedTicket(ticket)
     }
 
     return (
         <div className={"container w-4/6 py-28"}>
             <div className={"flex justify-between px-6 pb-6"}>
-                <span>Parents</span>
+                <span>Tickets</span>
                 <Button onClick={(event) => {
                     event.preventDefault()
                     handleEditClick(null)
@@ -88,39 +87,33 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
                 <TableHeader>
                     <TableRow>
                         <TableHead className="text-center">Name</TableHead>
-                        <TableHead className="text-center">Phone Numbers</TableHead>
+                        <TableHead className="text-center">Description</TableHead>
+                        <TableHead className="text-center">Price</TableHead>
+                        <TableHead className="text-center">Number Of Participants</TableHead>
+                        <TableHead className="text-center">Standard Validity Period</TableHead>
                         <TableHead className="px-5"></TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {
-                        parents && parents.length !== 0 ? (
-                            parents.map((parent) => (
-                                <TableRow key={parent.id} className={"hover:bg-gray-300 hover:cursor-pointer"}
-                                          onClick={() => router.push(`parents/${parent.id}`)}>
+                        tickets && tickets.length !== 0 ? (
+                            tickets.map((ticket) => (
+                                <TableRow key={ticket.id} className={"hover:bg-gray-300 hover:cursor-pointer"}
+                                          onClick={() => router.push(`tickets/${ticket.id}`)}>
                                     <TableCell className="text-center">
-                                        {parent.givenName} {parent.familyName}
+                                        {ticket.name}
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        {parent.phoneNumbers.length > 1
-                                            ? (
-                                                <TooltipProvider>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <div>
-                                                                {parent.phoneNumbers[0]} (+
-                                                                {parent.phoneNumbers.length - 1})
-                                                            </div>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            {parent.phoneNumbers.slice(1)
-                                                                .map((number, index) =>
-                                                                    <p key={index}>{number}</p>)}
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </TooltipProvider>
-                                            )
-                                            : (<>{parent.phoneNumbers[0]}</>)}
+                                        {ticket.description}
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        {ticket.price}
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        {ticket.numberOfParticipants}
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        {ticket.standardValidityPeriod}
                                     </TableCell>
                                     <TableCell className="p-1 text-center">
                                         <DropdownMenu>
@@ -134,7 +127,7 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
                                                     onClick={(event) => {
                                                         event.preventDefault()
                                                         event.stopPropagation()
-                                                        handleEditClick(parent)
+                                                        handleEditClick(ticket)
                                                     }}>
                                                     <Pencil className={"mx-1"}/>
                                                     <span>Edit</span>
@@ -144,7 +137,7 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
                                                     onClick={event => {
                                                         event.preventDefault()
                                                         event.stopPropagation()
-                                                        handleDeleteClick(parent)
+                                                        handleDeleteClick(ticket)
                                                     }}>
                                                     <Trash className={"mx-1"}/>
                                                     <span>Delete</span>
@@ -155,24 +148,24 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
                                 </TableRow>
                             ))) : (
                             <TableRow>
-                                <TableCell colSpan={3}>Nothing added</TableCell>
+                                <TableCell colSpan={6}>Nothing added</TableCell>
                             </TableRow>
                         )}
                 </TableBody>
             </Table>
             <Toaster/>
-            <ParentForm existingParent={editedParent ?? undefined}
+            <TicketForm existingTicket={editedTicket ?? undefined}
                         isOpen={isEditDialogOpen}
-                        onParentModified={onCParentSaved}
+                        onTicketModified={onCTicketSaved}
                         onOpenChange={setIsEditDialogOpen}
             />
-            <DeleteData data={deletedParent}
+            {/*<DeleteData data={deletedTicket}
                         isOpen={isDeleteDialogOpen}
                         onOpenChange={setIsDeleteDialogOpen}
-                        onSuccess={onParentDeleted}
-                        deleteFunction={deleteParent}
-                        dataType={"Parent"}
-            />
+                        onSuccess={onTicketDeleted}
+                        deleteFunction={deleteTicket}
+                        dataType={"Ticket"}
+            />*/}
         </div>
     )
 }

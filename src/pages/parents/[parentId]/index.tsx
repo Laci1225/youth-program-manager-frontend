@@ -11,6 +11,7 @@ import {serverSideClient} from "@/api/graphql/client";
 import getParentById from "@/api/graphql/parent/getParentById";
 import deleteParent from "@/api/graphql/parent/deleteParent";
 import DeleteData from "@/components/deleteData";
+import {ParentData} from "@/model/parent-data";
 
 
 export const getServerSideProps = (async (context) => {
