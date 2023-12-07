@@ -7,12 +7,6 @@ import {
     TableRow
 } from "@/components/ui/table";
 import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip"
-import {
     DropdownMenu,
     DropdownMenuContent, DropdownMenuItem,
     DropdownMenuSeparator,
@@ -42,7 +36,7 @@ export const getServerSideProps = (async () => {
 export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
     const [tickets, setTickets] = useState<TicketData[]>(ticketsData)
-    const onCTicketSaved = (savedTicket: TicketData) => {
+    const onTicketSaved = (savedTicket: TicketData) => {
         if (editedTicket) {
             const modifiedTickets = tickets.map((ticket) =>
                 ticket.id === savedTicket.id ? savedTicket : ticket
@@ -51,6 +45,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
         } else {
             setTickets(prevState => [...prevState, savedTicket])
         }
+        setEditedTicket(null)
     }
     const onTicketDeleted = (ticket: TicketData) => {
         const updatedTickets = tickets.filter(p => p.id !== ticket.id);
@@ -107,13 +102,13 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                                         {ticket.description}
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        {ticket.price}
+                                        {ticket.price} €
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        {ticket.numberOfParticipants}
+                                        {ticket.numberOfParticipants} pc(s)
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        {ticket.standardValidityPeriod}
+                                        {ticket.standardValidityPeriod} day(s)
                                     </TableCell>
                                     <TableCell className="p-1 text-center">
                                         <DropdownMenu>
@@ -156,7 +151,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
             <Toaster/>
             <TicketForm existingTicket={editedTicket ?? undefined}
                         isOpen={isEditDialogOpen}
-                        onTicketModified={onCTicketSaved}
+                        onTicketModified={onTicketSaved}
                         onOpenChange={setIsEditDialogOpen}
             />
             {/*<DeleteData data={deletedTicket}

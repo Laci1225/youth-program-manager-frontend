@@ -10,6 +10,7 @@ export default async function getAllTickets(client: ApolloClient<NormalizedCache
                 getAllTickets {
                     id
                     name
+                    description
                     price
                     numberOfParticipants
                     standardValidityPeriod
