@@ -1,29 +1,26 @@
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
-import {ChildData} from "@/model/child-data";
-import getChildById from "@/api/graphql/child/getChildById";
 import React, {useState} from "react";
-import ChildForm from "@/form/child/ChildForm";
 import Link from "next/link";
-import {format} from "date-fns";
 import {Toaster} from "@/components/ui/toaster";
-import ShowTable from "@/form/ShowTable";
 import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
-import {serverSideClient} from "@/api/graphql/client";
-import {useRouter} from "next/router";
 import {Pencil, Trash} from "lucide-react";
+import {useRouter} from "next/router";
+import ParentForm from "@/form/parent/ParentForm";
+import {serverSideClient} from "@/api/graphql/client";
+import getParentById from "@/api/graphql/parent/getParentById";
+import deleteParent from "@/api/graphql/parent/deleteParent";
 import DeleteData from "@/components/deleteData";
-import deleteChild from "@/api/graphql/child/deleteChild";
 
 
 export const getServerSideProps = (async (context) => {
-    let childData;
-    if (context.params?.childId) {
+    let parentData;
+    if (context.params?.parentId) {
         try {
-            childData = await getChildById(context.params.childId, serverSideClient);
+            parentData = await getParentById(context.params.parentId, serverSideClient);
             return {
                 props: {
-                    selectedChild: childData
+                    selectedParent: parentData
                 }
             }
         } catch (error) {
@@ -35,17 +32,17 @@ export const getServerSideProps = (async (context) => {
     return {
         notFound: true
     };
-}) satisfies GetServerSideProps<{ selectedChild: ChildData }, { childId: string }>;
-export default function Child({selectedChild}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    const [child, setChild] = useState<ChildData>(selectedChild)
+}) satisfies GetServerSideProps<{ selectedParent: ParentData }, { parentId: string }>;
+export default function Parent({selectedParent}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const [parent, setParent] = useState<ParentData>(selectedParent)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const router = useRouter()
-    const onChildUpdated = (newChild: ChildData) => {
-        setChild(newChild)
+    const onParentUpdated = (newParent: ParentData) => {
+        setParent(newParent)
     }
-    const onChildDeleted = () => {
-        router.push("/children")
+    const onParentDeleted = () => {
+        router.push("/parents")
     }
 
     function handleEditClick() {
@@ -59,11 +56,11 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
     return (
         <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
             <div className={"flex justify-between px-6 pb-6"}>
-                <Link href={"/children"}>
+                <Link href={"/parents"}>
                     <span className="material-icons-outlined">arrow_back</span>
                 </Link>
                 <div>
-                    Child details
+                    Parent details
                 </div>
                 <div className={"flex"}>
                     <div className={" flex flex-row items-center hover:cursor-pointer px-5"}
@@ -89,39 +86,39 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                 <div className="mb-6">
                     <Label>Full Name:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {child.givenName} {child.familyName}
+                        {parent.givenName} {parent.familyName}
                     </div>
                 </div>
                 <div className="mb-6">
-                    <Label>Birth date and place:</Label>
-                    <div className={`${fieldAppearance} mt-2`}>
-                        {format(new Date(child.birthDate), "P")} {child.birthPlace}
-                    </div>
+                    <Label>Phone numbers:</Label>
+                    <>
+                        {parent.phoneNumbers.map((numbers, index) => (
+                            <div key={index} className={`${fieldAppearance} mt-2`}>
+                                {numbers}
+                            </div>
+                        ))}
+                    </>
                 </div>
                 <div className="mb-6">
                     <Label>Address:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {child.address}
+                        {parent.address ?? <div className={"text-gray-400"}>Not added yet </div>}
                     </div>
                 </div>
-                <ShowTable tableFields={["Name", "Diagnosed at"]} value={child.diagnosedDiseases}
-                           showDeleteButton={false}/>
-                <ShowTable tableFields={["Name", "Dose", "Taken since"]} value={child.regularMedicines}
-                           showDeleteButton={false}/>
             </div>
             <Toaster/>
-            <ChildForm existingChild={child ?? undefined}
-                       isOpen={isEditDialogOpen}
-                       onChildModified={onChildUpdated}
-                       onOpenChange={setIsEditDialogOpen}
+            <ParentForm existingParent={parent ?? undefined}
+                        isOpen={isEditDialogOpen}
+                        onParentModified={onParentUpdated}
+                        onOpenChange={setIsEditDialogOpen}
             />
-            <DeleteData entityId={child.id}
-                        entityLabel={`${child.givenName} ${child.familyName}`}
+            <DeleteData entityId={parent.id}
+                        entityLabel={`${parent.givenName} ${parent.familyName}`}
                         isOpen={isDeleteDialogOpen}
                         onOpenChange={setIsDeleteDialogOpen}
-                        onSuccess={onChildDeleted}
-                        deleteFunction={deleteChild}
-                        entityType={"Child"}
+                        onSuccess={onParentDeleted}
+                        deleteFunction={deleteParent}
+                        entityType={"Parent"}
             />
         </div>
     )

@@ -26,7 +26,7 @@ export const getDiseaseSchema = (diseases: z.infer<typeof diseaseSchema>[]) =>
         diagnosedAt: z.date().max(new Date(), 'Invalid date format')
     })
 
-export const formSchema = z.object({
+export const childSchema = z.object({
     familyName: z.string().min(2, 'Name must be at least 2 characters.'),
     givenName: z.string().min(2, 'Name must be at least 2 characters.'),
     birthDate: z.date().max(new Date(), 'Invalid date format'),

@@ -8,22 +8,23 @@ import {
 } from "@/components/ui/table";
 import React, {useState} from "react";
 import {ChildData} from "@/model/child-data";
-import ChildForm from "@/form/ChildForm";
+import ChildForm from "@/form/child/ChildForm";
 import {Toaster} from "@/components/ui/toaster";
 import {format} from "date-fns";
-import getAllChildren from "@/api/graphql/getAllChildren";
+import getAllChildren from "@/api/graphql/child/getAllChildren";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
 import {serverSideClient} from "@/api/graphql/client";
+import deleteChild from "@/api/graphql/child/deleteChild";
 import {
     DropdownMenu,
     DropdownMenuContent, DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import DeleteChild from "@/components/deleteChild";
 import {Pencil, PlusSquare, Trash} from "lucide-react"
 import {useRouter} from "next/router";
 import {Button} from "@/components/ui/button";
+import DeleteData from "@/components/deleteData";
 
 
 export const getServerSideProps = (async () => {
@@ -53,7 +54,6 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
         setChildren(updatedChildren);
     }
 
-
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [editedChild, setEditedChild] = useState<ChildData | null>(null)
     const [deletedChild, setDeletedChild] = useState<ChildData>()
@@ -78,7 +78,7 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                     handleEditClick(null)
                 }}>
                     <PlusSquare/>
-                    <span>Add</span>
+                    <span>Create</span>
                 </Button>
             </div>
             <Table className={"border border-gray-700 rounded"}>
@@ -158,10 +158,13 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                        onChildModified={onChildSaved}
                        onOpenChange={setIsEditDialogOpen}
             />
-            <DeleteChild child={deletedChild}
-                         isOpen={isDeleteDialogOpen}
-                         onOpenChange={setIsDeleteDialogOpen}
-                         onSuccess={onChildDeleted}
+            <DeleteData entityId={deletedChild?.id}
+                        entityLabel={`${deletedChild?.givenName} ${deletedChild?.familyName}`}
+                        isOpen={isDeleteDialogOpen}
+                        onOpenChange={setIsDeleteDialogOpen}
+                        onSuccess={onChildDeleted}
+                        deleteFunction={deleteChild}
+                        entityType={"Child"}
             />
         </div>
     )
