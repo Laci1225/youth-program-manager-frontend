@@ -43,7 +43,7 @@ export const getServerSideProps = (async () => {
 export default function Parents({parentsData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
     const [parents, setParents] = useState<ParentData[]>(parentsData)
-    const onCParentSaved = (savedParent: ParentData) => {
+    const onParentSaved = (savedParent: ParentData) => {
         if (editedParent) {
             const modifiedParents = parents.map((parent) =>
                 parent.id === savedParent.id ? savedParent : parent
@@ -163,15 +163,16 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
             <Toaster/>
             <ParentForm existingParent={editedParent ?? undefined}
                         isOpen={isEditDialogOpen}
-                        onParentModified={onCParentSaved}
+                        onParentModified={onParentSaved}
                         onOpenChange={setIsEditDialogOpen}
             />
-            <DeleteData data={deletedParent}
+            <DeleteData entityId={deletedParent?.id}
+                        entityLabel={`${deletedParent?.givenName} ${deletedParent?.familyName}`}
                         isOpen={isDeleteDialogOpen}
                         onOpenChange={setIsDeleteDialogOpen}
                         onSuccess={onParentDeleted}
                         deleteFunction={deleteParent}
-                        dataType={"Parent"}
+                        entityType={"Parent"}
             />
         </div>
     )

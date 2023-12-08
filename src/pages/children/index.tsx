@@ -158,12 +158,13 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                        onChildModified={onChildSaved}
                        onOpenChange={setIsEditDialogOpen}
             />
-            <DeleteData data={deletedChild}
+            <DeleteData entityId={deletedChild?.id}
+                        entityLabel={`${deletedChild?.givenName} ${deletedChild?.familyName}`}
                         isOpen={isDeleteDialogOpen}
                         onOpenChange={setIsDeleteDialogOpen}
                         onSuccess={onChildDeleted}
                         deleteFunction={deleteChild}
-                        dataType={"Child"}
+                        entityType={"Child"}
             />
         </div>
     )
