@@ -23,6 +23,7 @@ import {useRouter} from "next/router";
 import DeleteData from "@/components/deleteData";
 import {TicketData} from "@/model/ticket-data";
 import TicketForm from "@/form/ticket/TicketForm";
+import deleteTicket from "@/api/graphql/ticket/deleteTicket";
 
 export const getServerSideProps = (async () => {
     const tickets = await getAllTickets(serverSideClient)
@@ -154,13 +155,14 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                         onTicketModified={onTicketSaved}
                         onOpenChange={setIsEditDialogOpen}
             />
-            {/*<DeleteData data={deletedTicket}
+            <DeleteData entityId={deletedTicket?.id}
+                        entityLabel={`${deletedTicket?.name}`}
                         isOpen={isDeleteDialogOpen}
                         onOpenChange={setIsDeleteDialogOpen}
                         onSuccess={onTicketDeleted}
                         deleteFunction={deleteTicket}
-                        dataType={"Ticket"}
-            />*/}
+                        entityType={"Ticket"}
+            />
         </div>
     )
 }

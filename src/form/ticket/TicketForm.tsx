@@ -12,6 +12,7 @@ import addTicket from "@/api/graphql/ticket/addTicket";
 import {TicketData} from "@/model/ticket-data";
 import {ticketSchema} from "@/form/ticket/ticketSchema";
 import {Textarea} from "@/components/ui/textarea"
+import updateTicket from "@/api/graphql/ticket/updateTicket";
 
 
 interface TicketFormProps {
@@ -38,44 +39,44 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
     function onSubmit(values: z.infer<typeof ticketSchema>) {
         console.log(values)
         setIsSubmitting(true)
-        //if (existingTicket) {
-        /* updateTicket(existingTicket.id, values)
-             .then((result) => {
-                 onTicketModified(result)
-                 toast({
-                     title: "The ticket is successfully updated",
-                     description: `A ticket with name: ${form.getValues("givenName")} ${form.getValues("familyName")} updated`,
-                     duration: 2000
-                 })
-                 onOpenChange(false)
-             }).catch(reason => {
-             toast({
-                 variant: "destructive",
-                 title: reason.toString(),
-                 duration: 2000
-             })
-         }).finally(() => {
-             setIsSubmitting(false)
-         })
-     } else */
-        addTicket(values)
-            .then((result) => {
-                onTicketModified(result)
+        if (existingTicket) {
+            updateTicket(existingTicket.id, values)
+                .then((result) => {
+                    onTicketModified(result)
+                    toast({
+                        title: "The ticket is successfully updated",
+                        description: `A ticket with name: ${form.getValues("name")} updated`,
+                        duration: 2000
+                    })
+                    onOpenChange(false)
+                }).catch(reason => {
                 toast({
-                    title: "The ticket is successfully added",
-                    description: `A ticket with name: ${form.getValues("name")} created`,
+                    variant: "destructive",
+                    title: reason.toString(),
                     duration: 2000
                 })
-                onOpenChange(false)
-            }).catch(reason => {
-            toast({
-                variant: "destructive",
-                title: reason.toString(),
-                duration: 2000
+            }).finally(() => {
+                setIsSubmitting(false)
             })
-        }).finally(() => {
-            setIsSubmitting(false)
-        })
+        } else
+            addTicket(values)
+                .then((result) => {
+                    onTicketModified(result)
+                    toast({
+                        title: "The ticket is successfully added",
+                        description: `A ticket with name: ${form.getValues("name")} created`,
+                        duration: 2000
+                    })
+                    onOpenChange(false)
+                }).catch(reason => {
+                toast({
+                    variant: "destructive",
+                    title: reason.toString(),
+                    duration: 2000
+                })
+            }).finally(() => {
+                setIsSubmitting(false)
+            })
     }
 
 
@@ -96,11 +97,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                     <DialogTitle>{existingTicket ? "Update" : "Create"} a ticket</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit, (errors, event) => {
-                            console.log(errors)
-                            console.log(event)
-                        }
-                    )}
+                    <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.log(errors))}
                           className="flex justify-center flex-col space-y-4 mx-4">
                         <ScrollArea className="h-[70vh]">
                             <div className="mx-4">
@@ -148,7 +145,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                             className="pr-5"
                                                         />
                                                         <span
-                                                            className="absolute text-black inset-y-0 right-0 flex items-center pr-2 text-muted">
+                                                            className="absolute text-gray-950 inset-y-0 right-0 flex items-center pr-2 text-muted">
                                                         €
                                                     </span>
                                                     </div>
@@ -171,7 +168,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                             className="pr-10"
                                                         />
                                                         <span
-                                                            className="absolute text-black inset-y-0 right-0 flex items-center pr-2 text-muted">
+                                                            className="absolute text-gray-950 inset-y-0 right-0 flex items-center pr-2 text-muted">
                                                         pc(s)
                                                     </span>
                                                     </div>
@@ -194,7 +191,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                             className="pr-[3.25rem]"
                                                         />
                                                         <span
-                                                            className="absolute text-black inset-y-0 right-0 flex items-center pr-2 text-muted">
+                                                            className="absolute text-gray-950 inset-y-0 right-0 flex items-center pr-2 text-muted">
                                                         day(s)
                                                     </span>
                                                     </div>
