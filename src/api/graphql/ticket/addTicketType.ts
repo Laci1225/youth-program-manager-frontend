@@ -16,7 +16,7 @@ export default function addTicketType(values: TicketDataInput) {
                     standardValidityPeriod
                 }
             }
-        `,
+        `, fetchPolicy: "no-cache",
         variables: {
             ticket: {
                 name: values.name,
@@ -24,7 +24,7 @@ export default function addTicketType(values: TicketDataInput) {
                 price: values.price,
                 numberOfParticipation: values.numberOfParticipation,
                 standardValidityPeriod: values.standardValidityPeriod
-            },
+            }, fetchPolicy: "no-cache"
         },
     }).then(value => value.data.addTicketType)
 }

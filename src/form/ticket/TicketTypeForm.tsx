@@ -10,7 +10,7 @@ import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "@/
 import LoadingButton from "@/components/loading-button";
 import addTicketType from "@/api/graphql/ticket/addTicketType";
 import {TicketData} from "@/model/ticket-data";
-import {ticketTypeSchema} from "@/form/ticket/ticketTypeSchema";
+import {ticketTypeSchema, ticketTypeSchemaEdit} from "@/form/ticket/ticketTypeSchema";
 import {Textarea} from "@/components/ui/textarea"
 import updateTicketType from "@/api/graphql/ticket/updateTicketType";
 
@@ -26,7 +26,7 @@ function TicketTypeForm({onTicketModified, existingTicket, isOpen, onOpenChange}
 
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof ticketTypeSchema>>({
-        resolver: zodResolver(ticketTypeSchema),
+        resolver: zodResolver(existingTicket ? ticketTypeSchemaEdit : ticketTypeSchema),
         defaultValues: {
             name: existingTicket?.name,
             description: existingTicket?.description,
