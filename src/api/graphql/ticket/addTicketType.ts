@@ -2,17 +2,17 @@ import {clientSideClient} from "@/api/graphql/client";
 import {gql} from "@apollo/client";
 import {TicketDataInput} from "@/model/ticket-data";
 
-export default function addTicket(values: TicketDataInput) {
+export default function addTicketType(values: TicketDataInput) {
     return clientSideClient
     .mutate({
         mutation: gql`
-            mutation AddTicket($ticket: TicketInput!) {
-                addTicket(ticket: $ticket) {
+            mutation AddTicket($ticket: TicketTypeInput!) {
+                addTicketType(ticket: $ticket) {
                     id
                     name
                     price
                     description
-                    numberOfParticipants
+                    numberOfParticipation
                     standardValidityPeriod
                 }
             }
@@ -22,9 +22,9 @@ export default function addTicket(values: TicketDataInput) {
                 name: values.name,
                 description: values.description,
                 price: values.price,
-                numberOfParticipants: values.numberOfParticipants,
+                numberOfParticipation: values.numberOfParticipation,
                 standardValidityPeriod: values.standardValidityPeriod
             },
         },
-    }).then(value => value.data.addTicket)
+    }).then(value => value.data.addTicketType)
 }

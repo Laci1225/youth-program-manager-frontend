@@ -1,26 +1,26 @@
-type Ticket {
+type TicketType {
     id: ID!
     name: String!
     description: String!
     price: Float!
-    numberOfParticipants: Int!
+    numberOfParticipation: Int!
     standardValidityPeriod: Int!
 }
 
-input TicketInput {
+input TicketTypeInput {
     name: String!
     description: String!
     price: Float!
-    numberOfParticipants: Int!
+    numberOfParticipation: Int!
     standardValidityPeriod: Int!
 }
 extend type Query {
-    getAllTickets: [Ticket!]!
-    getTicketById(id: String!): Ticket!
+    getAllTicketsType: [TicketType!]!
+    getTicketTypeById(id: String!): TicketType!
 
 }
 extend type Mutation{
-    addTicket(ticket: TicketInput!): Ticket!
-    updateTicket(id: String!, ticket: TicketInput!): Ticket!
-    deleteTicket(id: String!): Ticket!
+    addTicketType(ticket: TicketTypeInput!): TicketType!
+    updateTicketType(id: String!, ticket: TicketTypeInput!): TicketType!
+    deleteTicketType(id: String!): TicketType!
 }

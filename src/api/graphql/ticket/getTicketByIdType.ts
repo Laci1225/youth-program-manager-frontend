@@ -2,17 +2,17 @@ import {clientSideClient} from "@/api/graphql/client";
 import {ApolloClient, gql, NormalizedCacheObject} from "@apollo/client";
 import {TicketData} from "@/model/ticket-data";
 
-export default async function getTicketById(ticketId: string, client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketData> {
+export default async function getTicketByIdType(ticketId: string, client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketData> {
     return client
     .query({
         query: gql`
-            query GetTicketById($id: String!){
-                getTicketById(id : $id){
+            query GetTicketByIdType($id: String!){
+                getTicketTypeById(id : $id){
                     id
                     name
                     description
                     price
-                    numberOfParticipants
+                    numberOfParticipation
                     standardValidityPeriod
                 }
             }
@@ -20,5 +20,5 @@ export default async function getTicketById(ticketId: string, client: ApolloClie
         variables: {
             id: ticketId,
         },
-    }).then(value => value.data.getTicketById);
+    }).then(value => value.data.getTicketTypeById);
 }

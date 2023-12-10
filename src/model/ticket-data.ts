@@ -3,7 +3,7 @@ export interface TicketData {
     name: string,
     description: string,
     price: number,
-    numberOfParticipants: number
+    numberOfParticipation: number
     standardValidityPeriod: number
 }
 
@@ -11,6 +11,6 @@ export interface TicketDataInput {
     name: string,
     description: string,
     price: number,
-    numberOfParticipants: number
+    numberOfParticipation: number
     standardValidityPeriod: number
 }

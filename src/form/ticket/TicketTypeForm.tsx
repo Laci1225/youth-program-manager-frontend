@@ -8,11 +8,11 @@ import {toast} from "@/components/ui/use-toast";
 import {ScrollArea} from "@/components/ui/scroll-area"
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import LoadingButton from "@/components/loading-button";
-import addTicket from "@/api/graphql/ticket/addTicket";
+import addTicketType from "@/api/graphql/ticket/addTicketType";
 import {TicketData} from "@/model/ticket-data";
-import {ticketSchema} from "@/form/ticket/ticketSchema";
+import {ticketTypeSchema} from "@/form/ticket/ticketTypeSchema";
 import {Textarea} from "@/components/ui/textarea"
-import updateTicket from "@/api/graphql/ticket/updateTicket";
+import updateTicketType from "@/api/graphql/ticket/updateTicketType";
 
 
 interface TicketFormProps {
@@ -22,25 +22,25 @@ interface TicketFormProps {
     onOpenChange: (open: boolean) => void;
 }
 
-function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: TicketFormProps) {
+function TicketTypeForm({onTicketModified, existingTicket, isOpen, onOpenChange}: TicketFormProps) {
 
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const form = useForm<z.infer<typeof ticketSchema>>({
-        resolver: zodResolver(ticketSchema),
+    const form = useForm<z.infer<typeof ticketTypeSchema>>({
+        resolver: zodResolver(ticketTypeSchema),
         defaultValues: {
             name: existingTicket?.name,
             description: existingTicket?.description,
             price: existingTicket?.price,
-            numberOfParticipants: existingTicket?.numberOfParticipants,
+            numberOfParticipation: existingTicket?.numberOfParticipation,
             standardValidityPeriod: existingTicket?.standardValidityPeriod,
         },
     })
 
-    function onSubmit(values: z.infer<typeof ticketSchema>) {
+    function onSubmit(values: z.infer<typeof ticketTypeSchema>) {
         console.log(values)
         setIsSubmitting(true)
         if (existingTicket) {
-            updateTicket(existingTicket.id, values)
+            updateTicketType(existingTicket.id, values)
                 .then((result) => {
                     onTicketModified(result)
                     toast({
@@ -59,7 +59,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                 setIsSubmitting(false)
             })
         } else
-            addTicket(values)
+            addTicketType(values)
                 .then((result) => {
                     onTicketModified(result)
                     toast({
@@ -85,7 +85,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
             name: existingTicket?.name,
             description: existingTicket?.description,
             price: existingTicket?.price,
-            numberOfParticipants: existingTicket?.numberOfParticipants,
+            numberOfParticipation: existingTicket?.numberOfParticipation,
             standardValidityPeriod: existingTicket?.standardValidityPeriod,
         })
     }, [existingTicket])
@@ -145,7 +145,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                             className="pr-5"
                                                         />
                                                         <span
-                                                            className="absolute text-gray-950 inset-y-0 right-0 flex items-center pr-2 text-muted">
+                                                            className="absolute inset-y-0 right-0 flex items-center pr-2">
                                                         €
                                                     </span>
                                                     </div>
@@ -156,10 +156,10 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="numberOfParticipants"
+                                        name="numberOfParticipation"
                                         render={({field}) => (
                                             <FormItem className="w-48">
-                                                <FormLabel>Number Of Participants*</FormLabel>
+                                                <FormLabel>Number Of Participation*</FormLabel>
                                                 <FormControl>
                                                     <div className="relative w-20">
                                                         <Input
@@ -168,7 +168,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                             className="pr-10"
                                                         />
                                                         <span
-                                                            className="absolute text-gray-950 inset-y-0 right-0 flex items-center pr-2 text-muted">
+                                                            className="absolute inset-y-0 right-0 flex items-center pr-2">
                                                         pc(s)
                                                     </span>
                                                     </div>
@@ -191,7 +191,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                             className="pr-[3.25rem]"
                                                         />
                                                         <span
-                                                            className="absolute text-gray-950 inset-y-0 right-0 flex items-center pr-2 text-muted">
+                                                            className="absolute inset-y-0 right-0 flex items-center pr-2">
                                                         day(s)
                                                     </span>
                                                     </div>
@@ -215,4 +215,4 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
     );
 }
 
-export default TicketForm;
+export default TicketTypeForm;

@@ -16,17 +16,17 @@ import React, {useState} from "react";
 import {Toaster} from "@/components/ui/toaster";
 import {serverSideClient} from "@/api/graphql/client";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
-import getAllTickets from "@/api/graphql/ticket/getAllTickets";
+import getAllTicketsType from "@/api/graphql/ticket/getAllTicketsType";
 import {Pencil, PlusSquare, Trash} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
 import DeleteData from "@/components/deleteData";
 import {TicketData} from "@/model/ticket-data";
-import TicketForm from "@/form/ticket/TicketForm";
-import deleteTicket from "@/api/graphql/ticket/deleteTicket";
+import TicketTypeForm from "@/form/ticket/TicketTypeForm";
+import deleteTicketType from "@/api/graphql/ticket/deleteTicketType";
 
 export const getServerSideProps = (async () => {
-    const tickets = await getAllTickets(serverSideClient)
+    const tickets = await getAllTicketsType(serverSideClient)
     return {
         props: {
             ticketsData: tickets
@@ -85,8 +85,8 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                         <TableHead className="text-center">Name</TableHead>
                         <TableHead className="text-center">Description</TableHead>
                         <TableHead className="text-center">Price</TableHead>
-                        <TableHead className="text-center">Number Of Participants</TableHead>
-                        <TableHead className="text-center">Standard Validity Period</TableHead>
+                        <TableHead className="text-center"># of participation</TableHead>
+                        <TableHead className="text-center">Valid for</TableHead>
                         <TableHead className="px-5"></TableHead>
                     </TableRow>
                 </TableHeader>
@@ -95,7 +95,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                         tickets && tickets.length !== 0 ? (
                             tickets.map((ticket) => (
                                 <TableRow key={ticket.id} className={"hover:bg-gray-300 hover:cursor-pointer"}
-                                          onClick={() => router.push(`tickets/${ticket.id}`)}>
+                                          onClick={() => router.push(`ticket-types/${ticket.id}`)}>
                                     <TableCell className="text-center">
                                         {ticket.name}
                                     </TableCell>
@@ -106,7 +106,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                                         {ticket.price} €
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        {ticket.numberOfParticipants} pc(s)
+                                        {ticket.numberOfParticipation} pc(s)
                                     </TableCell>
                                     <TableCell className="text-center">
                                         {ticket.standardValidityPeriod} day(s)
@@ -150,17 +150,17 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                 </TableBody>
             </Table>
             <Toaster/>
-            <TicketForm existingTicket={editedTicket ?? undefined}
-                        isOpen={isEditDialogOpen}
-                        onTicketModified={onTicketSaved}
-                        onOpenChange={setIsEditDialogOpen}
+            <TicketTypeForm existingTicket={editedTicket ?? undefined}
+                            isOpen={isEditDialogOpen}
+                            onTicketModified={onTicketSaved}
+                            onOpenChange={setIsEditDialogOpen}
             />
             <DeleteData entityId={deletedTicket?.id}
                         entityLabel={`${deletedTicket?.name}`}
                         isOpen={isDeleteDialogOpen}
                         onOpenChange={setIsDeleteDialogOpen}
                         onSuccess={onTicketDeleted}
-                        deleteFunction={deleteTicket}
+                        deleteFunction={deleteTicketType}
                         entityType={"Ticket"}
             />
         </div>

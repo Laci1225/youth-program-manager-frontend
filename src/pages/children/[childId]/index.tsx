@@ -58,7 +58,7 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
 
     return (
         <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
-            <div className={"flex justify-between px-6 pb-6"}>
+            <div className={"flex justify-between px-6 pb-6 items-center"}>
                 <Link href={"/children"}>
                     <span className="material-icons-outlined">arrow_back</span>
                 </Link>

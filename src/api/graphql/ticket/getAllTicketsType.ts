@@ -3,20 +3,20 @@ import {clientSideClient} from '@/api/graphql/client';
 import {gql} from '@apollo/client';
 import {TicketData} from "@/model/ticket-data";
 
-export default async function getAllTickets(client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketData[]> {
+export default async function getAllTicketsType(client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketData[]> {
     let value = await client.query({
         query: gql`
             query {
-                getAllTickets {
+                getAllTicketsType {
                     id
                     name
                     description
                     price
-                    numberOfParticipants
+                    numberOfParticipation
                     standardValidityPeriod
                 }
             }
         `, fetchPolicy: "no-cache"
     });
-    return await value.data.getAllTickets;
+    return await value.data.getAllTicketsType;
 }
