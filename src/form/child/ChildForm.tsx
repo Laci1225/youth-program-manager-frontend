@@ -1,6 +1,6 @@
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 import {Input} from "@/components/ui/input";
-import React, {useEffect, useState} from "react";
+import React, {FormEvent, useEffect, useState} from "react";
 import {useForm} from "react-hook-form"
 import * as z from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -17,6 +17,15 @@ import {ChildData} from "@/model/child-data";
 import LoadingButton from "@/components/loading-button";
 import updateChild from "@/api/graphql/child/updateChild";
 import {parseDateInDisease, parseDateInMedicine} from "@/utils/child";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import getPotentialParents from "@/api/graphql/child/getPotentialParents";
+import {ParentData} from "@/model/parent-data";
 
 interface ChildFormProps {
     onChildModified: (child: ChildData) => void;
@@ -41,6 +50,7 @@ function ChildForm({
             birthDate: existingChild?.birthDate ? new Date(existingChild.birthDate) : undefined,
             birthPlace: existingChild?.birthPlace,
             address: existingChild?.address,
+            parents: [],
             diagnosedDiseases: parseDateInDisease(existingChild?.diagnosedDiseases),
             regularMedicines: parseDateInMedicine(existingChild?.regularMedicines)
         },
@@ -100,6 +110,18 @@ function ChildForm({
             regularMedicines: existingChild ? parseDateInMedicine(existingChild?.regularMedicines) : []
         })
     }, [existingChild]);
+    const [parents, setParents] = useState<ParentData[]>()
+    const [isSelectOpen, setIsSelectOpen] = useState(false);
+
+    function potentialParents(event: FormEvent<HTMLInputElement>) {
+        const name = event.currentTarget.value
+        if (name) {
+            getPotentialParents(event.currentTarget.value)
+                .then(value => setParents(value))
+        }
+        setIsSelectOpen(name.length > 0);
+    }
+
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[800px] h-[90vh] shadow-muted-foreground">
@@ -175,6 +197,35 @@ function ChildForm({
                                             <FormLabel>Address*</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="Address" {...field} />
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="parents"
+                                    render={({field}) => (
+                                        <FormItem className={"flex-1"}>
+                                            <FormLabel>Parent</FormLabel>
+                                            <FormControl>
+                                                <Select open={isSelectOpen} onOpenChange={setIsSelectOpen}>
+                                                    <div className={"flex"}>
+                                                        <Input onChange={potentialParents} placeholder={"Name"}/>
+                                                        <SelectTrigger>
+                                                            <SelectValue/>
+                                                        </SelectTrigger>
+                                                    </div>
+                                                    <SelectContent>
+                                                        {parents?.map(value =>
+                                                            <>
+                                                                <SelectItem value={value.id}
+                                                                            onClick={() => setIsSelectOpen(false)}>
+                                                                    {value.givenName} {value.familyName}
+                                                                </SelectItem>
+                                                            </>)}
+                                                    </SelectContent>
+                                                </Select>
                                             </FormControl>
                                             <FormMessage/>
                                         </FormItem>
