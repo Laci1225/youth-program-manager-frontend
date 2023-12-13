@@ -14,6 +14,10 @@ export default async function getChildById(childId: string, client: ApolloClient
                     birthDate
                     birthPlace
                     address
+                    relativeParents {
+                        name
+                        isEmergencyContact
+                    }
                     diagnosedDiseases {
                         name
                         diagnosedAt

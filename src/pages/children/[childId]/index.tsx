@@ -104,6 +104,8 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                         {child.address}
                     </div>
                 </div>
+                <ShowTable tableFields={["Name", "isEmergencyContact"]} value={child.relativeParents}
+                           showDeleteButton={false}/>
                 <ShowTable tableFields={["Name", "Diagnosed at"]} value={child.diagnosedDiseases}
                            showDeleteButton={false}/>
                 <ShowTable tableFields={["Name", "Dose", "Taken since"]} value={child.regularMedicines}

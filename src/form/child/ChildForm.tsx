@@ -17,13 +17,6 @@ import {ChildData} from "@/model/child-data";
 import LoadingButton from "@/components/loading-button";
 import updateChild from "@/api/graphql/child/updateChild";
 import {parseDateInDisease, parseDateInMedicine} from "@/utils/child";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 import getPotentialParents from "@/api/graphql/child/getPotentialParents";
 import {ParentData} from "@/model/parent-data";
 
@@ -118,12 +111,19 @@ function ChildForm({
         const name = event.currentTarget.value
 
         if (name) {
+            setIsSelectOpen(name.length > 0);
             setTimeout(() => {
                 getPotentialParents(name)
                     .then(value => setParents(value))
+                    .catch(reason => {
+                        console.error("Failed to get potential parents:", reason);
+                    });
             }, 500);
+        } else {
+            setSelectedParent(undefined);
+            setIsSelectOpen(false);
+            setParents([]);
         }
-        setIsSelectOpen(name.length > 0);
     }
 
     const [selectedParent, setSelectedParent] = useState<string | undefined>(undefined);
@@ -135,6 +135,7 @@ function ChildForm({
             isEmergencyContact: true
         }])
         console.log(form.getValues('relativeParents'))
+        setIsSelectOpen(false)
     }
 
     return (
@@ -224,28 +225,38 @@ function ChildForm({
                                         <FormItem className={"flex-1"}>
                                             <FormLabel>Parent</FormLabel>
                                             <FormControl>
-                                                <div className={"flex"}>
-                                                    <Select open={isSelectOpen} onOpenChange={setIsSelectOpen}
-                                                            onValueChange={(value) => onParentSelected(value)}
-                                                            defaultValue={selectedParent}>
-                                                        <Input
-                                                            onChange={
-                                                                (e) => {
-                                                                    potentialParents(e)
-                                                                }}
-                                                            placeholder={"Name"}/>
-                                                        <SelectTrigger>
-                                                            <SelectValue/>
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {parents?.map(value =>
-                                                                <>
-                                                                    <SelectItem key={value.id} value={value.id}>
-                                                                        {value.givenName} {value.familyName}
-                                                                    </SelectItem>
-                                                                </>)}
-                                                        </SelectContent>
-                                                    </Select>
+                                                <div className="relative">
+                                                    <Input
+                                                        type="text"
+                                                        value={
+                                                            selectedParent ? `${(parents
+                                                                    ?.find(value => value.id === selectedParent)
+                                                                    ?.familyName) || ''} ${(parents
+                                                                    ?.find(value => value.id === selectedParent)
+                                                                    ?.givenName) || ''}`
+                                                                : undefined}
+                                                        onChange={potentialParents}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Backspace') {
+                                                                setSelectedParent(undefined);
+                                                            }
+                                                        }}
+                                                        placeholder="Search..."
+                                                        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500"
+                                                    />
+                                                    {isSelectOpen && (
+                                                        <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-md">
+                                                            {parents?.map(option => (
+                                                                <li
+                                                                    key={option.id}
+                                                                    onClick={() => onParentSelected(option.id)}
+                                                                    className="px-3 py-2 cursor-pointer hover:bg-gray-100"
+                                                                >
+                                                                    {option.givenName} {option.familyName} {option.phoneNumbers[0]}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    )}
                                                 </div>
                                             </FormControl>
                                             <FormMessage/>
