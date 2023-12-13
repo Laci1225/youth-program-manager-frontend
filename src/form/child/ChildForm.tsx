@@ -19,6 +19,8 @@ import updateChild from "@/api/graphql/child/updateChild";
 import {parseDateInDisease, parseDateInMedicine} from "@/utils/child";
 import getPotentialParents from "@/api/graphql/child/getPotentialParents";
 import {ParentData} from "@/model/parent-data";
+import {Button} from "@/components/ui/button";
+import {XIcon} from "lucide-react";
 
 interface ChildFormProps {
     onChildModified: (child: ChildData) => void;
@@ -109,7 +111,6 @@ function ChildForm({
 
     function potentialParents(event: FormEvent<HTMLInputElement>) {
         const name = event.currentTarget.value
-
         if (name) {
             setIsSelectOpen(name.length > 0);
             setTimeout(() => {
@@ -134,7 +135,6 @@ function ChildForm({
             name: value,
             isEmergencyContact: true
         }])
-        console.log(form.getValues('relativeParents'))
         setIsSelectOpen(false)
     }
 
@@ -231,10 +231,10 @@ function ChildForm({
                                                         value={
                                                             selectedParent ? `${(parents
                                                                     ?.find(value => value.id === selectedParent)
-                                                                    ?.familyName) || ''} ${(parents
+                                                                    ?.familyName)} ${(parents
                                                                     ?.find(value => value.id === selectedParent)
-                                                                    ?.givenName) || ''}`
-                                                                : undefined}
+                                                                    ?.givenName)}`
+                                                                : selectedParent === "" ? "" : undefined}
                                                         onChange={potentialParents}
                                                         onKeyDown={(e) => {
                                                             if (e.key === 'Backspace') {
@@ -256,6 +256,19 @@ function ChildForm({
                                                                 </li>
                                                             ))}
                                                         </ul>
+                                                    )}
+                                                    {(
+                                                        <Button
+                                                            type="button"
+                                                            variant={"ghost"}
+                                                            className="absolute top-1 right-1 text-red-500 p-0 mt-1 mr-1 h-fit"
+                                                            onClick={() => {
+                                                                setSelectedParent("");
+                                                                form.setValue('relativeParents', []);
+                                                            }}
+                                                        >
+                                                            <XIcon/>
+                                                        </Button>
                                                     )}
                                                 </div>
                                             </FormControl>
