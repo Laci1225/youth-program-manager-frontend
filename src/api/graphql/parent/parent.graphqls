@@ -11,10 +11,12 @@ input ParentInput {
     givenName: String!
     phoneNumbers:[String!]!
     address: String
+    childId: String
 }
 extend type Query {
     getAllParents: [Parent!]!
     getParentById(id: String!): Parent!
+    getPotentialChildren(name: String!): [Child]
 
 }
 extend type Mutation{

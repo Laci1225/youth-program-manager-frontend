@@ -21,6 +21,7 @@ export default function addParent(values: ParentDataInput) {
                 givenName: values.givenName,
                 phoneNumbers: values.phoneNumbers,
                 address: values?.address,
+                childId: values?.childId
             },
         },
     }).then(value => value.data.addParent)

@@ -11,4 +11,5 @@ export interface ParentDataInput {
     familyName: string,
     phoneNumbers: string[],
     address?: string
+    childId?: string
 }

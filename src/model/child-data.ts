@@ -18,7 +18,7 @@ export interface ChildData {
 }
 
 interface RelativeParent {
-    name: string;
+    id: string;
     isEmergencyContact: boolean;
 }
 

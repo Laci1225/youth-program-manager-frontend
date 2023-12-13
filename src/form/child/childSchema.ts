@@ -34,7 +34,7 @@ export const childSchema = z.object({
     address: z.string().min(2, 'Address must be at least 2 characters.'),
     relativeParents: z.array(
         z.object({
-            name: z.string(),
+            id: z.string(),
             isEmergencyContact: z.boolean()
         }),
     ).optional(),
