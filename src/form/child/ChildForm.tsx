@@ -50,7 +50,7 @@ function ChildForm({
             birthDate: existingChild?.birthDate ? new Date(existingChild.birthDate) : undefined,
             birthPlace: existingChild?.birthPlace,
             address: existingChild?.address,
-            parents: [],
+            relativeParents: [],
             diagnosedDiseases: parseDateInDisease(existingChild?.diagnosedDiseases),
             regularMedicines: parseDateInMedicine(existingChild?.regularMedicines)
         },
@@ -81,6 +81,7 @@ function ChildForm({
             addChild(values)
                 .then((result) => {
                     onChildModified(result)
+                    console.log(result)
                     toast({
                         title: "The child is successfully added",
                         description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,
@@ -115,11 +116,25 @@ function ChildForm({
 
     function potentialParents(event: FormEvent<HTMLInputElement>) {
         const name = event.currentTarget.value
+
         if (name) {
-            getPotentialParents(event.currentTarget.value)
-                .then(value => setParents(value))
+            setTimeout(() => {
+                getPotentialParents(name)
+                    .then(value => setParents(value))
+            }, 500);
         }
         setIsSelectOpen(name.length > 0);
+    }
+
+    const [selectedParent, setSelectedParent] = useState<string | undefined>(undefined);
+
+    function onParentSelected(value: string) {
+        setSelectedParent(value)
+        form.setValue('relativeParents', [{
+            name: value,
+            isEmergencyContact: true
+        }])
+        console.log(form.getValues('relativeParents'))
     }
 
     return (
@@ -129,7 +144,7 @@ function ChildForm({
                     <DialogTitle>{existingChild ? "Update" : "Create"} a child</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)}
+                    <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.log(errors))}
                           className="flex justify-center flex-col space-y-4 mx-4">
                         <ScrollArea className="h-[70vh]">
                             <div className="mx-4">
@@ -204,28 +219,34 @@ function ChildForm({
                                 />
                                 <FormField
                                     control={form.control}
-                                    name="parents"
+                                    name="relativeParents"
                                     render={({field}) => (
                                         <FormItem className={"flex-1"}>
                                             <FormLabel>Parent</FormLabel>
                                             <FormControl>
-                                                <Select open={isSelectOpen} onOpenChange={setIsSelectOpen}>
-                                                    <div className={"flex"}>
-                                                        <Input onChange={potentialParents} placeholder={"Name"}/>
+                                                <div className={"flex"}>
+                                                    <Select open={isSelectOpen} onOpenChange={setIsSelectOpen}
+                                                            onValueChange={(value) => onParentSelected(value)}
+                                                            defaultValue={selectedParent}>
+                                                        <Input
+                                                            onChange={
+                                                                (e) => {
+                                                                    potentialParents(e)
+                                                                }}
+                                                            placeholder={"Name"}/>
                                                         <SelectTrigger>
                                                             <SelectValue/>
                                                         </SelectTrigger>
-                                                    </div>
-                                                    <SelectContent>
-                                                        {parents?.map(value =>
-                                                            <>
-                                                                <SelectItem value={value.id}
-                                                                            onClick={() => setIsSelectOpen(false)}>
-                                                                    {value.givenName} {value.familyName}
-                                                                </SelectItem>
-                                                            </>)}
-                                                    </SelectContent>
-                                                </Select>
+                                                        <SelectContent>
+                                                            {parents?.map(value =>
+                                                                <>
+                                                                    <SelectItem key={value.id} value={value.id}>
+                                                                        {value.givenName} {value.familyName}
+                                                                    </SelectItem>
+                                                                </>)}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
                                             </FormControl>
                                             <FormMessage/>
                                         </FormItem>

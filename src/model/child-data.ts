@@ -8,12 +8,18 @@ export interface ChildData {
     birthDate: Date,
     birthPlace: string,
     address: string,
+    relativeParents?: RelativeParent[],
     diagnosedDiseases?: Disease[],
-    hasDiagnosedDiseases: boolean
+    hasDiagnosedDiseases: boolean,
     regularMedicines?: Medicine[],
-    hasRegularMedicines: boolean
+    hasRegularMedicines: boolean,
     createdDate: string,
     modifiedDate: string
+}
+
+interface RelativeParent {
+    name: string;
+    isEmergencyContact: boolean;
 }
 
 export interface ChildDataInput {
@@ -22,6 +28,7 @@ export interface ChildDataInput {
     birthDate: Date,
     birthPlace: string,
     address: string,
+    relativeParents?: RelativeParent[],
     diagnosedDiseases?: Disease[],
     regularMedicines?: Medicine[],
 }

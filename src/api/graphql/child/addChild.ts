@@ -13,6 +13,10 @@ export default function addChild(values: ChildDataInput) {
                     birthDate
                     birthPlace
                     address
+                    relativeParents {
+                        name
+                        isEmergencyContact
+                    }
                     diagnosedDiseases {
                         name
                         diagnosedAt
@@ -34,6 +38,10 @@ export default function addChild(values: ChildDataInput) {
                 birthDate: values.birthDate,
                 birthPlace: values.birthPlace,
                 address: values.address,
+                relativeParents: values.relativeParents?.map(parent => ({
+                    name: parent.name,
+                    isEmergencyContact: parent.isEmergencyContact
+                })),
                 diagnosedDiseases: values.diagnosedDiseases?.map(disease => ({
                     name: disease.name,
                     diagnosedAt: disease.diagnosedAt
