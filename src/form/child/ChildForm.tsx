@@ -111,6 +111,7 @@ function ChildForm({
 
     function potentialParents(event: FormEvent<HTMLInputElement>) {
         const name = event.currentTarget.value
+        setMessage(name);
         if (name) {
             setIsSelectOpen(name.length > 0);
             setTimeout(() => {
@@ -121,23 +122,23 @@ function ChildForm({
                     });
             }, 500);
         } else {
-            setSelectedParentId(undefined);
             setIsSelectOpen(false);
             setParents([]);
         }
     }
 
-    const [selectedParentId, setSelectedParentId] = useState<string | undefined>(undefined);
 
     function onParentSelected(id: string) {
-        setSelectedParentId(id)
         form.setValue('relativeParents', [{
             id: id,
             isEmergencyContact: true
         }])
+        const parent = parents?.find(name => name.id == id);
+        setMessage(`${parent?.familyName} ${parent?.givenName}`)
         setIsSelectOpen(false)
     }
 
+    const [message, setMessage] = useState<string | undefined>(undefined)
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[800px] h-[90vh] shadow-muted-foreground">
@@ -228,17 +229,11 @@ function ChildForm({
                                                 <div className="relative">
                                                     <Input
                                                         type="text"
-                                                        value={
-                                                            selectedParentId ? `${(parents
-                                                                    ?.find(value => value.id === selectedParentId)
-                                                                    ?.familyName)} ${(parents
-                                                                    ?.find(value => value.id === selectedParentId)
-                                                                    ?.givenName)}`
-                                                                : selectedParentId === "" ? "" : undefined}
+                                                        value={message}
                                                         onChange={potentialParents}
                                                         onKeyDown={(e) => {
                                                             if (e.key === 'Backspace') {
-                                                                setSelectedParentId(undefined);
+                                                                setMessage(undefined)
                                                             }
                                                         }}
                                                         placeholder="Search..."
@@ -263,7 +258,7 @@ function ChildForm({
                                                             variant={"ghost"}
                                                             className="absolute top-1 right-1 text-red-500 p-0 mt-1 mr-1 h-fit"
                                                             onClick={() => {
-                                                                setSelectedParentId("");
+                                                                setMessage("")
                                                                 form.setValue('relativeParents', []);
                                                             }}
                                                         >

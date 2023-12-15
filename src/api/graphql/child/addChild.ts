@@ -14,7 +14,7 @@ export default function addChild(values: ChildDataInput) {
                     birthPlace
                     address
                     relativeParents {
-                        name
+                        id
                         isEmergencyContact
                     }
                     diagnosedDiseases {
