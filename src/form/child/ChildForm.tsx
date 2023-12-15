@@ -129,13 +129,7 @@ function ChildForm({
 
 
     function onParentSelected(id: string) {
-        form.setValue('relativeParents', [{
-            id: id,
-            isEmergencyContact: true
-        }])
-        const parent = parents?.find(name => name.id == id);
-        setMessage(`${parent?.familyName} ${parent?.givenName}`)
-        setIsSelectOpen(false)
+
     }
 
     const [message, setMessage] = useState<string | undefined>(undefined)
@@ -244,7 +238,15 @@ function ChildForm({
                                                             {parents?.map(option => (
                                                                 <li
                                                                     key={option.id}
-                                                                    onClick={() => onParentSelected(option.id)}
+                                                                    onClick={() => {
+                                                                        field.onChange([{
+                                                                            id: option.id,
+                                                                            isEmergencyContact: true
+                                                                        }])
+                                                                        const parent = parents?.find(name => name.id == option.id);
+                                                                        setMessage(`${parent?.familyName} ${parent?.givenName}`)
+                                                                        setIsSelectOpen(false)
+                                                                    }}
                                                                     className="px-3 py-2 cursor-pointer hover:bg-gray-100"
                                                                 >
                                                                     {option.givenName} {option.familyName} {option.phoneNumbers[0]}
