@@ -12,6 +12,7 @@ import {parentSchema} from "@/form/parent/parentSchema";
 import addParent from "@/api/graphql/parent/addParent";
 import {InputPhoneNumbersHandler} from "@/form/parent/InputPhoneNumbersHandler";
 import updateParent from "@/api/graphql/parent/updateParent";
+import {ParentData} from "@/model/parent-data";
 
 interface ParentFormProps {
     onParentModified: (parent: ParentData) => void;

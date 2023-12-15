@@ -1,5 +1,6 @@
 import {clientSideClient} from "@/api/graphql/client";
 import {ApolloClient, gql, NormalizedCacheObject} from "@apollo/client";
+import {ParentData, ParentDataInput} from "@/model/parent-data";
 
 export default async function updateParent(parentId: string, parentData: ParentDataInput, client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<ParentData> {
     let value = await client

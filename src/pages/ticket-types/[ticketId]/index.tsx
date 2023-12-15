@@ -1,29 +1,27 @@
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
-import {ChildData} from "@/model/child-data";
-import getChildById from "@/api/graphql/child/getChildById";
 import React, {useState} from "react";
-import ChildForm from "@/form/child/ChildForm";
 import Link from "next/link";
-import {format} from "date-fns";
 import {Toaster} from "@/components/ui/toaster";
-import ShowTable from "@/form/ShowTable";
 import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
-import {serverSideClient} from "@/api/graphql/client";
-import {useRouter} from "next/router";
 import {Pencil, Trash} from "lucide-react";
+import {useRouter} from "next/router";
+import TicketTypeForm from "@/form/ticket/TicketTypeForm";
+import {serverSideClient} from "@/api/graphql/client";
+import getTicketTypeById from "@/api/graphql/ticket/getTicketTypeById";
+import deletedTicketType from "@/api/graphql/ticket/deletedTicketType";
 import DeleteData from "@/components/deleteData";
-import deleteChild from "@/api/graphql/child/deleteChild";
+import {TicketData} from "@/model/ticket-data";
 
 
 export const getServerSideProps = (async (context) => {
-    let childData;
-    if (context.params?.childId) {
+    let ticketData;
+    if (context.params?.ticketId) {
         try {
-            childData = await getChildById(context.params.childId, serverSideClient);
+            ticketData = await getTicketTypeById(context.params.ticketId, serverSideClient);
             return {
                 props: {
-                    selectedChild: childData
+                    selectedTicket: ticketData
                 }
             }
         } catch (error) {
@@ -35,17 +33,17 @@ export const getServerSideProps = (async (context) => {
     return {
         notFound: true
     };
-}) satisfies GetServerSideProps<{ selectedChild: ChildData }, { childId: string }>;
-export default function Child({selectedChild}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    const [child, setChild] = useState<ChildData>(selectedChild)
+}) satisfies GetServerSideProps<{ selectedTicket: TicketData }, { ticketId: string }>;
+export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const [ticket, setTicket] = useState<TicketData>(selectedTicket)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const router = useRouter()
-    const onChildUpdated = (newChild: ChildData) => {
-        setChild(newChild)
+    const onTicketUpdated = (newTicket: TicketData) => {
+        setTicket(newTicket)
     }
-    const onChildDeleted = () => {
-        router.push("/children")
+    const onTicketDeleted = () => {
+        router.push("/ticket-types")
     }
 
     function handleEditClick() {
@@ -59,11 +57,11 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
     return (
         <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
             <div className={"flex justify-between px-6 pb-6 items-center"}>
-                <Link href={"/children"}>
+                <Link href={"/ticket-types"}>
                     <span className="material-icons-outlined">arrow_back</span>
                 </Link>
                 <div>
-                    Child details
+                    Ticket details
                 </div>
                 <div className={"flex"}>
                     <div className={" flex flex-row items-center hover:cursor-pointer px-5"}
@@ -89,39 +87,49 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                 <div className="mb-6">
                     <Label>Full Name:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {child.givenName} {child.familyName}
+                        {ticket.name}
                     </div>
                 </div>
                 <div className="mb-6">
-                    <Label>Birth date and place:</Label>
-                    <div className={`${fieldAppearance} mt-2`}>
-                        {format(new Date(child.birthDate), "P")} {child.birthPlace}
+                    <Label>Description:</Label>
+                    <div className={`${fieldAppearance} mt-2 h-fit`}>
+                        {ticket.description}
                     </div>
                 </div>
-                <div className="mb-6">
-                    <Label>Address:</Label>
-                    <div className={`${fieldAppearance} mt-2`}>
-                        {child.address}
+                <div className={"flex flex-wrap items-center "}>
+                    <div className="mb-6 flex-1">
+                        <Label>Price:</Label>
+                        <div className={`${fieldAppearance} mt-2`}>
+                            {ticket.price} €
+                        </div>
+                    </div>
+                    <div className="mb-6 flex-1">
+                        <Label>Number of participation:</Label>
+                        <div className={`${fieldAppearance} mt-2`}>
+                            {ticket.numberOfParticipation} pc(s)
+                        </div>
+                    </div>
+                    <div className="mb-6 flex-1">
+                        <Label>Standard validation period :</Label>
+                        <div className={`${fieldAppearance} mt-2`}>
+                            {ticket.standardValidityPeriod} day(s)
+                        </div>
                     </div>
                 </div>
-                <ShowTable tableFields={["Name", "Diagnosed at"]} value={child.diagnosedDiseases}
-                           showDeleteButton={false}/>
-                <ShowTable tableFields={["Name", "Dose", "Taken since"]} value={child.regularMedicines}
-                           showDeleteButton={false}/>
             </div>
             <Toaster/>
-            <ChildForm existingChild={child ?? undefined}
-                       isOpen={isEditDialogOpen}
-                       onChildModified={onChildUpdated}
-                       onOpenChange={setIsEditDialogOpen}
+            <TicketTypeForm existingTicket={ticket ?? undefined}
+                            isOpen={isEditDialogOpen}
+                            onTicketModified={onTicketUpdated}
+                            onOpenChange={setIsEditDialogOpen}
             />
-            <DeleteData entityId={child.id}
-                        entityLabel={`${child.givenName} ${child.familyName}`}
+            <DeleteData entityId={ticket.id}
+                        entityLabel={`${ticket.name}`}
                         isOpen={isDeleteDialogOpen}
                         onOpenChange={setIsDeleteDialogOpen}
-                        onSuccess={onChildDeleted}
-                        deleteFunction={deleteChild}
-                        entityType={"Child"}
+                        onSuccess={onTicketDeleted}
+                        deleteFunction={deletedTicketType}
+                        entityType={"Ticket"}
             />
         </div>
     )
