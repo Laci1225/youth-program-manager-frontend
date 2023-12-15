@@ -22,5 +22,5 @@ extend type Query {
 extend type Mutation{
     addTicketType(ticket: TicketTypeInput!): TicketType!
     updateTicketType(id: String!, ticket: TicketTypeInput!): TicketType!
-    deleteTicketType(id: String!): TicketType!
+    deletedTicketType(id: String!): TicketType!
 }

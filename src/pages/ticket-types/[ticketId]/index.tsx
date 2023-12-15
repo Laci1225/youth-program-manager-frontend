@@ -9,7 +9,7 @@ import {useRouter} from "next/router";
 import TicketTypeForm from "@/form/ticket/TicketTypeForm";
 import {serverSideClient} from "@/api/graphql/client";
 import getTicketTypeById from "@/api/graphql/ticket/getTicketTypeById";
-import deleteTicketType from "@/api/graphql/ticket/deleteTicketType";
+import deletedTicketType from "@/api/graphql/ticket/deletedTicketType";
 import DeleteData from "@/components/deleteData";
 import {TicketData} from "@/model/ticket-data";
 
@@ -128,7 +128,7 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                         isOpen={isDeleteDialogOpen}
                         onOpenChange={setIsDeleteDialogOpen}
                         onSuccess={onTicketDeleted}
-                        deleteFunction={deleteTicketType}
+                        deleteFunction={deletedTicketType}
                         entityType={"Ticket"}
             />
         </div>
