@@ -25,7 +25,7 @@ type Child {
     modifiedDate: LocalDateTime
 }
 type RelativeParents {
-    name: String!
+    id: ID!
     isEmergencyContact: Boolean!
 }
 
@@ -46,14 +46,8 @@ input ChildInput {
     birthDate: LocalDateTime!
     birthPlace:String!
     address: String!
-    relativeParents: [RelativeParentsInput]
     diagnosedDiseases: [DiseaseInput!]
     regularMedicines: [MedicineInput!]
-}
-
-input RelativeParentsInput {
-    name: String!
-    isEmergencyContact: Boolean!
 }
 
 type Query {
