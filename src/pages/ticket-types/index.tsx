@@ -16,7 +16,7 @@ import React, {useState} from "react";
 import {Toaster} from "@/components/ui/toaster";
 import {serverSideClient} from "@/api/graphql/client";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
-import getAllTicketsType from "@/api/graphql/ticket/getAllTicketsType";
+import getAllTicketTypes from "@/api/graphql/ticket/getAllTicketTypes";
 import {Pencil, PlusSquare, Trash} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
@@ -26,7 +26,7 @@ import TicketTypeForm from "@/form/ticket/TicketTypeForm";
 import deleteTicketType from "@/api/graphql/ticket/deleteTicketType";
 
 export const getServerSideProps = (async () => {
-    const tickets = await getAllTicketsType(serverSideClient)
+    const tickets = await getAllTicketTypes(serverSideClient)
     return {
         props: {
             ticketsData: tickets

@@ -15,7 +15,7 @@ input TicketTypeInput {
     standardValidityPeriod: Int!
 }
 extend type Query {
-    getAllTicketsType: [TicketType!]!
+    getAllTicketTypes: [TicketType!]!
     getTicketTypeById(id: String!): TicketType!
 
 }
