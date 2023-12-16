@@ -8,8 +8,8 @@ import {Pencil, Trash} from "lucide-react";
 import {useRouter} from "next/router";
 import TicketTypeForm from "@/form/ticket/TicketTypeForm";
 import {serverSideClient} from "@/api/graphql/client";
-import getTicketByIdType from "@/api/graphql/ticket/getTicketByIdType";
-import deleteTicketType from "@/api/graphql/ticket/deleteTicketType";
+import getTicketTypeById from "@/api/graphql/ticket/getTicketTypeById";
+import deletedTicketType from "@/api/graphql/ticket/deletedTicketType";
 import DeleteData from "@/components/deleteData";
 import {TicketData} from "@/model/ticket-data";
 
@@ -18,7 +18,7 @@ export const getServerSideProps = (async (context) => {
     let ticketData;
     if (context.params?.ticketId) {
         try {
-            ticketData = await getTicketByIdType(context.params.ticketId, serverSideClient);
+            ticketData = await getTicketTypeById(context.params.ticketId, serverSideClient);
             return {
                 props: {
                     selectedTicket: ticketData
@@ -128,7 +128,7 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                         isOpen={isDeleteDialogOpen}
                         onOpenChange={setIsDeleteDialogOpen}
                         onSuccess={onTicketDeleted}
-                        deleteFunction={deleteTicketType}
+                        deleteFunction={deletedTicketType}
                         entityType={"Ticket"}
             />
         </div>

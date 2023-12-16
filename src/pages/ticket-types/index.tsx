@@ -16,17 +16,17 @@ import React, {useState} from "react";
 import {Toaster} from "@/components/ui/toaster";
 import {serverSideClient} from "@/api/graphql/client";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
-import getAllTicketsType from "@/api/graphql/ticket/getAllTicketsType";
+import getAllTicketTypes from "@/api/graphql/ticket/getAllTicketTypes";
 import {Pencil, PlusSquare, Trash} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
 import DeleteData from "@/components/deleteData";
 import {TicketData} from "@/model/ticket-data";
 import TicketTypeForm from "@/form/ticket/TicketTypeForm";
-import deleteTicketType from "@/api/graphql/ticket/deleteTicketType";
+import deletedTicketType from "@/api/graphql/ticket/deletedTicketType";
 
 export const getServerSideProps = (async () => {
-    const tickets = await getAllTicketsType(serverSideClient)
+    const tickets = await getAllTicketTypes(serverSideClient)
     return {
         props: {
             ticketsData: tickets
@@ -160,7 +160,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                         isOpen={isDeleteDialogOpen}
                         onOpenChange={setIsDeleteDialogOpen}
                         onSuccess={onTicketDeleted}
-                        deleteFunction={deleteTicketType}
+                        deleteFunction={deletedTicketType}
                         entityType={"Ticket"}
             />
         </div>
