@@ -1,6 +1,6 @@
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 import {Input} from "@/components/ui/input";
-import React, {FormEvent, useEffect, useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useForm} from "react-hook-form"
 import * as z from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -17,26 +17,7 @@ import {ChildData} from "@/model/child-data";
 import LoadingButton from "@/components/loading-button";
 import updateChild from "@/api/graphql/child/updateChild";
 import {parseDateInDisease, parseDateInMedicine} from "@/utils/child";
-import getPotentialParents from "@/api/graphql/child/getPotentialParents";
-import {ParentData} from "@/model/parent-data";
-import {Button} from "@/components/ui/button";
-import {XIcon} from "lucide-react";
-import {Check, ChevronsUpDown} from "lucide-react"
-import {cn} from "@/lib/utils"
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-} from "@/components/ui/command"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
-import {Option} from "commander";
-import {AutoComplete} from "@/form/child/Autocomplete";
+import {AutoComplete} from "@/form/child/AutoComplete";
 
 interface ChildFormProps {
     onChildModified: (child: ChildData) => void;
@@ -122,30 +103,6 @@ function ChildForm({
             regularMedicines: existingChild ? parseDateInMedicine(existingChild?.regularMedicines) : []
         })
     }, [existingChild]);
-    const [parents, setParents] = useState<ParentData[]>()
-    const [isSelectOpen, setIsSelectOpen] = useState(false);
-
-    function potentialParents(event: FormEvent<HTMLInputElement>) {
-        const name = event.currentTarget.value
-        setMessage(name);
-        if (name) {
-            setIsSelectOpen(name.length > 0);
-            setTimeout(() => {
-                getPotentialParents(name)
-                    .then(value => setParents(value))
-                    .catch(reason => {
-                        console.error("Failed to get potential parents:", reason);
-                    });
-            }, 500);
-        } else {
-            setIsSelectOpen(false);
-            setParents([]);
-        }
-    }
-
-    const [value, setValue] = useState("")
-
-    const [message, setMessage] = useState<string | undefined>(undefined)
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[800px] h-[90vh] shadow-muted-foreground">
@@ -238,10 +195,13 @@ function ChildForm({
                                                     isLoading={false}
                                                     disabled={false}
                                                     onValueChange={(value) => {
-                                                        field.onChange([{
-                                                            id: value.id,
-                                                            isEmergencyContact: true
-                                                        }])
+                                                        if (!value)
+                                                            form.setValue("relativeParents", undefined)
+                                                        else
+                                                            field.onChange([{
+                                                                id: value.id,
+                                                                isEmergencyContact: true
+                                                            }])
                                                     }}
                                                     placeholder={"Select parents..."}
                                                     emptyMessage={"No parent found"}
