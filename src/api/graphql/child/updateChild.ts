@@ -14,6 +14,10 @@ export default async function updateChild(childId: string, childData: ChildDataI
                     birthDate
                     birthPlace
                     address
+                    relativeParents {
+                        id
+                        isEmergencyContact
+                    }
                     diagnosedDiseases {
                         name
                         diagnosedAt

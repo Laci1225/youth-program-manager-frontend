@@ -1,6 +1,6 @@
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 import {Input} from "@/components/ui/input";
-import React, {FormEvent, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useForm} from "react-hook-form"
 import * as z from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -13,11 +13,6 @@ import addParent from "@/api/graphql/parent/addParent";
 import {InputPhoneNumbersHandler} from "@/form/parent/InputPhoneNumbersHandler";
 import updateParent from "@/api/graphql/parent/updateParent";
 import {ParentData} from "@/model/parent-data";
-import {Button} from "@/components/ui/button";
-import {XIcon} from "lucide-react";
-import {ChildData} from "@/model/child-data";
-import getPotentialChildren from "@/api/graphql/parent/getPotentialChildren";
-import {format} from "date-fns";
 
 interface ParentFormProps {
     onParentModified: (parent: ParentData) => void;
@@ -93,35 +88,6 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange}: Pa
         })
     }, [existingParent])
 
-    const [selectedChild, setSelectedChild] = useState<string | undefined>(undefined)
-    const [isSelectOpen, setIsSelectOpen] = useState(false);
-    const [children, setChildren] = useState<ChildData[]>([])
-
-    function potentialChildren(event: FormEvent<HTMLInputElement>) {
-        const name = event.currentTarget.value
-        if (name) {
-            setIsSelectOpen(name.length > 0);
-            setTimeout(() => {
-                getPotentialChildren(name)
-                    .then(value => setChildren(value))
-                    .catch(reason => {
-                        console.error("Failed to get potential children:", reason);
-                    });
-            }, 500);
-        } else {
-            setSelectedChild(undefined);
-            setIsSelectOpen(false);
-            setChildren([]);
-        }
-    }
-
-    function onChildSelected(id: string) {
-        setSelectedChild(id)
-        form.setValue('childId', id)
-        setIsSelectOpen(false)
-        console.log(form.getValues('childId'))
-    }
-
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[800px] h-[90vh] shadow-muted-foreground">
@@ -161,64 +127,6 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange}: Pa
                                         )}
                                     />
                                 </div>
-                                <FormField
-                                    control={form.control}
-                                    name="childId"
-                                    render={({field}) => (
-                                        <FormItem className={"flex-1"}>
-                                            <FormLabel>Parent</FormLabel>
-                                            <FormControl>
-                                                <div className="relative">
-                                                    <Input
-                                                        type="text"
-                                                        value={
-                                                            selectedChild ? `${(children
-                                                                    ?.find(value => value.id === selectedChild)
-                                                                    ?.familyName)} ${(children
-                                                                    ?.find(value => value.id === selectedChild)
-                                                                    ?.givenName)}`
-                                                                : selectedChild === "" ? "" : undefined}
-                                                        onChange={potentialChildren}
-                                                        onKeyDown={(e) => {
-                                                            if (e.key === 'Backspace') {
-                                                                setSelectedChild(undefined);
-                                                            }
-                                                        }}
-                                                        placeholder="Search..."
-                                                        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500"
-                                                    />
-                                                    {isSelectOpen && (
-                                                        <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-md">
-                                                            {children?.map(option => (
-                                                                <li
-                                                                    key={option.id}
-                                                                    onClick={() => onChildSelected(option.id)}
-                                                                    className="px-3 py-2 cursor-pointer hover:bg-gray-100"
-                                                                >
-                                                                    {option.givenName} {option.familyName} {option.birthDate ? format(new Date(option.birthDate), 'P') : undefined}
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    )}
-                                                    {(
-                                                        <Button
-                                                            type="button"
-                                                            variant={"ghost"}
-                                                            className="absolute top-1 right-1 text-red-500 p-0 mt-1 mr-1 h-fit"
-                                                            onClick={() => {
-                                                                setSelectedChild("");
-                                                                form.setValue('childId', undefined);
-                                                            }}
-                                                        >
-                                                            <XIcon/>
-                                                        </Button>
-                                                    )}
-                                                </div>
-                                            </FormControl>
-                                            <FormMessage/>
-                                        </FormItem>
-                                    )}
-                                />
                                 <FormField
                                     control={form.control}
                                     name="phoneNumbers"

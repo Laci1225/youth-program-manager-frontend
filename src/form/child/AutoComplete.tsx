@@ -2,7 +2,7 @@
 
 import {CommandGroup, CommandItem, CommandList, CommandInput} from "@/components/ui/command"
 import {Command as CommandPrimitive} from "cmdk"
-import React, {useState, useRef, useCallback, type KeyboardEvent, FormEvent} from "react"
+import React, {useState, useRef, useCallback, type KeyboardEvent, FormEvent, useEffect} from "react"
 
 import {cn} from "@/lib/utils"
 import {Check, XIcon} from "lucide-react"
@@ -10,6 +10,7 @@ import {Skeleton} from "@/components/ui/skeleton";
 import {ParentData} from "@/model/parent-data";
 import getPotentialParents from "@/api/graphql/child/getPotentialParents";
 import {Button} from "@/components/ui/button";
+import getParentById from "@/api/graphql/parent/getParentById";
 
 
 type AutoCompleteProps = {
@@ -19,9 +20,11 @@ type AutoCompleteProps = {
     isLoading?: boolean
     disabled?: boolean
     placeholder?: string
+    initId?: string
 }
 
 export const AutoComplete = ({
+                                 initId,
                                  placeholder,
                                  emptyMessage,
                                  value,
@@ -35,6 +38,11 @@ export const AutoComplete = ({
     const [selected, setSelected] = useState<ParentData | undefined>(value as ParentData)
     const [inputValue, setInputValue] = useState<string | undefined>(value ? `${value.familyName} ${value.givenName}` : undefined)
     const [options, setOptions] = useState<ParentData[]>()
+
+    useEffect(() => {
+        if (initId)
+            getParentById(initId).then(value1 => setInputValue(value1 ? `${value1.familyName} ${value1.givenName}` : undefined))
+    }, [initId]);
 
     function potentialParents(event: FormEvent<HTMLInputElement>) {
         const name = event.currentTarget.value

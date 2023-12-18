@@ -1,7 +1,7 @@
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
-import {ChildData} from "@/model/child-data";
+import {ChildData, RelativeParent} from "@/model/child-data";
 import getChildById from "@/api/graphql/child/getChildById";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import ChildForm from "@/form/child/ChildForm";
 import Link from "next/link";
 import {format} from "date-fns";
@@ -14,6 +14,7 @@ import {useRouter} from "next/router";
 import {Pencil, Trash} from "lucide-react";
 import DeleteData from "@/components/deleteData";
 import deleteChild from "@/api/graphql/child/deleteChild";
+import getParentById from "@/api/graphql/parent/getParentById";
 
 
 export const getServerSideProps = (async (context) => {
@@ -54,6 +55,27 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
 
     function handleDeleteClick() {
         setIsDeleteDialogOpen(true)
+    }
+
+    const [parent, setParent] = useState<{ name: string, isEmergencyContact: string }[] | undefined>(undefined)
+    useEffect(() => {
+        const a = fetchParentDetails(child)
+        a?.then(value => setParent(value))
+    }, [child]);
+
+    function fetchParentDetails(child: ChildData) {
+        const parents = child.relativeParents;
+        console.log(parents)
+        if (!parents)
+            return undefined
+        else
+            return Promise.all(parents.map(async (parent: RelativeParent) => {
+                const parentData = await getParentById(parent.id);
+                return {
+                    name: parentData.familyName + " " + parentData.givenName,
+                    isEmergencyContact: parent.isEmergencyContact ? 'check_box' : 'check_box_outline_blank',
+                };
+            }));
     }
 
     return (
@@ -104,7 +126,12 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                         {child.address}
                     </div>
                 </div>
-                <ShowTable tableFields={["Name", "isEmergencyContact"]} value={child.relativeParents}
+                <ShowTable tableFields={["Name", "isEmergencyContact"]}
+                           value={parent?.map((parent, index) => ({
+                               name: parent.name,
+                               isEmergencyContact: <span
+                                   className="material-icons-outlined">{parent.isEmergencyContact}</span>
+                           }))}
                            showDeleteButton={false}/>
                 <ShowTable tableFields={["Name", "Diagnosed at"]} value={child.diagnosedDiseases}
                            showDeleteButton={false}/>

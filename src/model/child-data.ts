@@ -17,7 +17,7 @@ export interface ChildData {
     modifiedDate: string
 }
 
-interface RelativeParent {
+export interface RelativeParent {
     id: string;
     isEmergencyContact: boolean;
 }

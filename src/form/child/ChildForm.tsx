@@ -42,7 +42,7 @@ function ChildForm({
             birthDate: existingChild?.birthDate ? new Date(existingChild.birthDate) : undefined,
             birthPlace: existingChild?.birthPlace,
             address: existingChild?.address,
-            relativeParents: [],
+            relativeParents: existingChild?.relativeParents,
             diagnosedDiseases: parseDateInDisease(existingChild?.diagnosedDiseases),
             regularMedicines: parseDateInMedicine(existingChild?.regularMedicines)
         },
@@ -99,6 +99,7 @@ function ChildForm({
             birthDate: existingChild?.birthDate ? new Date(existingChild.birthDate) : undefined,
             birthPlace: existingChild?.birthPlace ?? "",
             address: existingChild?.address ?? "",
+            relativeParents: existingChild?.relativeParents ?? [],
             diagnosedDiseases: existingChild ? parseDateInDisease(existingChild?.diagnosedDiseases) : [],
             regularMedicines: existingChild ? parseDateInMedicine(existingChild?.regularMedicines) : []
         })
@@ -194,6 +195,7 @@ function ChildForm({
                                                     key={0}
                                                     isLoading={false}
                                                     disabled={false}
+                                                    initId={field.value ? field.value[0]?.id : undefined}
                                                     onValueChange={(value) => {
                                                         if (!value)
                                                             form.setValue("relativeParents", undefined)

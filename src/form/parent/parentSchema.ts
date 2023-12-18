@@ -20,5 +20,4 @@ export const parentSchema = z.object({
     givenName: z.string().min(2, 'Name must be at least 2 characters.'),
     phoneNumbers: uniquePhoneNumbers,
     address: z.string().optional(),
-    childId: z.string().optional()
 });
