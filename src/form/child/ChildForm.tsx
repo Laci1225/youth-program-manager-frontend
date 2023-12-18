@@ -1,6 +1,6 @@
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 import {Input} from "@/components/ui/input";
-import React, {FormEvent, useEffect, useState} from "react";
+import React, {FormEvent, useEffect, useRef, useState} from "react";
 import {useForm} from "react-hook-form"
 import * as z from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -21,6 +21,22 @@ import getPotentialParents from "@/api/graphql/child/getPotentialParents";
 import {ParentData} from "@/model/parent-data";
 import {Button} from "@/components/ui/button";
 import {XIcon} from "lucide-react";
+import {Check, ChevronsUpDown} from "lucide-react"
+import {cn} from "@/lib/utils"
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+} from "@/components/ui/command"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
+import {Option} from "commander";
+import {AutoComplete} from "@/form/child/Autocomplete";
 
 interface ChildFormProps {
     onChildModified: (child: ChildData) => void;
@@ -127,10 +143,7 @@ function ChildForm({
         }
     }
 
-
-    function onParentSelected(id: string) {
-
-    }
+    const [value, setValue] = useState("")
 
     const [message, setMessage] = useState<string | undefined>(undefined)
     return (
@@ -220,54 +233,19 @@ function ChildForm({
                                         <FormItem className={"flex-1"}>
                                             <FormLabel>Parent</FormLabel>
                                             <FormControl>
-                                                <div className="relative">
-                                                    <Input
-                                                        type="text"
-                                                        value={message}
-                                                        onChange={potentialParents}
-                                                        onKeyDown={(e) => {
-                                                            if (e.key === 'Backspace') {
-                                                                setMessage(undefined)
-                                                            }
-                                                        }}
-                                                        placeholder="Search..."
-                                                        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:border-blue-500"
-                                                    />
-                                                    {isSelectOpen && (
-                                                        <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-md">
-                                                            {parents?.map(option => (
-                                                                <li
-                                                                    key={option.id}
-                                                                    onClick={() => {
-                                                                        field.onChange([{
-                                                                            id: option.id,
-                                                                            isEmergencyContact: true
-                                                                        }])
-                                                                        const parent = parents?.find(name => name.id == option.id);
-                                                                        setMessage(`${parent?.familyName} ${parent?.givenName}`)
-                                                                        setIsSelectOpen(false)
-                                                                    }}
-                                                                    className="px-3 py-2 cursor-pointer hover:bg-gray-100"
-                                                                >
-                                                                    {option.givenName} {option.familyName} {option.phoneNumbers[0]}
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    )}
-                                                    {(
-                                                        <Button
-                                                            type="button"
-                                                            variant={"ghost"}
-                                                            className="absolute top-1 right-1 text-red-500 p-0 mt-1 mr-1 h-fit"
-                                                            onClick={() => {
-                                                                setMessage("")
-                                                                form.setValue('relativeParents', []);
-                                                            }}
-                                                        >
-                                                            <XIcon/>
-                                                        </Button>
-                                                    )}
-                                                </div>
+                                                <AutoComplete
+                                                    key={0}
+                                                    isLoading={false}
+                                                    disabled={false}
+                                                    onValueChange={(value) => {
+                                                        field.onChange([{
+                                                            id: value.id,
+                                                            isEmergencyContact: true
+                                                        }])
+                                                    }}
+                                                    placeholder={"Select parents..."}
+                                                    emptyMessage={"No parent found"}
+                                                />
                                             </FormControl>
                                             <FormMessage/>
                                         </FormItem>
