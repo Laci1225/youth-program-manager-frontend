@@ -32,3 +32,15 @@ export interface ChildDataInput {
     diagnosedDiseases?: Disease[],
     regularMedicines?: Medicine[],
 }
+
+export interface ChildDataUpdateInput {
+    id: string,
+    familyName: string,
+    givenName: string,
+    birthDate: Date,
+    birthPlace: string,
+    address: string,
+    relativeParents?: RelativeParent[],
+    diagnosedDiseases?: Disease[],
+    regularMedicines?: Medicine[],
+}

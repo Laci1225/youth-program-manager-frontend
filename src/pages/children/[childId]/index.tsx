@@ -11,10 +11,15 @@ import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
 import {serverSideClient} from "@/api/graphql/client";
 import {useRouter} from "next/router";
-import {Pencil, Trash} from "lucide-react";
+import {Pencil, PlusSquare, Trash, XIcon} from "lucide-react";
 import DeleteData from "@/components/deleteData";
 import deleteChild from "@/api/graphql/child/deleteChild";
 import getParentById from "@/api/graphql/parent/getParentById";
+import {AutoComplete} from "@/form/child/AutoComplete";
+import {Button} from "@/components/ui/button";
+import updateChild from "@/api/graphql/child/updateChild";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
+import {toast} from "@/components/ui/use-toast";
 
 
 export const getServerSideProps = (async (context) => {
@@ -57,27 +62,34 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
         setIsDeleteDialogOpen(true)
     }
 
-    const [parent, setParent] = useState<{ name: string, isEmergencyContact: string }[] | undefined>(undefined)
+    const [parents, setParents] = useState<{ id: string, name: string, isEmergencyContact: string }[]>([])
     useEffect(() => {
-        const a = fetchParentDetails(child)
-        a?.then(value => setParent(value))
+        fetchParentDetails(child)?.then(value => setParents(value))
     }, [child]);
 
     function fetchParentDetails(child: ChildData) {
         const parents = child.relativeParents;
-        console.log(parents)
         if (!parents)
             return undefined
         else
             return Promise.all(parents.map(async (parent: RelativeParent) => {
                 const parentData = await getParentById(parent.id);
                 return {
+                    id: parentData.id,
                     name: parentData.familyName + " " + parentData.givenName,
                     isEmergencyContact: parent.isEmergencyContact ? 'check_box' : 'check_box_outline_blank',
                 };
             }));
     }
 
+    const [isAutoCompleteShown, setIsAutoCompleteShown] = useState(false)
+    const [relativeParent, setRelativeParent] = useState<RelativeParent>()
+
+    function changeAutoCompleteVisibility() {
+        setIsAutoCompleteShown(!isAutoCompleteShown)
+    }
+
+    console.log(child.relativeParents)
     return (
         <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
             <div className={"flex justify-between px-6 pb-6 items-center"}>
@@ -126,13 +138,120 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                         {child.address}
                     </div>
                 </div>
-                <ShowTable tableFields={["Name", "isEmergencyContact"]}
-                           value={parent?.map((parent, index) => ({
-                               name: parent.name,
-                               isEmergencyContact: <span
-                                   className="material-icons-outlined">{parent.isEmergencyContact}</span>
-                           }))}
-                           showDeleteButton={false}/>
+                <div className={"flex justify-between"}>
+                    <Button
+                        type={"button"}
+                        variant={"ghost"}
+                        onClick={changeAutoCompleteVisibility}
+                    >
+                        {
+                            isAutoCompleteShown ? (
+                                <>
+                                    <span>Cancel</span>
+                                </>) : (
+                                <>
+                                    <PlusSquare/>
+                                    <span>Edit parents</span>
+                                </>)
+                        }
+                    </Button>
+                    {isAutoCompleteShown &&
+                        <Button onClick={() => updateChild(child)
+                            .then(value => {
+                                setChild(value)
+                                toast({
+                                    title: "The child is successfully updated",
+                                    description: `A child with name: ${child.givenName} ${child.familyName} updated`,
+                                    duration: 2000
+                                })
+                                setIsAutoCompleteShown(false)
+                            })}>
+                            Save
+                        </Button>}
+                </div>
+                {isAutoCompleteShown ? (
+                        <>
+                            <Table className={"w-full border border-gray-200"}>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className={"text-left"}>Name</TableHead>
+                                        <TableHead className="text-center">isEmergencyContact</TableHead>
+                                        <TableHead className="w-5"></TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>{
+                                    parents && parents.length !== 0 ? (
+                                        parents.map((parent, index) => (
+                                            <TableRow key={index}>
+                                                <TableCell className={"text-left"}>
+                                                    {parent.name}
+                                                </TableCell>
+                                                <TableCell className={"text-center"}>
+                                                    <span className={"material-icons-outlined"}>
+                                                        {parent.isEmergencyContact}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell className={"text-center"}>
+                                                    <Button type={"button"} className="p-0"
+                                                            variant={"ghost"}
+                                                            onClick={() => {
+                                                                const updatedParents = child.relativeParents?.filter(value => value.id !== parent.id);
+                                                                if (updatedParents) {
+                                                                    const updatedChild = {
+                                                                        ...child,
+                                                                        relativeParents: updatedParents
+                                                                    };
+                                                                    setChild(updatedChild);
+                                                                }
+                                                            }}>
+                                                        <span className="material-icons-outlined">delete</span>
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))) : (
+                                        <TableRow>
+                                            <TableCell className={"text-center text-gray-400"} colSpan={3}>
+                                                Nothing added yet
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                            <div className={"flex justify-between mb-5"}>
+                                <AutoComplete
+                                    key={0}
+                                    isLoading={false}
+                                    disabled={false}
+                                    onValueChange={(value) => {
+                                        if (value)
+                                            setRelativeParent({
+                                                id: value.id,
+                                                isEmergencyContact: true
+                                            })
+                                    }}
+                                    placeholder={"Select parents..."}
+                                    emptyMessage={"No parent found"}
+                                />
+                                <Button
+                                    onClick={() => {
+                                        if (relativeParent) {
+                                            const updatedRelativeParents = child.relativeParents ? [...child.relativeParents, relativeParent] : [relativeParent];
+                                            const updatedChild = {...child, relativeParents: updatedRelativeParents};
+                                            setChild(updatedChild);
+                                        }
+                                    }}>
+                                    Add
+                                </Button>
+                            </div>
+                        </>) :
+                    <ShowTable tableFields={["Name", "isEmergencyContact"]}
+                               value={parents?.map((parent) => ({
+                                   name: parent.name,
+                                   isEmergencyContact: <span
+                                       className="material-icons-outlined">{parent.isEmergencyContact}</span>
+                               }))}
+                               showDeleteButton={false}/>
+                }
                 <ShowTable tableFields={["Name", "Diagnosed at"]} value={child.diagnosedDiseases}
                            showDeleteButton={false}/>
                 <ShowTable tableFields={["Name", "Dose", "Taken since"]} value={child.regularMedicines}

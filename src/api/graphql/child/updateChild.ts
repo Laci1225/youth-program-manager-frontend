@@ -1,13 +1,13 @@
 import {clientSideClient} from "@/api/graphql/client";
 import {ApolloClient, gql, NormalizedCacheObject} from "@apollo/client";
-import {ChildData, ChildDataInput} from "@/model/child-data";
+import {ChildData, ChildDataUpdateInput} from "@/model/child-data";
 
-export default async function updateChild(childId: string, childData: ChildDataInput, client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<ChildData> {
+export default async function updateChild(childData: ChildDataUpdateInput, client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<ChildData> {
     let value = await client
     .mutate({
         mutation: gql`
-            mutation UpdateChild($id: String!,$child: ChildInput!) {
-                updateChild(id : $id,child: $child){
+            mutation UpdateChild($child: ChildUpdateInput!) {
+                updateChild(child: $child){
                     id
                     familyName
                     givenName
@@ -33,7 +33,6 @@ export default async function updateChild(childId: string, childData: ChildDataI
             }
         `, fetchPolicy: "no-cache",
         variables: {
-            id: childId,
             child: childData
         },
     });

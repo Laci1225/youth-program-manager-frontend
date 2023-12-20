@@ -51,7 +51,11 @@ function ChildForm({
     function onSubmit(values: z.infer<typeof childSchema>) {
         setIsSubmitting(true)
         if (existingChild) {
-            updateChild(existingChild.id, values)
+            const updateValues = {
+                ...values,
+                id: existingChild.id
+            };
+            updateChild(updateValues)
                 .then((result) => {
                     onChildModified(result)
                     toast({

@@ -27,8 +27,6 @@ export default async function getChildById(childId: string, client: ApolloClient
                         dose
                         takenSince
                     }
-                    hasDiagnosedDiseases
-                    hasRegularMedicines
                 }
             }
         `, fetchPolicy: "no-cache",

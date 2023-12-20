@@ -46,8 +46,26 @@ input ChildInput {
     birthDate: LocalDateTime!
     birthPlace:String!
     address: String!
+    relativeParents: [RelativeParentsInput!]
     diagnosedDiseases: [DiseaseInput!]
     regularMedicines: [MedicineInput!]
+}
+input ChildUpdateInput {
+    id: String!,
+    familyName: String!
+    givenName: String!
+    birthDate: LocalDateTime!
+    birthPlace:String!
+    address: String!
+    relativeParents: [RelativeParentsInput!]
+    hasDiagnosedDiseases: Boolean!
+    hasRegularMedicines: Boolean!
+    diagnosedDiseases: [DiseaseInput!]
+    regularMedicines: [MedicineInput!]
+}
+input RelativeParentsInput {
+    id: ID!
+    isEmergencyContact: Boolean!
 }
 
 type Query {
@@ -57,6 +75,6 @@ type Query {
 }
 type Mutation{
     addChild(child: ChildInput!): Child!
-    updateChild(id: String!, child: ChildInput!): Child!
+    updateChild(child: ChildUpdateInput!): Child!
     deleteChild(id: String!): Child!
 }

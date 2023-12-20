@@ -38,7 +38,7 @@ export default function ShowTable({tableFields, value, showDeleteButton, onChang
             </TableHeader>
             <TableBody>{
                 value && value?.length !== 0 ? (
-                    value.map((field: Disease | Medicine, index: number) => (
+                    value.map((field: Disease | Medicine | Object, index: number) => (
                         <TableRow key={index}>
                             {Object.values(field).map((value) => (
                                 <TableCell key={value} className={"text-center"}>
