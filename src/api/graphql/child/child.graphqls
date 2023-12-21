@@ -58,8 +58,6 @@ input ChildUpdateInput {
     birthPlace:String!
     address: String!
     relativeParents: [RelativeParentsInput!]
-    hasDiagnosedDiseases: Boolean!
-    hasRegularMedicines: Boolean!
     diagnosedDiseases: [DiseaseInput!]
     regularMedicines: [MedicineInput!]
 }

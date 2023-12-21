@@ -11,7 +11,7 @@ import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
 import {serverSideClient} from "@/api/graphql/client";
 import {useRouter} from "next/router";
-import {Pencil, PlusSquare, Trash, XIcon} from "lucide-react";
+import {Pencil, PlusSquare, Trash} from "lucide-react";
 import DeleteData from "@/components/deleteData";
 import deleteChild from "@/api/graphql/child/deleteChild";
 import getParentById from "@/api/graphql/parent/getParentById";
@@ -156,16 +156,32 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                         }
                     </Button>
                     {isAutoCompleteShown &&
-                        <Button onClick={() => updateChild(child)
-                            .then(value => {
-                                setChild(value)
+                        <Button onClick={() => {
+                            const {hasDiagnosedDiseases, hasRegularMedicines, ...childWithoutUnnecessaryFields} = child;
+                            const emergencyContacts = child.relativeParents?.filter(parent => parent.isEmergencyContact);
+                            if (emergencyContacts && emergencyContacts.length === 0 && childWithoutUnnecessaryFields.relativeParents?.length !== 0) {
                                 toast({
-                                    title: "The child is successfully updated",
-                                    description: `A child with name: ${child.givenName} ${child.familyName} updated`,
-                                    duration: 2000
-                                })
-                                setIsAutoCompleteShown(false)
-                            })}>
+                                    title: "Error",
+                                    description: "At least one parent should be marked as an emergency contact.",
+                                    duration: 2000,
+                                    variant: "destructive"
+                                });
+                            } else {
+                                updateChild(childWithoutUnnecessaryFields)
+                                    .then(value => {
+                                        setChild(value);
+                                        toast({
+                                            title: "The child is successfully updated",
+                                            description: `A child with name: ${child.givenName} ${child.familyName} updated`,
+                                            duration: 2000
+                                        });
+                                        setIsAutoCompleteShown(false);
+                                    })
+                                    .catch(error => {
+                                        console.error("Failed to update child:", error);
+                                    });
+                            }
+                        }}>
                             Save
                         </Button>}
                 </div>
@@ -187,9 +203,29 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                                                     {parent.name}
                                                 </TableCell>
                                                 <TableCell className={"text-center"}>
+                                                    <Button type={"button"} variant={"ghost"}
+                                                            onClick={() => {
+                                                                const updatedParents = child.relativeParents?.map(relative => {
+                                                                    if (relative.id === parent.id) {
+                                                                        return {
+                                                                            ...relative,
+                                                                            isEmergencyContact: !relative.isEmergencyContact
+                                                                        };
+                                                                    }
+                                                                    return relative;
+                                                                });
+                                                                if (updatedParents) {
+                                                                    const updatedChild = {
+                                                                        ...child,
+                                                                        relativeParents: updatedParents
+                                                                    };
+                                                                    setChild(updatedChild);
+                                                                }
+                                                            }}>
                                                     <span className={"material-icons-outlined"}>
                                                         {parent.isEmergencyContact}
                                                     </span>
+                                                    </Button>
                                                 </TableCell>
                                                 <TableCell className={"text-center"}>
                                                     <Button type={"button"} className="p-0"

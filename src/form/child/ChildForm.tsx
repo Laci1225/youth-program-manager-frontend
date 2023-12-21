@@ -201,13 +201,18 @@ function ChildForm({
                                                     disabled={false}
                                                     initId={field.value ? field.value[0]?.id : undefined}
                                                     onValueChange={(value) => {
-                                                        if (!value)
-                                                            form.setValue("relativeParents", undefined)
-                                                        else
-                                                            field.onChange([{
+                                                        if (value) {
+                                                            const selectedParent = {
                                                                 id: value.id,
                                                                 isEmergencyContact: true
-                                                            }])
+                                                            };
+                                                            const existingParents = field.value || [];
+                                                            const updatedParents = [
+                                                                selectedParent,
+                                                                ...existingParents.slice(1)
+                                                            ];
+                                                            field.onChange(updatedParents);
+                                                        }
                                                     }}
                                                     placeholder={"Select parents..."}
                                                     emptyMessage={"No parent found"}
