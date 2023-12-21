@@ -14,6 +14,10 @@ export default async function getAllChildren(client: ApolloClient<NormalizedCach
                     birthPlace
                     birthDate
                     address
+                    relativeParents {
+                        id
+                        isEmergencyContact
+                    }
                     diagnosedDiseases {
                         name
                         diagnosedAt

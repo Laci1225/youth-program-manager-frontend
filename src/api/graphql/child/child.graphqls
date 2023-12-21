@@ -46,7 +46,7 @@ input ChildInput {
     birthDate: LocalDateTime!
     birthPlace:String!
     address: String!
-    relativeParents: [RelativeParentsInput!]
+    relativeParents: [RelativeParentsInput]
     diagnosedDiseases: [DiseaseInput!]
     regularMedicines: [MedicineInput!]
 }
@@ -57,7 +57,7 @@ input ChildUpdateInput {
     birthDate: LocalDateTime!
     birthPlace:String!
     address: String!
-    relativeParents: [RelativeParentsInput!]
+    relativeParents: [RelativeParentsInput]
     diagnosedDiseases: [DiseaseInput!]
     regularMedicines: [MedicineInput!]
 }

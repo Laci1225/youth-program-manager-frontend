@@ -21,7 +21,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import {Pencil, PlusSquare, Trash} from "lucide-react"
+import {AlertTriangle, Pencil, PlusSquare, Trash} from "lucide-react"
 import {useRouter} from "next/router";
 import {Button} from "@/components/ui/button";
 import DeleteData from "@/components/deleteData";
@@ -112,6 +112,12 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                                     <TableCell className="text-center">{child.hasRegularMedicines ?
                                         <span className="material-icons-outlined">check_box</span> :
                                         <span className="material-icons-outlined">check_box_outline_blank</span>}
+                                    </TableCell>
+                                    <TableCell className={"text-right"}>
+                                        {
+                                            !child.relativeParents && (
+                                                <AlertTriangle className={"text-yellow-600 "}/>)
+                                        }
                                     </TableCell>
                                     <TableCell className="p-1 text-center">
                                         <DropdownMenu>
