@@ -11,7 +11,7 @@ import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
 import {serverSideClient} from "@/api/graphql/client";
 import {useRouter} from "next/router";
-import {Pencil, PlusSquare, Trash} from "lucide-react";
+import {AlertTriangle, Pencil, PlusSquare, Trash} from "lucide-react";
 import DeleteData from "@/components/deleteData";
 import deleteChild from "@/api/graphql/child/deleteChild";
 import getParentById from "@/api/graphql/parent/getParentById";
@@ -20,6 +20,10 @@ import {Button} from "@/components/ui/button";
 import updateChild from "@/api/graphql/child/updateChild";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {toast} from "@/components/ui/use-toast";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
+import HoverText from "@/components/hoverText";
+import ParentForm from "@/form/parent/ParentForm";
+import {ParentData} from "@/model/parent-data";
 
 
 export const getServerSideProps = (async (context) => {
@@ -84,12 +88,26 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
 
     const [isAutoCompleteShown, setIsAutoCompleteShown] = useState(false)
     const [relativeParent, setRelativeParent] = useState<RelativeParent>()
+    const [isParentEditDialogOpen, setParentIsEditDialogOpen] = useState(false)
+    const onParentUpdated = (newParent: ParentData) => {
+        console.log(newParent)
+        const selectedParent = {
+            id: newParent.id,
+            isEmergencyContact: true
+        };
+        const updatedRelativeParents = child.relativeParents ? [...child.relativeParents, selectedParent] : [selectedParent];
+        const updatedChild = {...child, relativeParents: updatedRelativeParents};
+        setChild(updatedChild);
+    }
 
     function changeAutoCompleteVisibility() {
         setIsAutoCompleteShown(!isAutoCompleteShown)
     }
 
-    console.log(child.relativeParents)
+    function handleParentEditClick() {
+        setParentIsEditDialogOpen(true)
+    }
+
     return (
         <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
             <div className={"flex justify-between px-6 pb-6 items-center"}>
@@ -99,6 +117,10 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                 <div>
                     Child details
                 </div>
+                <HoverText trigger={
+                    (!child.relativeParents || child.relativeParents?.length === 0) && (
+                        <AlertTriangle className={"text-yellow-600 "}/>)
+                } content={"Parent not associated yet"}/>
                 <div className={"flex"}>
                     <div className={" flex flex-row items-center hover:cursor-pointer px-5"}
                          onClick={(event) => {
@@ -278,6 +300,12 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                                     }}>
                                     Add
                                 </Button>
+                                <Button
+                                    onClick={() => {
+                                        handleParentEditClick()
+                                    }}>
+                                    Create new parent
+                                </Button>
                             </div>
                         </>) :
                     <ShowTable tableFields={["Name", "isEmergencyContact"]}
@@ -294,6 +322,11 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                            showDeleteButton={false}/>
             </div>
             <Toaster/>
+            <ParentForm
+                isOpen={isParentEditDialogOpen}
+                onOpenChange={setParentIsEditDialogOpen}
+                onParentModified={onParentUpdated}
+            />
             <ChildForm existingChild={child ?? undefined}
                        isOpen={isEditDialogOpen}
                        onChildModified={onChildUpdated}

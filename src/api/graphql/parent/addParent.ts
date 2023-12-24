@@ -8,6 +8,7 @@ export default function addParent(values: ParentDataInput) {
         mutation: gql`
             mutation AddParent($parent: ParentInput!) {
                 addParent(parent: $parent) {
+                    id
                     familyName
                     givenName
                     phoneNumbers
@@ -21,7 +22,6 @@ export default function addParent(values: ParentDataInput) {
                 givenName: values.givenName,
                 phoneNumbers: values.phoneNumbers,
                 address: values?.address,
-                childId: values?.childId
             },
         },
     }).then(value => value.data.addParent)

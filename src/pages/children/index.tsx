@@ -25,6 +25,9 @@ import {AlertTriangle, Pencil, PlusSquare, Trash} from "lucide-react"
 import {useRouter} from "next/router";
 import {Button} from "@/components/ui/button";
 import DeleteData from "@/components/deleteData";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
+import HoverText from "@/components/hoverText";
+import SettingsDropdown from "@/components/SettingsDropdown";
 
 
 export const getServerSideProps = (async () => {
@@ -114,40 +117,17 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                                         <span className="material-icons-outlined">check_box_outline_blank</span>}
                                     </TableCell>
                                     <TableCell className={"text-right"}>
-                                        {
-                                            !child.relativeParents && (
+                                        <HoverText trigger={
+                                            (!child.relativeParents || child.relativeParents?.length === 0) && (
                                                 <AlertTriangle className={"text-yellow-600 "}/>)
-                                        }
+                                        } content={"Parent not associated yet"}/>
                                     </TableCell>
                                     <TableCell className="p-1 text-center">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger onClick={event => event.preventDefault()}>
-                                                <span className="material-icons-outlined">more_horiz</span>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent className={"min-w-8"}>
-                                                <DropdownMenuSeparator/>
-                                                <DropdownMenuItem
-                                                    className={"justify-center hover:cursor-pointer"}
-                                                    onClick={(event) => {
-                                                        event.preventDefault()
-                                                        event.stopPropagation()
-                                                        handleEditClick(child)
-                                                    }}>
-                                                    <Pencil className={"mx-1"}/>
-                                                    <span>Edit</span>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem
-                                                    className={"justify-center hover:cursor-pointer p-2 mx-5 bg-red-600 text-white"}
-                                                    onClick={event => {
-                                                        event.preventDefault()
-                                                        event.stopPropagation()
-                                                        handleDeleteClick(child)
-                                                    }}>
-                                                    <Trash className={"mx-1"}/>
-                                                    <span>Delete</span>
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                        <SettingsDropdown
+                                            handleEditClick={handleEditClick}
+                                            handleDeleteClick={handleDeleteClick}
+                                            item={child}
+                                        />
                                     </TableCell>
                                 </TableRow>
                             ))) : (

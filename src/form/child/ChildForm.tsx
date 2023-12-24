@@ -212,7 +212,8 @@ function ChildForm({
                                                                 ...existingParents.slice(1)
                                                             ];
                                                             field.onChange(updatedParents);
-                                                        }
+                                                        } else field.onChange(undefined);
+
                                                     }}
                                                     placeholder={"Select parents..."}
                                                     emptyMessage={"No parent found"}
