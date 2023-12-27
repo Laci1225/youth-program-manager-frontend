@@ -1,5 +1,6 @@
 import {Disease} from "@/model/disease";
 import {Medicine} from "@/model/medicine";
+import {ParentDataWithEmergencyContact} from "@/model/parent-data";
 
 export interface ChildData {
     id: string,
@@ -15,6 +16,11 @@ export interface ChildData {
     hasRegularMedicines: boolean,
     createdDate: string,
     modifiedDate: string
+}
+
+export interface ChildDataWithParents {
+    childDto: ChildData,
+    parents: ParentDataWithEmergencyContact[]
 }
 
 export interface RelativeParent {

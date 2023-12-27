@@ -6,6 +6,11 @@ export interface ParentData {
     address?: string
 }
 
+export interface ParentDataWithEmergencyContact {
+    parentDto: ParentData,
+    isEmergencyContact: boolean
+}
+
 export interface ParentDataInput {
     givenName: string,
     familyName: string,

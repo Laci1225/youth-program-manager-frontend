@@ -1,7 +1,7 @@
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
-import {ChildData, RelativeParent} from "@/model/child-data";
+import {ChildData, ChildDataWithParents, RelativeParent} from "@/model/child-data";
 import getChildById from "@/api/graphql/child/getChildById";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import ChildForm from "@/form/child/ChildForm";
 import Link from "next/link";
 import {format} from "date-fns";
@@ -14,13 +14,11 @@ import {useRouter} from "next/router";
 import {AlertTriangle, Pencil, PlusSquare, Trash} from "lucide-react";
 import DeleteData from "@/components/deleteData";
 import deleteChild from "@/api/graphql/child/deleteChild";
-import getParentById from "@/api/graphql/parent/getParentById";
 import {AutoComplete} from "@/form/child/AutoComplete";
 import {Button} from "@/components/ui/button";
 import updateChild from "@/api/graphql/child/updateChild";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {toast} from "@/components/ui/use-toast";
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import HoverText from "@/components/hoverText";
 import ParentForm from "@/form/parent/ParentForm";
 import {ParentData} from "@/model/parent-data";
@@ -45,9 +43,11 @@ export const getServerSideProps = (async (context) => {
     return {
         notFound: true
     };
-}) satisfies GetServerSideProps<{ selectedChild: ChildData }, { childId: string }>;
+}) satisfies GetServerSideProps<{ selectedChild: ChildDataWithParents }, { childId: string }>;
 export default function Child({selectedChild}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    const [child, setChild] = useState<ChildData>(selectedChild)
+    console.log(selectedChild)
+    const [childWithParents, setChildWithParents] = useState<ChildDataWithParents>(selectedChild)
+    const [child, setChild] = useState<ChildData>(childWithParents.childDto)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const router = useRouter()
@@ -66,31 +66,11 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
         setIsDeleteDialogOpen(true)
     }
 
-    const [parents, setParents] = useState<{ id: string, name: string, isEmergencyContact: string }[]>([])
-    useEffect(() => {
-        fetchParentDetails(child)?.then(value => setParents(value))
-    }, [child]);
-
-    function fetchParentDetails(child: ChildData) {
-        const parents = child.relativeParents;
-        if (!parents)
-            return undefined
-        else
-            return Promise.all(parents.map(async (parent: RelativeParent) => {
-                const parentData = await getParentById(parent.id);
-                return {
-                    id: parentData.id,
-                    name: parentData.familyName + " " + parentData.givenName,
-                    isEmergencyContact: parent.isEmergencyContact ? 'check_box' : 'check_box_outline_blank',
-                };
-            }));
-    }
-
     const [isAutoCompleteShown, setIsAutoCompleteShown] = useState(false)
     const [relativeParent, setRelativeParent] = useState<RelativeParent>()
+    const [parent, setParent] = useState<ParentData>()
     const [isParentEditDialogOpen, setParentIsEditDialogOpen] = useState(false)
     const onParentUpdated = (newParent: ParentData) => {
-        console.log(newParent)
         const selectedParent = {
             id: newParent.id,
             isEmergencyContact: true
@@ -218,48 +198,68 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>{
-                                    parents && parents.length !== 0 ? (
-                                        parents.map((parent, index) => (
+                                    childWithParents.parents && childWithParents.parents.length !== 0 ? (
+                                        childWithParents.parents.map((parent, index) => (
                                             <TableRow key={index}>
                                                 <TableCell className={"text-left"}>
-                                                    {parent.name}
+                                                    {parent.parentDto.givenName} {parent.parentDto.familyName}
                                                 </TableCell>
                                                 <TableCell className={"text-center"}>
-                                                    <Button type={"button"} variant={"ghost"}
-                                                            onClick={() => {
-                                                                const updatedParents = child.relativeParents?.map(relative => {
-                                                                    if (relative.id === parent.id) {
-                                                                        return {
-                                                                            ...relative,
-                                                                            isEmergencyContact: !relative.isEmergencyContact
-                                                                        };
-                                                                    }
-                                                                    return relative;
-                                                                });
-                                                                if (updatedParents) {
-                                                                    const updatedChild = {
-                                                                        ...child,
-                                                                        relativeParents: updatedParents
+                                                    <Button
+                                                        type={"button"}
+                                                        variant={"ghost"}
+                                                        onClick={() => {
+                                                            const updatedParents = child.relativeParents?.map(relative => {
+                                                                if (relative.id === parent.parentDto.id) {
+                                                                    return {
+                                                                        ...relative,
+                                                                        isEmergencyContact: !relative.isEmergencyContact
                                                                     };
-                                                                    setChild(updatedChild);
                                                                 }
-                                                            }}>
-                                                    <span className={"material-icons-outlined"}>
-                                                        {parent.isEmergencyContact}
-                                                    </span>
+                                                                return relative;
+                                                            });
+                                                            if (updatedParents) {
+                                                                const updatedChild = {
+                                                                    ...child,
+                                                                    relativeParents: updatedParents
+                                                                };
+                                                                setChild(updatedChild);
+                                                                setChildWithParents({
+                                                                    childDto: updatedChild,
+                                                                    parents: childWithParents.parents.map(relative => {
+                                                                        if (relative.parentDto.id === parent.parentDto.id) {
+                                                                            return {
+                                                                                ...relative,
+                                                                                isEmergencyContact: !relative.isEmergencyContact
+                                                                            };
+                                                                        }
+                                                                        return relative;
+                                                                    })
+                                                                });
+                                                            }
+                                                        }}
+                                                    >
+                                                        <span className={"material-icons-outlined"}>
+                                                            {parent.isEmergencyContact ? 'check_box' : 'check_box_outline_blank'}
+                                                        </span>
                                                     </Button>
                                                 </TableCell>
+
                                                 <TableCell className={"text-center"}>
                                                     <Button type={"button"} className="p-0"
                                                             variant={"ghost"}
                                                             onClick={() => {
-                                                                const updatedParents = child.relativeParents?.filter(value => value.id !== parent.id);
+                                                                const updatedParents = child.relativeParents?.filter(value => value.id !== parent.parentDto.id);
                                                                 if (updatedParents) {
                                                                     const updatedChild = {
                                                                         ...child,
                                                                         relativeParents: updatedParents
                                                                     };
                                                                     setChild(updatedChild);
+                                                                    setChildWithParents({
+                                                                        childDto: updatedChild,
+                                                                        parents: childWithParents.parents
+                                                                    })
                                                                 }
                                                             }}>
                                                         <span className="material-icons-outlined">delete</span>
@@ -286,6 +286,7 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                                                 id: value.id,
                                                 isEmergencyContact: true
                                             })
+                                        setParent(value)
                                     }}
                                     placeholder={"Select parents..."}
                                     emptyMessage={"No parent found"}
@@ -295,8 +296,22 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                                         if (relativeParent) {
                                             const updatedRelativeParents = child.relativeParents ? [...child.relativeParents, relativeParent] : [relativeParent];
                                             const updatedChild = {...child, relativeParents: updatedRelativeParents};
+
+                                            const updatedParents = childWithParents.parents || [];
+                                            if (parent) {
+                                                updatedParents.push({
+                                                    parentDto: parent,
+                                                    isEmergencyContact: true
+                                                });
+                                            }
+
                                             setChild(updatedChild);
+                                            setChildWithParents({
+                                                childDto: updatedChild,
+                                                parents: updatedParents
+                                            });
                                         }
+
                                     }}>
                                     Add
                                 </Button>
@@ -309,10 +324,10 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                             </div>
                         </>) :
                     <ShowTable tableFields={["Name", "isEmergencyContact"]}
-                               value={parents?.map((parent) => ({
-                                   name: parent.name,
+                               value={childWithParents.parents?.map((parent) => ({
+                                   name: parent.parentDto.givenName + " " + parent.parentDto.familyName,
                                    isEmergencyContact: <span
-                                       className="material-icons-outlined">{parent.isEmergencyContact}</span>
+                                       className="material-icons-outlined">{parent.isEmergencyContact ? 'check_box' : 'check_box_outline_blank'}</span>
                                }))}
                                showDeleteButton={false}/>
                 }

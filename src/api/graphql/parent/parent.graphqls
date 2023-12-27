@@ -6,6 +6,10 @@ type Parent {
     address: String
 }
 
+type ParentWithEmergencyContact{
+    parentDto : Parent
+    isEmergencyContact: Boolean
+}
 input ParentInput {
     familyName: String!
     givenName: String!
