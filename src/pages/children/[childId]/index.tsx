@@ -1,7 +1,7 @@
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
 import {ChildData, ChildDataWithParents, RelativeParent} from "@/model/child-data";
 import getChildById from "@/api/graphql/child/getChildById";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import ChildForm from "@/form/child/ChildForm";
 import Link from "next/link";
 import {format} from "date-fns";
@@ -21,7 +21,7 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/c
 import {toast} from "@/components/ui/use-toast";
 import HoverText from "@/components/hoverText";
 import ParentForm from "@/form/parent/ParentForm";
-import {ParentData} from "@/model/parent-data";
+import {ParentData, ParentDataWithEmergencyContact} from "@/model/parent-data";
 
 
 export const getServerSideProps = (async (context) => {
@@ -45,7 +45,6 @@ export const getServerSideProps = (async (context) => {
     };
 }) satisfies GetServerSideProps<{ selectedChild: ChildDataWithParents }, { childId: string }>;
 export default function Child({selectedChild}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    console.log(selectedChild)
     const [childWithParents, setChildWithParents] = useState<ChildDataWithParents>(selectedChild)
     const [child, setChild] = useState<ChildData>(childWithParents.childDto)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -86,6 +85,39 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
 
     function handleParentEditClick() {
         setParentIsEditDialogOpen(true)
+    }
+
+    function update(childWithoutUnnecessaryFields: Omit<ChildData, "hasRegularMedicines" | "hasDiagnosedDiseases">) {
+        updateChild(childWithoutUnnecessaryFields)
+            .then(value => {
+                setChild(value);
+                toast({
+                    title: "The child is successfully updated",
+                    description: `A child with name: ${child.givenName} ${child.familyName} updated`,
+                    duration: 2000
+                });
+                setIsAutoCompleteShown(false);
+            })
+            .catch(error => {
+                console.error("Failed to update child:", error);
+            })
+            .then(() =>
+                getChildById(child.id)
+                    .then(value => setChildWithParents(value))
+            )
+    }
+
+    function deleteC(parent: ParentDataWithEmergencyContact) {
+        const updatedParents = child.relativeParents?.filter(value => value.id !== parent.parentDto.id);
+        const updated2 = childWithParents.parents.filter(value => value.parentDto.id !== parent.parentDto.id)
+        if (updated2) {
+            const updatedChild = {
+                ...child,
+                relativeParents: updatedParents
+            };
+            setChild(updatedChild);
+            setChildWithParents({childDto: updatedChild, parents: updated2})
+        }
     }
 
     return (
@@ -148,9 +180,7 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                     >
                         {
                             isAutoCompleteShown ? (
-                                <>
-                                    <span>Cancel</span>
-                                </>) : (
+                                <span>Cancel</span>) : (
                                 <>
                                     <PlusSquare/>
                                     <span>Edit parents</span>
@@ -169,19 +199,7 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                                     variant: "destructive"
                                 });
                             } else {
-                                updateChild(childWithoutUnnecessaryFields)
-                                    .then(value => {
-                                        setChild(value);
-                                        toast({
-                                            title: "The child is successfully updated",
-                                            description: `A child with name: ${child.givenName} ${child.familyName} updated`,
-                                            duration: 2000
-                                        });
-                                        setIsAutoCompleteShown(false);
-                                    })
-                                    .catch(error => {
-                                        console.error("Failed to update child:", error);
-                                    });
+                                update(childWithoutUnnecessaryFields);
                             }
                         }}>
                             Save
@@ -249,18 +267,7 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                                                     <Button type={"button"} className="p-0"
                                                             variant={"ghost"}
                                                             onClick={() => {
-                                                                const updatedParents = child.relativeParents?.filter(value => value.id !== parent.parentDto.id);
-                                                                if (updatedParents) {
-                                                                    const updatedChild = {
-                                                                        ...child,
-                                                                        relativeParents: updatedParents
-                                                                    };
-                                                                    setChild(updatedChild);
-                                                                    setChildWithParents({
-                                                                        childDto: updatedChild,
-                                                                        parents: childWithParents.parents
-                                                                    })
-                                                                }
+                                                                deleteC(parent);
                                                             }}>
                                                         <span className="material-icons-outlined">delete</span>
                                                     </Button>
@@ -304,12 +311,7 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                                                     isEmergencyContact: true
                                                 });
                                             }
-
                                             setChild(updatedChild);
-                                            setChildWithParents({
-                                                childDto: updatedChild,
-                                                parents: updatedParents
-                                            });
                                         }
 
                                     }}>
