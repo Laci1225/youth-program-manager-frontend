@@ -12,9 +12,10 @@ interface ShowTableProps {
     value: any[] | undefined;
     showDeleteButton: boolean
     onChange?: (...event: any[]) => void;
+    className?: string
 }
 
-export default function ShowTable({tableFields, value, showDeleteButton, onChange}: ShowTableProps) {
+export default function ShowTable({tableFields, value, showDeleteButton, onChange, className}: ShowTableProps) {
     const handleDelete = (index: number) => {
         if (value && onChange) {
             onChange(value.filter((_, i) => i !== index));
@@ -24,7 +25,7 @@ export default function ShowTable({tableFields, value, showDeleteButton, onChang
             });
         }
     };
-    return (<div className={"w-full"}>
+    return (<div className={`w-full ${className}`}>
         <Table className={"w-full border border-gray-200"}>
             <TableHeader>
                 <TableRow>

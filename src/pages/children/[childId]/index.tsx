@@ -79,15 +79,18 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
         setChild(updatedChild);
     }
 
+    const [editBorderShown, setEditBorderShown] = useState(false)
+
     function changeAutoCompleteVisibility() {
         setIsAutoCompleteShown(!isAutoCompleteShown)
+        setEditBorderShown(!editBorderShown)
     }
 
     function handleParentEditClick() {
         setParentIsEditDialogOpen(true)
     }
 
-    function update(childWithoutUnnecessaryFields: Omit<ChildData, "hasRegularMedicines" | "hasDiagnosedDiseases">) {
+    function updateAndSaveChild(childWithoutUnnecessaryFields: Omit<ChildData, "hasRegularMedicines" | "hasDiagnosedDiseases">) {
         updateChild(childWithoutUnnecessaryFields)
             .then(value => {
                 setChild(value);
@@ -99,7 +102,7 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                 setIsAutoCompleteShown(false);
             })
             .catch(error => {
-                console.error("Failed to update child:", error);
+                console.error("Failed to updateAndSaveChild child:", error);
             })
             .then(() =>
                 getChildById(child.id)
@@ -107,7 +110,7 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
             )
     }
 
-    function deleteC(parent: ParentDataWithEmergencyContact) {
+    function deleteChildData(parent: ParentDataWithEmergencyContact) {
         const updatedParents = child.relativeParents?.filter(value => value.id !== parent.parentDto.id);
         const updated2 = childWithParents.parents.filter(value => value.parentDto.id !== parent.parentDto.id)
         if (updated2) {
@@ -119,6 +122,24 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
             setChildWithParents({childDto: updatedChild, parents: updated2})
         }
     }
+
+    const setRelativeParents = (newParent: ParentData) => {
+        const isParentAlreadyAdded = child.relativeParents?.some(
+            (parent) => parent.id === newParent.id
+        );
+
+        if (!isParentAlreadyAdded) {
+            setRelativeParent({id: newParent.id, isEmergencyContact: true})
+        } else {
+            toast({
+                title: "Parent already added",
+                description: `${newParent.givenName} ${newParent.familyName} is already associated with this child.`,
+                duration: 2000,
+                variant: "destructive"
+            });
+        }
+    };
+
 
     return (
         <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
@@ -172,170 +193,195 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                         {child.address}
                     </div>
                 </div>
-                <div className={"flex justify-between"}>
-                    <Button
-                        type={"button"}
-                        variant={"ghost"}
-                        onClick={changeAutoCompleteVisibility}
-                    >
-                        {
-                            isAutoCompleteShown ? (
-                                <span>Cancel</span>) : (
-                                <>
-                                    <PlusSquare/>
-                                    <span>Edit parents</span>
-                                </>)
-                        }
-                    </Button>
-                    {isAutoCompleteShown &&
-                        <Button onClick={() => {
-                            const {hasDiagnosedDiseases, hasRegularMedicines, ...childWithoutUnnecessaryFields} = child;
-                            const emergencyContacts = child.relativeParents?.filter(parent => parent.isEmergencyContact);
-                            if (emergencyContacts && emergencyContacts.length === 0 && childWithoutUnnecessaryFields.relativeParents?.length !== 0) {
-                                toast({
-                                    title: "Error",
-                                    description: "At least one parent should be marked as an emergency contact.",
-                                    duration: 2000,
-                                    variant: "destructive"
-                                });
-                            } else {
-                                update(childWithoutUnnecessaryFields);
+                <div className={`mb-6 ${editBorderShown && "border border-dashed border-gray-400  p-2 rounded"}`}>
+                    <div className={"flex justify-between mb-5"}>
+                        <Button
+                            type={"button"}
+                            variant={"ghost"}
+                            onClick={changeAutoCompleteVisibility}
+                        >
+                            {
+                                isAutoCompleteShown ? (
+                                    <span>Cancel</span>) : (
+                                    <>
+                                        <Pencil/>
+                                        <span>Edit parents</span>
+                                    </>)
                             }
-                        }}>
-                            Save
-                        </Button>}
-                </div>
-                {isAutoCompleteShown ? (
-                        <>
-                            <Table className={"w-full border border-gray-200"}>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className={"text-left"}>Name</TableHead>
-                                        <TableHead className="text-center">isEmergencyContact</TableHead>
-                                        <TableHead className="w-5"></TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>{
-                                    childWithParents.parents && childWithParents.parents.length !== 0 ? (
-                                        childWithParents.parents.map((parent, index) => (
-                                            <TableRow key={index}>
-                                                <TableCell className={"text-left"}>
-                                                    {parent.parentDto.givenName} {parent.parentDto.familyName}
-                                                </TableCell>
-                                                <TableCell className={"text-center"}>
-                                                    <Button
-                                                        type={"button"}
-                                                        variant={"ghost"}
-                                                        onClick={() => {
-                                                            const updatedParents = child.relativeParents?.map(relative => {
-                                                                if (relative.id === parent.parentDto.id) {
-                                                                    return {
-                                                                        ...relative,
-                                                                        isEmergencyContact: !relative.isEmergencyContact
-                                                                    };
-                                                                }
-                                                                return relative;
-                                                            });
-                                                            if (updatedParents) {
-                                                                const updatedChild = {
-                                                                    ...child,
-                                                                    relativeParents: updatedParents
-                                                                };
-                                                                setChild(updatedChild);
-                                                                setChildWithParents({
-                                                                    childDto: updatedChild,
-                                                                    parents: childWithParents.parents.map(relative => {
-                                                                        if (relative.parentDto.id === parent.parentDto.id) {
-                                                                            return {
-                                                                                ...relative,
-                                                                                isEmergencyContact: !relative.isEmergencyContact
-                                                                            };
-                                                                        }
-                                                                        return relative;
-                                                                    })
+                        </Button>
+                        {isAutoCompleteShown &&
+                            <Button onClick={() => {
+                                const {
+                                    hasDiagnosedDiseases,
+                                    hasRegularMedicines,
+                                    ...childWithoutUnnecessaryFields
+                                } = child;
+                                const emergencyContacts = child.relativeParents?.filter(parent => parent.isEmergencyContact);
+                                if (emergencyContacts && emergencyContacts.length === 0 && childWithoutUnnecessaryFields.relativeParents?.length !== 0) {
+                                    toast({
+                                        title: "Error",
+                                        description: "At least one parent should be marked as an emergency contact.",
+                                        duration: 2000,
+                                        variant: "destructive"
+                                    });
+                                } else {
+                                    updateAndSaveChild(childWithoutUnnecessaryFields);
+                                }
+                            }}>
+                                Save
+                            </Button>}
+                    </div>
+                    {isAutoCompleteShown ? (
+                            <>
+                                <Table className={"w-full border border-gray-200"}>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className={"text-left"}>Name</TableHead>
+                                            <TableHead className="text-center">isEmergencyContact</TableHead>
+                                            <TableHead className="w-5"></TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>{
+                                        childWithParents.parents && childWithParents.parents.length !== 0 ? (
+                                            childWithParents.parents.map((parent, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell className={"text-left"}>
+                                                        {parent.parentDto.givenName} {parent.parentDto.familyName}
+                                                    </TableCell>
+                                                    <TableCell className={"text-center"}>
+                                                        <Button
+                                                            type={"button"}
+                                                            variant={"ghost"}
+                                                            onClick={() => {
+                                                                const updatedParents = child.relativeParents?.map(relative => {
+                                                                    if (relative.id === parent.parentDto.id) {
+                                                                        return {
+                                                                            ...relative,
+                                                                            isEmergencyContact: !relative.isEmergencyContact
+                                                                        };
+                                                                    }
+                                                                    return relative;
                                                                 });
-                                                            }
-                                                        }}
-                                                    >
+                                                                if (updatedParents) {
+                                                                    const updatedChild = {
+                                                                        ...child,
+                                                                        relativeParents: updatedParents
+                                                                    };
+                                                                    setChild(updatedChild);
+                                                                    setChildWithParents({
+                                                                        childDto: updatedChild,
+                                                                        parents: childWithParents.parents.map(relative => {
+                                                                            if (relative.parentDto.id === parent.parentDto.id) {
+                                                                                return {
+                                                                                    ...relative,
+                                                                                    isEmergencyContact: !relative.isEmergencyContact
+                                                                                };
+                                                                            }
+                                                                            return relative;
+                                                                        })
+                                                                    });
+                                                                }
+                                                            }}
+                                                        >
                                                         <span className={"material-icons-outlined"}>
                                                             {parent.isEmergencyContact ? 'check_box' : 'check_box_outline_blank'}
                                                         </span>
-                                                    </Button>
-                                                </TableCell>
+                                                        </Button>
+                                                    </TableCell>
 
-                                                <TableCell className={"text-center"}>
-                                                    <Button type={"button"} className="p-0"
-                                                            variant={"ghost"}
-                                                            onClick={() => {
-                                                                deleteC(parent);
-                                                            }}>
-                                                        <span className="material-icons-outlined">delete</span>
-                                                    </Button>
+                                                    <TableCell className={"text-center"}>
+                                                        <Button type={"button"} className="p-0"
+                                                                variant={"ghost"}
+                                                                onClick={() => {
+                                                                    deleteChildData(parent);
+                                                                }}>
+                                                            <span className="material-icons-outlined">delete</span>
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))) : (
+                                            <TableRow>
+                                                <TableCell className={"text-center text-gray-400"} colSpan={3}>
+                                                    Nothing added yet
                                                 </TableCell>
                                             </TableRow>
-                                        ))) : (
-                                        <TableRow>
-                                            <TableCell className={"text-center text-gray-400"} colSpan={3}>
-                                                Nothing added yet
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                            <div className={"flex justify-between mb-5"}>
-                                <AutoComplete
-                                    key={0}
-                                    isLoading={false}
-                                    disabled={false}
-                                    onValueChange={(value) => {
-                                        if (value)
-                                            setRelativeParent({
-                                                id: value.id,
-                                                isEmergencyContact: true
-                                            })
-                                        setParent(value)
-                                    }}
-                                    placeholder={"Select parents..."}
-                                    emptyMessage={"No parent found"}
-                                />
-                                <Button
-                                    onClick={() => {
-                                        if (relativeParent) {
-                                            const updatedRelativeParents = child.relativeParents ? [...child.relativeParents, relativeParent] : [relativeParent];
-                                            const updatedChild = {...child, relativeParents: updatedRelativeParents};
+                                        )}
+                                    </TableBody>
+                                </Table>
+                                <div className={"flex justify-between mb-5 mt-3"}>
+                                    <div className={"flex w-4/5"}>
+                                        <AutoComplete
+                                            className={"w-2/3 mr-3"}
+                                            relativeParents={child.relativeParents}
+                                            key={0}
+                                            isLoading={false}
+                                            disabled={false}
+                                            onValueChange={(value) => {
+                                                if (value)
+                                                    setRelativeParents(value)
+                                                setParent(value)
+                                            }}
+                                            placeholder={"Select parents..."}
+                                            emptyMessage={"No parent found"}
+                                        />
+                                        <Button
+                                            onClick={() => {
+                                                if (relativeParent) {
+                                                    const isParentAlreadyAdded = child.relativeParents?.some(
+                                                        (parent) => parent.id === relativeParent.id
+                                                    );
 
-                                            const updatedParents = childWithParents.parents || [];
-                                            if (parent) {
-                                                updatedParents.push({
-                                                    parentDto: parent,
-                                                    isEmergencyContact: true
-                                                });
-                                            }
-                                            setChild(updatedChild);
-                                        }
+                                                    if (!isParentAlreadyAdded) {
+                                                        setRelativeParent({id: relativeParent.id, isEmergencyContact: true})
+                                                        const updatedRelativeParents = child.relativeParents ? [...child.relativeParents, relativeParent] : [relativeParent];
+                                                        const updatedChild = {
+                                                            ...child,
+                                                            relativeParents: updatedRelativeParents
+                                                        };
 
-                                    }}>
-                                    Add
-                                </Button>
-                                <Button
-                                    onClick={() => {
-                                        handleParentEditClick()
-                                    }}>
-                                    Create new parent
-                                </Button>
-                            </div>
-                        </>) :
-                    <ShowTable tableFields={["Name", "isEmergencyContact"]}
-                               value={childWithParents.parents?.map((parent) => ({
-                                   name: parent.parentDto.givenName + " " + parent.parentDto.familyName,
-                                   isEmergencyContact: <span
-                                       className="material-icons-outlined">{parent.isEmergencyContact ? 'check_box' : 'check_box_outline_blank'}</span>
-                               }))}
-                               showDeleteButton={false}/>
-                }
-                <ShowTable tableFields={["Name", "Diagnosed at"]} value={child.diagnosedDiseases}
+                                                        const updatedParents = childWithParents.parents || [];
+                                                        if (parent) {
+                                                            updatedParents.push({
+                                                                parentDto: parent,
+                                                                isEmergencyContact: true
+                                                            });
+                                                        }
+                                                        setChild(updatedChild);
+                                                    } else {
+                                                        toast({
+                                                            title: "Parent already added",
+                                                            duration: 2000,
+                                                            variant: "destructive"
+                                                        });
+                                                    }
+
+                                                }
+
+                                            }}>
+                                            <><PlusSquare/> Add</>
+                                        </Button>
+                                    </div>
+                                    <Button
+                                        onClick={() => {
+                                            handleParentEditClick()
+                                        }}>
+                                        Create
+                                    </Button>
+                                </div>
+                            </>) :
+                        <ShowTable tableFields={["Name", "isEmergencyContact"]}
+                                   value={childWithParents.parents?.map((parent) => ({
+                                       name: parent.parentDto.givenName + " " + parent.parentDto.familyName,
+                                       isEmergencyContact: <span
+                                           className="material-icons-outlined">{parent.isEmergencyContact ? 'check_box' : 'check_box_outline_blank'}</span>
+                                   }))}
+                                   showDeleteButton={false}/>
+                    }
+                </div>
+                <ShowTable className={"mb-6"} tableFields={["Name", "Diagnosed at"]} value={child.diagnosedDiseases}
                            showDeleteButton={false}/>
-                <ShowTable tableFields={["Name", "Dose", "Taken since"]} value={child.regularMedicines}
+                <ShowTable tableFields={["Name", "Dose", "Taken since"]}
+                           value={child.regularMedicines}
                            showDeleteButton={false}/>
             </div>
             <Toaster/>

@@ -11,6 +11,7 @@ import {ParentData} from "@/model/parent-data";
 import getPotentialParents from "@/api/graphql/child/getPotentialParents";
 import {Button} from "@/components/ui/button";
 import getParentById from "@/api/graphql/parent/getParentById";
+import {RelativeParent} from "@/model/child-data";
 
 
 type AutoCompleteProps = {
@@ -21,9 +22,13 @@ type AutoCompleteProps = {
     disabled?: boolean
     placeholder?: string
     initId?: string
+    className?: string
+    relativeParents?: RelativeParent[]
 }
 
 export const AutoComplete = ({
+                                 relativeParents,
+                                 className,
                                  initId,
                                  placeholder,
                                  emptyMessage,
@@ -51,7 +56,16 @@ export const AutoComplete = ({
             setOpen(name.length > 0);
             setTimeout(() => {
                 getPotentialParents(name)
-                    .then(value => setOptions(value))
+                    .then(parents => {
+                        console.log(parents)
+                        console.log(relativeParents)
+                        const filteredParents = parents.filter((parent) =>
+                            !relativeParents?.some(
+                                (relativeParent) => relativeParent.id === parent.id
+                            )
+                        );
+                        setOptions(filteredParents)
+                    })
                     .catch(reason => {
                         console.error("Failed to get potential parents:", reason);
                     });
@@ -111,7 +125,7 @@ export const AutoComplete = ({
     )
 
     return (
-        <div className={"relative"}>
+        <div className={`relative ${className}`}>
             <CommandPrimitive onKeyDown={handleKeyDown}>
                 <div>
                     <CommandInput

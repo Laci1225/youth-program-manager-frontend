@@ -18,6 +18,9 @@ import LoadingButton from "@/components/loading-button";
 import updateChild from "@/api/graphql/child/updateChild";
 import {parseDateInDisease, parseDateInMedicine} from "@/utils/child";
 import {AutoComplete} from "@/form/child/AutoComplete";
+import ParentForm from "@/form/parent/ParentForm";
+import {ParentData} from "@/model/parent-data";
+import {Button} from "@/components/ui/button";
 
 interface ChildFormProps {
     onChildModified: (child: ChildData) => void;
@@ -108,166 +111,190 @@ function ChildForm({
             regularMedicines: existingChild ? parseDateInMedicine(existingChild?.regularMedicines) : []
         })
     }, [existingChild]);
-    return (
-        <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[800px] h-[90vh] shadow-muted-foreground">
-                <DialogHeader>
-                    <DialogTitle>{existingChild ? "Update" : "Create"} a child</DialogTitle>
-                </DialogHeader>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.log(errors))}
-                          className="flex justify-center flex-col space-y-4 mx-4">
-                        <ScrollArea className="h-[70vh]">
-                            <div className="mx-4">
-                                <div className="flex">
-                                    <FormField
-                                        control={form.control}
-                                        name="familyName"
-                                        render={({field}) => (
-                                            <FormItem className="flex-1">
-                                                <FormLabel>Family name*</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Family name" {...field} />
-                                                </FormControl>
-                                                <FormMessage/>
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="givenName"
-                                        render={({field}) => (
-                                            <FormItem className="flex-1">
-                                                <FormLabel>Given name*</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Given name" {...field} />
-                                                </FormControl>
-                                                <FormMessage/>
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-                                <div className="flex">
-                                    <FormField
-                                        control={form.control}
-                                        name="birthDate"
-                                        render={({field}) => (
-                                            <FormItem className="flex-1">
-                                                <FormLabel>Birthdate*</FormLabel>
-                                                <FormControl>
-                                                    <CalendarInput {...field} shownYear={2010}/>
-                                                </FormControl>
-                                                <FormMessage/>
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="birthPlace"
-                                        render={({field}) => (
-                                            <FormItem className="flex-1">
-                                                <FormLabel>Birth place*</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Birth place" {...field} />
-                                                </FormControl>
-                                                <FormMessage/>
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-                                <FormField
-                                    control={form.control}
-                                    name="address"
-                                    render={({field}) => (
-                                        <FormItem className={"flex-1"}>
-                                            <FormLabel>Address*</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Address" {...field} />
-                                            </FormControl>
-                                            <FormMessage/>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="relativeParents"
-                                    render={({field}) => (
-                                        <FormItem className={"flex-1"}>
-                                            <FormLabel>Parent</FormLabel>
-                                            <FormControl>
-                                                <AutoComplete
-                                                    key={0}
-                                                    isLoading={false}
-                                                    disabled={false}
-                                                    initId={field.value ? field.value[0]?.id : undefined}
-                                                    onValueChange={(value) => {
-                                                        if (value) {
-                                                            const selectedParent = {
-                                                                id: value.id,
-                                                                isEmergencyContact: true
-                                                            };
-                                                            const existingParents = field.value || [];
-                                                            const updatedParents = [
-                                                                selectedParent,
-                                                                ...existingParents.slice(1)
-                                                            ];
-                                                            field.onChange(updatedParents);
-                                                        } else field.onChange(undefined);
+    const [isParentEditDialogOpen, setParentIsEditDialogOpen] = useState(false)
+    const onParentUpdated = () => {
+    }
 
-                                                    }}
-                                                    placeholder={"Select parents..."}
-                                                    emptyMessage={"No parent found"}
-                                                />
-                                            </FormControl>
-                                            <FormMessage/>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="diagnosedDiseases"
-                                    render={({field}) => (
-                                        <FormItem>
-                                            <div className="flex justify-between">
-                                                <FormLabel>Diagnosed diseases</FormLabel>
+    function handleParentEditClick() {
+        setParentIsEditDialogOpen(true)
+    }
+
+    return (
+        <>
+            <Dialog open={isOpen} onOpenChange={onOpenChange}>
+                <DialogContent className="sm:max-w-[800px] h-[90vh] shadow-muted-foreground">
+                    <DialogHeader>
+                        <DialogTitle>{existingChild ? "Update" : "Create"} a child</DialogTitle>
+                    </DialogHeader>
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.log(errors))}
+                              className="flex justify-center flex-col space-y-4 mx-4">
+                            <ScrollArea className="h-[70vh]">
+                                <div className="mx-4">
+                                    <div className="flex">
+                                        <FormField
+                                            control={form.control}
+                                            name="familyName"
+                                            render={({field}) => (
+                                                <FormItem className="flex-1">
+                                                    <FormLabel>Family name*</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Family name" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="givenName"
+                                            render={({field}) => (
+                                                <FormItem className="flex-1">
+                                                    <FormLabel>Given name*</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Given name" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <div className="flex">
+                                        <FormField
+                                            control={form.control}
+                                            name="birthDate"
+                                            render={({field}) => (
+                                                <FormItem className="flex-1">
+                                                    <FormLabel>Birthdate*</FormLabel>
+                                                    <FormControl>
+                                                        <CalendarInput {...field} shownYear={2010}/>
+                                                    </FormControl>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="birthPlace"
+                                            render={({field}) => (
+                                                <FormItem className="flex-1">
+                                                    <FormLabel>Birth place*</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Birth place" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <FormField
+                                        control={form.control}
+                                        name="address"
+                                        render={({field}) => (
+                                            <FormItem className={"flex-1"}>
+                                                <FormLabel>Address*</FormLabel>
                                                 <FormControl>
-                                                    <InputDiseaseHandler {...field}/>
+                                                    <Input placeholder="Address" {...field} />
                                                 </FormControl>
                                                 <FormMessage/>
-                                            </div>
-                                            <ShowTable tableFields={["Name", "Diagnosed at"]} {...field}
-                                                       showDeleteButton/>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="regularMedicines"
-                                    render={({field}) => (
-                                        <FormItem>
-                                            <div className="flex justify-between">
-                                                <FormLabel>Regular medicines</FormLabel>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="relativeParents"
+                                        render={({field}) => (
+                                            <FormItem className={"flex-1"}>
+                                                <FormLabel>Parent</FormLabel>
                                                 <FormControl>
-                                                    <InputMedicinesHandler {...field}/>
+                                                    <div className={"flex justify-between"}>
+                                                        <AutoComplete
+                                                            className={"w-2/3"}
+                                                            key={0}
+                                                            isLoading={false}
+                                                            disabled={false}
+                                                            initId={field.value ? field.value[0]?.id : undefined}
+                                                            onValueChange={(value) => {
+                                                                if (value) {
+                                                                    const selectedParent = {
+                                                                        id: value.id,
+                                                                        isEmergencyContact: true
+                                                                    };
+                                                                    const existingParents = field.value || [];
+                                                                    const updatedParents = [
+                                                                        selectedParent,
+                                                                        ...existingParents.slice(1)
+                                                                    ];
+                                                                    field.onChange(updatedParents);
+                                                                } else field.onChange(undefined);
+
+                                                            }}
+                                                            placeholder={"Select parents..."}
+                                                            emptyMessage={"No parent found"}
+                                                        />
+                                                        <Button type={"button"}
+                                                                onClick={() => {
+                                                                    handleParentEditClick()
+                                                                }}>
+                                                            Create
+                                                        </Button>
+                                                    </div>
                                                 </FormControl>
                                                 <FormMessage/>
-                                            </div>
-                                            <ShowTable tableFields={["Name", "Dose", "Taken since"]} {...field}
-                                                       showDeleteButton/>
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-                        </ScrollArea>
-                        <DialogFooter>
-                            <LoadingButton isLoading={isSubmitting}>
-                                {existingChild ? "Update" : "Create"}
-                            </LoadingButton>
-                        </DialogFooter>
-                    </form>
-                </Form>
-            </DialogContent>
-        </Dialog>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="diagnosedDiseases"
+                                        render={({field}) => (
+                                            <FormItem>
+                                                <div className="flex justify-between">
+                                                    <FormLabel>Diagnosed diseases</FormLabel>
+                                                    <FormControl>
+                                                        <InputDiseaseHandler {...field}/>
+                                                    </FormControl>
+                                                    <FormMessage/>
+                                                </div>
+                                                <ShowTable tableFields={["Name", "Diagnosed at"]} {...field}
+                                                           showDeleteButton/>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="regularMedicines"
+                                        render={({field}) => (
+                                            <FormItem>
+                                                <div className="flex justify-between">
+                                                    <FormLabel>Regular medicines</FormLabel>
+                                                    <FormControl>
+                                                        <InputMedicinesHandler {...field}/>
+                                                    </FormControl>
+                                                    <FormMessage/>
+                                                </div>
+                                                <ShowTable tableFields={["Name", "Dose", "Taken since"]} {...field}
+                                                           showDeleteButton/>
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                            </ScrollArea>
+                            <DialogFooter>
+                                <LoadingButton isLoading={isSubmitting}>
+                                    {existingChild ? "Update" : "Create"}
+                                </LoadingButton>
+                            </DialogFooter>
+                        </form>
+                    </Form>
+                </DialogContent>
+            </Dialog>
+            <ParentForm
+                isOpen={isParentEditDialogOpen}
+                onOpenChange={setParentIsEditDialogOpen}
+                onParentModified={onParentUpdated}
+            />
+        </>
     );
 }
 
