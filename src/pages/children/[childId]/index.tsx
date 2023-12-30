@@ -1,7 +1,7 @@
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
 import {ChildData, ChildDataWithParents, RelativeParent} from "@/model/child-data";
 import getChildById from "@/api/graphql/child/getChildById";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import ChildForm from "@/form/child/ChildForm";
 import Link from "next/link";
 import {format} from "date-fns";
@@ -102,7 +102,12 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                 setIsAutoCompleteShown(false);
             })
             .catch(error => {
-                console.error("Failed to updateAndSaveChild child:", error);
+                toast({
+                    title: `Child with name: ${child.givenName} ${child.familyName} cannot be updated updated`,
+                    description: `${error.message}`,
+                    duration: 2000,
+                    variant: "destructive"
+                });
             })
             .then(() =>
                 getChildById(child.id)
@@ -325,6 +330,7 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                                             emptyMessage={"No parent found"}
                                         />
                                         <Button
+                                            disabled={!parent}
                                             onClick={() => {
                                                 if (relativeParent) {
                                                     const isParentAlreadyAdded = child.relativeParents?.some(

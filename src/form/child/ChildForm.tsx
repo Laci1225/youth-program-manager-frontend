@@ -19,7 +19,6 @@ import updateChild from "@/api/graphql/child/updateChild";
 import {parseDateInDisease, parseDateInMedicine} from "@/utils/child";
 import {AutoComplete} from "@/form/child/AutoComplete";
 import ParentForm from "@/form/parent/ParentForm";
-import {ParentData} from "@/model/parent-data";
 import {Button} from "@/components/ui/button";
 
 interface ChildFormProps {
@@ -70,7 +69,7 @@ function ChildForm({
                 }).catch(reason => {
                 toast({
                     variant: "destructive",
-                    title: reason.toString(),
+                    title: reason.message,
                     duration: 2000
                 })
             }).finally(() => {
