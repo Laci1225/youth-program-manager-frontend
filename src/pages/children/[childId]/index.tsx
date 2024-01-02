@@ -22,6 +22,8 @@ import {toast} from "@/components/ui/use-toast";
 import HoverText from "@/components/hoverText";
 import ParentForm from "@/form/parent/ParentForm";
 import {ParentData, ParentDataWithEmergencyContact} from "@/model/parent-data";
+import SaveParentsDataToChild from "@/table/child/SaveParentsDataToChild";
+import ChildsParentTable from "@/table/child/ChildsParentTable";
 
 
 export const getServerSideProps = (async (context) => {
@@ -82,29 +84,33 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
         setIsDeleteDialogOpen(true)
     }
 
-    const [inputChild, setInputChild] = useState<ChildDataInput>()
-
     const [isAutoCompleteShown, setIsAutoCompleteShown] = useState(false)
-    const [relativeParent, setRelativeParent] = useState<RelativeParent>()
-    const [parent, setParent] = useState<ParentData>()
+    const [autocompleteRelativeParent, setAutocompleteRelativeParent] = useState<RelativeParent>()
+    const [autocompleteParent, setAutocompleteParent] = useState<ParentData>()
     const [isParentEditDialogOpen, setParentIsEditDialogOpen] = useState(false)
-    const onParentUpdated = (newParent: ParentData) => {
-        const selectedParent = {
-            id: newParent.id,
+    const onParentAdded = (newParent: ParentData) => {
+        const newParentData: ParentDataWithEmergencyContact = {
+            parentDto: newParent,
             isEmergencyContact: true
         };
-        setChildWithParents({...childWithParents, parents: undefined})
-        //const updatedRelativeParents = child.relativeParents ? [...child.relativeParents, selectedParent] : [selectedParent];
-        //const updatedChild = {...child, relativeParents: updatedRelativeParents};
-        //setChild(updatedChild);
+        const updatedParents = childWithParents.parents ? [...childWithParents.parents, newParentData] : [newParentData];
+        setChildWithParents({...childWithParents, parents: updatedParents})
     }
 
     const [editBorderShown, setEditBorderShown] = useState(false)
 
-    function changeAutoCompleteVisibility() {
+    function onEditClicked() {
         setIsAutoCompleteShown(!isAutoCompleteShown)
         setEditBorderShown(!editBorderShown)
     }
+
+    function onCancelClicked() {
+        getChildById(child.id)
+            .then(value => setChildWithParents(value))
+        setIsAutoCompleteShown(!isAutoCompleteShown)
+        setEditBorderShown(!editBorderShown)
+    }
+
 
     function handleParentEditClick() {
         setParentIsEditDialogOpen(true)
@@ -135,36 +141,35 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
             )
     }
 
-    function deleteChildData(parent: ParentDataWithEmergencyContact) {
-        const updatedParents = child.relativeParents?.filter(value => value.id !== parent.parentDto.id);
-        const updated2 = childWithParents.parents?.filter(value => value.parentDto.id !== parent.parentDto.id)
-        /*if (updated2) {
-            const updatedChild = {
-                ...child,
-                relativeParents: updatedParents
-            };*/
-        setChildWithParents(prevState => ({...prevState, parents: updated2}))
-        //}
-    }
-
-    const setRelativeParents = (newParent: ParentData) => {
+    function addParentToChild() {
+        if (!autocompleteParent) return;
+        setIsParentAdded(true)
+        setAutocompleteParent(undefined)
         const isParentAlreadyAdded = child.relativeParents?.some(
-            (parent) => parent.id === newParent.id
+            (parent) => parent.id === autocompleteRelativeParent?.id
         );
 
-        if (!isParentAlreadyAdded) {
-            setRelativeParent({id: newParent.id, isEmergencyContact: true})
+        if (!isParentAlreadyAdded && autocompleteRelativeParent) {
+            setAutocompleteRelativeParent({id: autocompleteRelativeParent.id, isEmergencyContact: true});
+            const updatedParents = childWithParents.parents || [];
+            updatedParents.push({
+                parentDto: autocompleteParent,
+                isEmergencyContact: true,
+            });
+            setChildWithParents((prevState) => ({
+                ...prevState,
+                parents: updatedParents,
+            }));
         } else {
             toast({
                 title: "Parent already added",
-                description: `${newParent.givenName} ${newParent.familyName} is already associated with this child.`,
                 duration: 2000,
-                variant: "destructive"
+                variant: "destructive",
             });
         }
-    };
+    }
 
-
+    const [isParentAdded, setIsParentAdded] = useState(false)
     return (
         <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
             <div className={"flex justify-between px-6 pb-6 items-center"}>
@@ -218,176 +223,36 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                     </div>
                 </div>
                 <div className={`mb-6 ${editBorderShown && "border border-dashed border-gray-400  p-2 rounded"}`}>
-                    <div className={"flex justify-between mb-5"}>
-                        <Button
-                            type={"button"}
-                            variant={"ghost"}
-                            onClick={changeAutoCompleteVisibility}
-                        >
-                            {
-                                isAutoCompleteShown ? (
-                                    <span>Cancel</span>) : (
-                                    <>
-                                        <Pencil/>
-                                        <span>Edit parents</span>
-                                    </>)
-                            }
-                        </Button>
-                        {isAutoCompleteShown &&
-                            <Button onClick={() => {
-                                const {
-                                    hasDiagnosedDiseases,
-                                    hasRegularMedicines,
-                                    createdDate,
-                                    modifiedDate,
-                                    ...childWithoutUnnecessaryFields
-                                } = child;
-                                const emergencyContacts = child.relativeParents?.filter(parent => parent.isEmergencyContact);
-                                if (emergencyContacts && emergencyContacts.length === 0 && childWithoutUnnecessaryFields.relativeParents?.length !== 0) {
-                                    toast({
-                                        title: "Error",
-                                        description: "At least one parent should be marked as an emergency contact.",
-                                        duration: 2000,
-                                        variant: "destructive"
-                                    });
-                                } else {
-                                    updateAndSaveChild(childWithoutUnnecessaryFields);
-                                }
-                            }}>
-                                Save
-                            </Button>}
-                    </div>
+                    <SaveParentsDataToChild child={child}
+                                            onEdit={onEditClicked}
+                                            isAutoCompleteShown={isAutoCompleteShown}
+                                            updateAndSaveChild={updateAndSaveChild}
+                                            onCancel={onCancelClicked}/>
                     {isAutoCompleteShown ? (
                             <>
-                                <Table className={"w-full border border-gray-200"}>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead className={"text-left"}>Name</TableHead>
-                                            <TableHead className="text-center">isEmergencyContact</TableHead>
-                                            <TableHead className="w-5"></TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>{
-                                        childWithParents.parents && childWithParents.parents.length !== 0 ? (
-                                            childWithParents.parents.map((parent, index) => (
-                                                <TableRow key={index}>
-                                                    <TableCell className={"text-left"}>
-                                                        {parent.parentDto.givenName} {parent.parentDto.familyName}
-                                                    </TableCell>
-                                                    <TableCell className={"text-center"}>
-                                                        <Button
-                                                            type={"button"}
-                                                            variant={"ghost"}
-                                                            onClick={() => {
-                                                                const updatedParents = child.relativeParents?.map(relative => {
-                                                                    if (relative.id === parent.parentDto.id) {
-                                                                        return {
-                                                                            ...relative,
-                                                                            isEmergencyContact: !relative.isEmergencyContact
-                                                                        };
-                                                                    }
-                                                                    return relative;
-                                                                });
-                                                                if (updatedParents) {
-                                                                    const updatedChild = {
-                                                                        ...child,
-                                                                        relativeParents: updatedParents
-                                                                    };
-                                                                    setChildWithParents(prevState => ({
-                                                                        ...prevState,
-                                                                        childDto: updatedChild,
-                                                                        parents: prevState.parents?.map(relative => {
-                                                                            if (relative.parentDto.id === parent.parentDto.id) {
-                                                                                return {
-                                                                                    ...relative,
-                                                                                    isEmergencyContact: !relative.isEmergencyContact
-                                                                                };
-                                                                            }
-                                                                            return relative;
-                                                                        })
-                                                                    }));
-                                                                }
-                                                            }}
-                                                        >
-                                                        <span className={"material-icons-outlined"}>
-                                                            {parent.isEmergencyContact ? 'check_box' : 'check_box_outline_blank'}
-                                                        </span>
-                                                        </Button>
-                                                    </TableCell>
-
-                                                    <TableCell className={"text-center"}>
-                                                        <Button type={"button"} className="p-0"
-                                                                variant={"ghost"}
-                                                                onClick={() => {
-                                                                    deleteChildData(parent);
-                                                                }}>
-                                                            <span className="material-icons-outlined">delete</span>
-                                                        </Button>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))) : (
-                                            <TableRow>
-                                                <TableCell className={"text-center text-gray-400"} colSpan={3}>
-                                                    Nothing added yet
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-                                    </TableBody>
-                                </Table>
+                                <ChildsParentTable child={child}
+                                                   childWithParents={childWithParents}
+                                                   setChildWithParents={setChildWithParents}/>
                                 <div className={"flex justify-between mb-5 mt-3"}>
                                     <div className={"flex w-4/5"}>
                                         <AutoComplete
                                             className={"w-2/3 mr-3"}
                                             relativeParents={child.relativeParents}
                                             key={0}
+                                            isAdded={isParentAdded}
                                             isLoading={false}
                                             disabled={false}
                                             onValueChange={(value) => {
                                                 if (value)
-                                                    setRelativeParents(value)
-                                                setParent(value)
+                                                    setAutocompleteRelativeParent({id: value.id, isEmergencyContact: true})
+                                                setAutocompleteParent(value)
                                             }}
                                             placeholder={"Select parents..."}
                                             emptyMessage={"No parent found"}
                                         />
                                         <Button
-                                            disabled={!parent}
-                                            onClick={() => {
-                                                if (relativeParent) {
-                                                    const isParentAlreadyAdded = child.relativeParents?.some(
-                                                        (parent) => parent.id === relativeParent.id
-                                                    );
-
-                                                    if (!isParentAlreadyAdded) {
-                                                        setRelativeParent({id: relativeParent.id, isEmergencyContact: true})
-                                                        const updatedRelativeParents = child.relativeParents ? [...child.relativeParents, relativeParent] : [relativeParent];
-                                                        const updatedChild = {
-                                                            ...child,
-                                                            relativeParents: updatedRelativeParents
-                                                        };
-
-                                                        const updatedParents = childWithParents.parents || [];
-                                                        if (parent) {
-                                                            updatedParents.push({
-                                                                parentDto: parent,
-                                                                isEmergencyContact: true
-                                                            });
-                                                        }
-                                                        setChildWithParents(prevState => ({
-                                                            ...prevState,
-                                                            parents: updatedParents
-                                                        }))
-                                                    } else {
-                                                        toast({
-                                                            title: "Parent already added",
-                                                            duration: 2000,
-                                                            variant: "destructive"
-                                                        });
-                                                    }
-
-                                                }
-
-                                            }}>
+                                            disabled={!autocompleteParent}
+                                            onClick={addParentToChild}>
                                             <><PlusSquare/> Add</>
                                         </Button>
                                     </div>
@@ -418,7 +283,7 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
             <ParentForm
                 isOpen={isParentEditDialogOpen}
                 onOpenChange={setParentIsEditDialogOpen}
-                onParentModified={onParentUpdated}
+                onParentModified={onParentAdded}
             />
             <ChildForm existingChild={child ?? undefined}
                        isOpen={isEditDialogOpen}

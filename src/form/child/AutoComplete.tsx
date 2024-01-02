@@ -25,12 +25,14 @@ type AutoCompleteProps = {
     initId?: string
     className?: string
     relativeParents?: RelativeParent[]
+    isAdded: boolean
 }
 
 export const AutoComplete = ({
                                  relativeParents,
                                  className,
                                  initId,
+                                 isAdded,
                                  placeholder,
                                  emptyMessage,
                                  value,
@@ -46,9 +48,14 @@ export const AutoComplete = ({
     const [options, setOptions] = useState<ParentData[]>()
 
     useEffect(() => {
+        if (isAdded) {
+            setInputValue("")
+            setSelected(undefined)
+            setOptions(undefined)
+        }
         if (initId)
             getParentById(initId).then(value1 => setInputValue(value1 ? `${value1.familyName} ${value1.givenName}` : undefined))
-    }, [initId]);
+    }, [initId, isAdded]);
 
     const fetchPotentialParents = useCallback((name: string) => {
         getPotentialParents(name)
@@ -65,16 +72,9 @@ export const AutoComplete = ({
                 console.error("Failed to get potential parents:", reason);
             });
     }, [relativeParents]);
-    const a = useCallback(() => {
-        getPotentialParents("name")
-    }, [])
-    //const debouncedFetchPotentialParents = debounce(fetchPotentialParents);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const debouncedFetchPotentialParents = useCallback(debounce(fetchPotentialParents), [fetchPotentialParents]);
-    const b = useCallback(() => {
-        a();
-    }, [a])
 
     function potentialParents(event: FormEvent<HTMLInputElement>) {
         const name = event.currentTarget.value
@@ -85,10 +85,10 @@ export const AutoComplete = ({
         } else {
             setOpen(false);
             setOptions(undefined);
+            setInputValue(undefined)
         }
     }
 
-    console.log(options)
     const handleKeyDown = useCallback(
         (event: KeyboardEvent<HTMLDivElement>) => {
             const input = inputRef.current
@@ -168,7 +168,6 @@ export const AutoComplete = ({
                                 {options && options.length > 0 ? (
                                     <CommandGroup>
                                         {options.map((option) => {
-                                            console.log(option, "a")
                                             const isSelected = selected?.id === option.id
                                             return (
                                                 <CommandItem
