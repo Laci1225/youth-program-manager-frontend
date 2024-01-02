@@ -1,5 +1,5 @@
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
-import {ChildData, ChildDataWithParents, RelativeParent} from "@/model/child-data";
+import {ChildData, ChildDataInput, ChildDataWithParents, RelativeParent} from "@/model/child-data";
 import getChildById from "@/api/graphql/child/getChildById";
 import React, {useState} from "react";
 import ChildForm from "@/form/child/ChildForm";
@@ -46,12 +46,29 @@ export const getServerSideProps = (async (context) => {
 }) satisfies GetServerSideProps<{ selectedChild: ChildDataWithParents }, { childId: string }>;
 export default function Child({selectedChild}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const [childWithParents, setChildWithParents] = useState<ChildDataWithParents>(selectedChild)
-    const [child, setChild] = useState<ChildData>(childWithParents.childDto)
+    const child: ChildData = {
+        id: childWithParents.id,
+        familyName: childWithParents.familyName,
+        givenName: childWithParents.givenName,
+        birthDate: childWithParents.birthDate,
+        birthPlace: childWithParents.birthPlace,
+        address: childWithParents.address,
+        relativeParents: childWithParents.parents?.map(value => ({
+            id: value.parentDto.id,
+            isEmergencyContact: value.isEmergencyContact,
+        })) || [],
+        diagnosedDiseases: childWithParents.diagnosedDiseases,
+        regularMedicines: childWithParents.regularMedicines,
+        createdDate: childWithParents.createdDate,
+        modifiedDate: childWithParents.modifiedDate,
+        hasDiagnosedDiseases: childWithParents.hasDiagnosedDiseases,
+        hasRegularMedicines: childWithParents.hasRegularMedicines
+    };
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const router = useRouter()
     const onChildUpdated = (newChild: ChildData) => {
-        setChild(newChild)
+        setChildWithParents((prevState) => ({...prevState, childDto: newChild}))
     }
     const onChildDeleted = () => {
         router.push("/children")
@@ -65,6 +82,8 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
         setIsDeleteDialogOpen(true)
     }
 
+    const [inputChild, setInputChild] = useState<ChildDataInput>()
+
     const [isAutoCompleteShown, setIsAutoCompleteShown] = useState(false)
     const [relativeParent, setRelativeParent] = useState<RelativeParent>()
     const [parent, setParent] = useState<ParentData>()
@@ -74,9 +93,10 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
             id: newParent.id,
             isEmergencyContact: true
         };
-        const updatedRelativeParents = child.relativeParents ? [...child.relativeParents, selectedParent] : [selectedParent];
-        const updatedChild = {...child, relativeParents: updatedRelativeParents};
-        setChild(updatedChild);
+        setChildWithParents({...childWithParents, parents: undefined})
+        //const updatedRelativeParents = child.relativeParents ? [...child.relativeParents, selectedParent] : [selectedParent];
+        //const updatedChild = {...child, relativeParents: updatedRelativeParents};
+        //setChild(updatedChild);
     }
 
     const [editBorderShown, setEditBorderShown] = useState(false)
@@ -90,10 +110,10 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
         setParentIsEditDialogOpen(true)
     }
 
-    function updateAndSaveChild(childWithoutUnnecessaryFields: Omit<ChildData, "hasRegularMedicines" | "hasDiagnosedDiseases">) {
+    function updateAndSaveChild(childWithoutUnnecessaryFields: Omit<ChildData, "hasRegularMedicines" | "modifiedDate" | "createdDate" | "hasDiagnosedDiseases">) {
         updateChild(childWithoutUnnecessaryFields)
             .then(value => {
-                setChild(value);
+                setChildWithParents(prevState => ({...prevState, childDto: value}))
                 toast({
                     title: "The child is successfully updated",
                     description: `A child with name: ${child.givenName} ${child.familyName} updated`,
@@ -117,15 +137,14 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
 
     function deleteChildData(parent: ParentDataWithEmergencyContact) {
         const updatedParents = child.relativeParents?.filter(value => value.id !== parent.parentDto.id);
-        const updated2 = childWithParents.parents.filter(value => value.parentDto.id !== parent.parentDto.id)
-        if (updated2) {
+        const updated2 = childWithParents.parents?.filter(value => value.parentDto.id !== parent.parentDto.id)
+        /*if (updated2) {
             const updatedChild = {
                 ...child,
                 relativeParents: updatedParents
-            };
-            setChild(updatedChild);
-            setChildWithParents({childDto: updatedChild, parents: updated2})
-        }
+            };*/
+        setChildWithParents(prevState => ({...prevState, parents: updated2}))
+        //}
     }
 
     const setRelativeParents = (newParent: ParentData) => {
@@ -219,6 +238,8 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                                 const {
                                     hasDiagnosedDiseases,
                                     hasRegularMedicines,
+                                    createdDate,
+                                    modifiedDate,
                                     ...childWithoutUnnecessaryFields
                                 } = child;
                                 const emergencyContacts = child.relativeParents?.filter(parent => parent.isEmergencyContact);
@@ -272,10 +293,10 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                                                                         ...child,
                                                                         relativeParents: updatedParents
                                                                     };
-                                                                    setChild(updatedChild);
-                                                                    setChildWithParents({
+                                                                    setChildWithParents(prevState => ({
+                                                                        ...prevState,
                                                                         childDto: updatedChild,
-                                                                        parents: childWithParents.parents.map(relative => {
+                                                                        parents: prevState.parents?.map(relative => {
                                                                             if (relative.parentDto.id === parent.parentDto.id) {
                                                                                 return {
                                                                                     ...relative,
@@ -284,7 +305,7 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                                                                             }
                                                                             return relative;
                                                                         })
-                                                                    });
+                                                                    }));
                                                                 }
                                                             }}
                                                         >
@@ -352,7 +373,10 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                                                                 isEmergencyContact: true
                                                             });
                                                         }
-                                                        setChild(updatedChild);
+                                                        setChildWithParents(prevState => ({
+                                                            ...prevState,
+                                                            parents: updatedParents
+                                                        }))
                                                     } else {
                                                         toast({
                                                             title: "Parent already added",

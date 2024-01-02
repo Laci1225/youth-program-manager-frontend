@@ -199,50 +199,50 @@ function ChildForm({
                                             </FormItem>
                                         )}
                                     />
-                                    <FormField
-                                        control={form.control}
-                                        name="relativeParents"
-                                        render={({field}) => (
-                                            <FormItem className={"flex-1"}>
-                                                <FormLabel>Parent</FormLabel>
-                                                <FormControl>
-                                                    <div className={"flex justify-between"}>
-                                                        <AutoComplete
-                                                            className={"w-2/3"}
-                                                            key={0}
-                                                            isLoading={false}
-                                                            disabled={false}
-                                                            initId={field.value ? field.value[0]?.id : undefined}
-                                                            onValueChange={(value) => {
-                                                                if (value) {
-                                                                    const selectedParent = {
-                                                                        id: value.id,
-                                                                        isEmergencyContact: true
-                                                                    };
-                                                                    const existingParents = field.value || [];
-                                                                    const updatedParents = [
-                                                                        selectedParent,
-                                                                        ...existingParents.slice(1)
-                                                                    ];
-                                                                    field.onChange(updatedParents);
-                                                                } else field.onChange(undefined);
+                                    {!existingChild &&
+                                        <FormField
+                                            control={form.control}
+                                            name="relativeParents"
+                                            render={({field}) => (
+                                                <FormItem className={"flex-1"}>
+                                                    <FormLabel>Parent</FormLabel>
+                                                    <FormControl>
+                                                        <div className={"flex justify-between"}>
+                                                            <AutoComplete
+                                                                className={"w-2/3"}
+                                                                key={0}
+                                                                isLoading={false}
+                                                                disabled={false}
+                                                                initId={field.value ? field.value[0]?.id : undefined}
+                                                                onValueChange={(value) => {
+                                                                    if (value) {
+                                                                        const selectedParent = {
+                                                                            id: value.id,
+                                                                            isEmergencyContact: true
+                                                                        };
+                                                                        const updatedParents = [
+                                                                            selectedParent
+                                                                        ];
+                                                                        field.onChange(updatedParents);
+                                                                    } else field.onChange(undefined);
 
-                                                            }}
-                                                            placeholder={"Select parents..."}
-                                                            emptyMessage={"No parent found"}
-                                                        />
-                                                        <Button type={"button"}
-                                                                onClick={() => {
-                                                                    handleParentEditClick()
-                                                                }}>
-                                                            Create
-                                                        </Button>
-                                                    </div>
-                                                </FormControl>
-                                                <FormMessage/>
-                                            </FormItem>
-                                        )}
-                                    />
+                                                                }}
+                                                                placeholder={"Select parents..."}
+                                                                emptyMessage={"No parent found"}
+                                                            />
+                                                            <Button type={"button"}
+                                                                    onClick={() => {
+                                                                        handleParentEditClick()
+                                                                    }}>
+                                                                Create
+                                                            </Button>
+                                                        </div>
+                                                    </FormControl>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+                                    }
                                     <FormField
                                         control={form.control}
                                         name="diagnosedDiseases"

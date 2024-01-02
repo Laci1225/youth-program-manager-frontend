@@ -8,37 +8,36 @@ export default async function getChildById(childId: string, client: ApolloClient
         query: gql`
             query GetChildById($id: String!){
                 getChildById(id : $id){
-                    childDto {
-                        id
-                        familyName
-                        givenName
-                        birthDate
-                        birthPlace
-                        address
-                        relativeParents {
-                            id
-                            isEmergencyContact
-                        }
-                        diagnosedDiseases {
-                            name
-                            diagnosedAt
-                        }
-                        regularMedicines {
-                            name
-                            dose
-                            takenSince
-                        }
-                    }
+
+                    id
+                    familyName
+                    givenName
+                    birthDate
+                    birthPlace
+                    address
                     parents {
                         parentDto {
                             id
                             givenName
                             familyName
-                            address
                             phoneNumbers
+                            address
                         }
                         isEmergencyContact
                     }
+                    diagnosedDiseases {
+                        name
+                        diagnosedAt
+                    }
+                    regularMedicines {
+                        name
+                        dose
+                        takenSince
+                    }
+                    hasDiagnosedDiseases
+                    hasRegularMedicines
+                    createdDate
+                    modifiedDate
                 }
             }
         `, fetchPolicy: "no-cache",

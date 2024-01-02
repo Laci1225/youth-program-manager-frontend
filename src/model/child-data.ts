@@ -19,8 +19,19 @@ export interface ChildData {
 }
 
 export interface ChildDataWithParents {
-    childDto: ChildData,
-    parents: ParentDataWithEmergencyContact[]
+    id: string,
+    familyName: string,
+    givenName: string,
+    birthDate: Date,
+    birthPlace: string,
+    address: string,
+    parents?: ParentDataWithEmergencyContact[],
+    diagnosedDiseases?: Disease[],
+    regularMedicines?: Medicine[],
+    hasDiagnosedDiseases: boolean,
+    hasRegularMedicines: boolean,
+    createdDate: string,
+    modifiedDate: string
 }
 
 export interface RelativeParent {

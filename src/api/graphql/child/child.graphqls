@@ -25,8 +25,19 @@ type Child {
     modifiedDate: LocalDateTime
 }
 type ChildWithParents{
-    childDto: Child
+    id: ID!
+    familyName: String!
+    givenName: String!
+    birthDate: LocalDateTime!
+    birthPlace:String!
+    address: String!
+    diagnosedDiseases: [Disease!]
+    regularMedicines: [Medicine!]
     parents: [ParentWithEmergencyContact]
+    hasDiagnosedDiseases: Boolean!
+    hasRegularMedicines: Boolean!
+    createdDate: LocalDateTime
+    modifiedDate: LocalDateTime
 }
 type RelativeParents {
     id: ID!

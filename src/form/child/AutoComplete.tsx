@@ -12,6 +12,7 @@ import getPotentialParents from "@/api/graphql/child/getPotentialParents";
 import {Button} from "@/components/ui/button";
 import getParentById from "@/api/graphql/parent/getParentById";
 import {RelativeParent} from "@/model/child-data";
+import debounce from "@/utils/debounce";
 
 
 type AutoCompleteProps = {
@@ -49,33 +50,45 @@ export const AutoComplete = ({
             getParentById(initId).then(value1 => setInputValue(value1 ? `${value1.familyName} ${value1.givenName}` : undefined))
     }, [initId]);
 
+    const fetchPotentialParents = useCallback((name: string) => {
+        getPotentialParents(name)
+            .then(parents => {
+                const filteredParents = parents.filter((parent) =>
+                    !relativeParents?.some(
+                        (relativeParent) => relativeParent.id === parent.id
+                    )
+                );
+                setOptions(filteredParents)
+                //todo limit for options
+            })
+            .catch(reason => {
+                console.error("Failed to get potential parents:", reason);
+            });
+    }, [relativeParents]);
+    const a = useCallback(() => {
+        getPotentialParents("name")
+    }, [])
+    //const debouncedFetchPotentialParents = debounce(fetchPotentialParents);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const debouncedFetchPotentialParents = useCallback(debounce(fetchPotentialParents), [fetchPotentialParents]);
+    const b = useCallback(() => {
+        a();
+    }, [a])
+
     function potentialParents(event: FormEvent<HTMLInputElement>) {
         const name = event.currentTarget.value
         setInputValue(name);
         if (name) {
             setOpen(name.length > 0);
-            setTimeout(() => {
-                getPotentialParents(name)
-                    .then(parents => {
-                        console.log(parents)
-                        console.log(relativeParents)
-                        const filteredParents = parents.filter((parent) =>
-                            !relativeParents?.some(
-                                (relativeParent) => relativeParent.id === parent.id
-                            )
-                        );
-                        setOptions(filteredParents)
-                    })
-                    .catch(reason => {
-                        console.error("Failed to get potential parents:", reason);
-                    });
-            }, 500);
+            debouncedFetchPotentialParents(name);
         } else {
             setOpen(false);
             setOptions(undefined);
         }
     }
 
+    console.log(options)
     const handleKeyDown = useCallback(
         (event: KeyboardEvent<HTMLDivElement>) => {
             const input = inputRef.current
@@ -152,9 +165,10 @@ export const AutoComplete = ({
                                         </div>
                                     </CommandPrimitive.Loading>
                                 ) : null}
-                                {options && options.length > 0 && !isLoading ? (
+                                {options && options.length > 0 ? (
                                     <CommandGroup>
                                         {options.map((option) => {
+                                            console.log(option, "a")
                                             const isSelected = selected?.id === option.id
                                             return (
                                                 <CommandItem
