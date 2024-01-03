@@ -17,9 +17,10 @@ import {ChildData} from "@/model/child-data";
 import LoadingButton from "@/components/loading-button";
 import updateChild from "@/api/graphql/child/updateChild";
 import {parseDateInDisease, parseDateInMedicine} from "@/utils/child";
-import {AutoComplete} from "@/form/child/AutoComplete";
+import {AutoComplete} from "@/table/AutoComplete";
 import ParentForm from "@/form/parent/ParentForm";
 import {Button} from "@/components/ui/button";
+import getPotentialParents from "@/api/graphql/child/getPotentialParents";
 
 interface ChildFormProps {
     onChildModified: (child: ChildData) => void;
@@ -213,7 +214,8 @@ function ChildForm({
                                                                 key={0}
                                                                 isLoading={false}
                                                                 disabled={false}
-                                                                initId={field.value ? field.value[0]?.id : undefined}
+                                                                getPotential={getPotentialParents}
+                                                                isAdded={false}
                                                                 onValueChange={(value) => {
                                                                     if (value) {
                                                                         const selectedParent = {

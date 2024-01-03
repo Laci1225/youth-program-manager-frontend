@@ -11,6 +11,7 @@ export default async function getPotentialChildren(childName: string, client: Ap
                     id
                     familyName
                     givenName
+                    birthDate
                 }
             }
         `, fetchPolicy: "no-cache",

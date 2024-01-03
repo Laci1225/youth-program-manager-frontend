@@ -8,7 +8,6 @@ export default async function getChildById(childId: string, client: ApolloClient
         query: gql`
             query GetChildById($id: String!){
                 getChildById(id : $id){
-
                     id
                     familyName
                     givenName

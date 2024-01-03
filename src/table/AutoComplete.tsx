@@ -1,5 +1,3 @@
-"use client"
-
 import {CommandGroup, CommandItem, CommandList, CommandInput} from "@/components/ui/command"
 import {Command as CommandPrimitive} from "cmdk"
 import React, {useState, useRef, useCallback, type KeyboardEvent, FormEvent, useEffect} from "react"
@@ -11,41 +9,41 @@ import {ParentData} from "@/model/parent-data";
 import getPotentialParents from "@/api/graphql/child/getPotentialParents";
 import {Button} from "@/components/ui/button";
 import getParentById from "@/api/graphql/parent/getParentById";
-import {RelativeParent} from "@/model/child-data";
+import {ChildData, RelativeParent} from "@/model/child-data";
 import debounce from "@/utils/debounce";
 
 
-type AutoCompleteProps = {
+type AutoCompleteProps<T> = {
     emptyMessage: string
-    value?: ParentData
-    onValueChange?: (value: ParentData | undefined) => void
+    value?: T
+    onValueChange?: (value: T | undefined) => void
     isLoading?: boolean
     disabled?: boolean
     placeholder?: string
-    initId?: string
     className?: string
-    relativeParents?: RelativeParent[]
+    alreadyAddedData?: ChildData[] | RelativeParent[]
     isAdded: boolean
+    getPotential: (name: string) => Promise<T[]>
 }
 
-export const AutoComplete = ({
-                                 relativeParents,
-                                 className,
-                                 initId,
-                                 isAdded,
-                                 placeholder,
-                                 emptyMessage,
-                                 value,
-                                 onValueChange,
-                                 disabled,
-                                 isLoading = false,
-                             }: AutoCompleteProps) => {
+export const AutoComplete = <T extends ParentData | ChildData>({
+                                                                   alreadyAddedData,
+                                                                   className,
+                                                                   isAdded,
+                                                                   placeholder,
+                                                                   emptyMessage,
+                                                                   value,
+                                                                   onValueChange,
+                                                                   disabled,
+                                                                   isLoading = false,
+                                                                   getPotential
+                                                               }: AutoCompleteProps<T>) => {
     const inputRef = useRef<HTMLInputElement>(null)
 
     const [isOpen, setOpen] = useState(false)
-    const [selected, setSelected] = useState<ParentData | undefined>(value as ParentData)
+    const [selected, setSelected] = useState<T | undefined>(value as T)
     const [inputValue, setInputValue] = useState<string | undefined>(value ? `${value.familyName} ${value.givenName}` : undefined)
-    const [options, setOptions] = useState<ParentData[]>()
+    const [options, setOptions] = useState<T[]>()
 
     useEffect(() => {
         if (isAdded) {
@@ -53,15 +51,13 @@ export const AutoComplete = ({
             setSelected(undefined)
             setOptions(undefined)
         }
-        if (initId)
-            getParentById(initId).then(value1 => setInputValue(value1 ? `${value1.familyName} ${value1.givenName}` : undefined))
-    }, [initId, isAdded]);
+    }, [isAdded]);
 
     const fetchPotentialParents = useCallback((name: string) => {
-        getPotentialParents(name)
+        getPotential(name)
             .then(parents => {
                 const filteredParents = parents.filter((parent) =>
-                    !relativeParents?.some(
+                    !alreadyAddedData?.some(
                         (relativeParent) => relativeParent.id === parent.id
                     )
                 );
@@ -71,7 +67,7 @@ export const AutoComplete = ({
             .catch(reason => {
                 console.error("Failed to get potential parents:", reason);
             });
-    }, [relativeParents]);
+    }, [alreadyAddedData]);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const debouncedFetchPotentialParents = useCallback(debounce(fetchPotentialParents), [fetchPotentialParents]);
@@ -122,7 +118,7 @@ export const AutoComplete = ({
     }, [selected])
 
     const handleSelectOption = useCallback(
-        (selectedOption: ParentData) => {
+        (selectedOption: T) => {
             setInputValue(selectedOption ? `${selectedOption.familyName} ${selectedOption.givenName}` : undefined)
 
             setSelected(selectedOption)
@@ -181,7 +177,7 @@ export const AutoComplete = ({
                                                     className={cn("flex items-center gap-2 w-full", !isSelected ? "pl-8" : null)}
                                                 >
                                                     {isSelected ? <Check className="w-4"/> : null}
-                                                    {option.familyName} {option.givenName} {option.phoneNumbers[0]}
+                                                    {option.familyName} {option.givenName}
                                                 </CommandItem>
                                             )
                                         })}

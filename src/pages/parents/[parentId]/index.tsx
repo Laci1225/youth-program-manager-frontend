@@ -4,14 +4,22 @@ import Link from "next/link";
 import {Toaster} from "@/components/ui/toaster";
 import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
-import {Pencil, Trash} from "lucide-react";
+import {Pencil, PlusSquare, Trash} from "lucide-react";
 import {useRouter} from "next/router";
 import ParentForm from "@/form/parent/ParentForm";
 import {serverSideClient} from "@/api/graphql/client";
 import getParentById from "@/api/graphql/parent/getParentById";
 import deleteParent from "@/api/graphql/parent/deleteParent";
 import DeleteData from "@/components/deleteData";
-import {ParentData} from "@/model/parent-data";
+import {ParentData, ParentDataWithChildren} from "@/model/parent-data";
+import SaveParentsDataToChild from "@/table/child/SaveParentsDataToChild";
+import ChildsParentTable from "@/table/child/ChildsParentTable";
+import {AutoComplete} from "@/table/AutoComplete";
+import getPotentialParents from "@/api/graphql/child/getPotentialParents";
+import {Button} from "@/components/ui/button";
+import ShowTable from "@/form/ShowTable";
+import {RelativeParent} from "@/model/child-data";
+import fromParentWithChildrenToParent from "@/model/fromParentWithChildrenToParent";
 
 
 export const getServerSideProps = (async (context) => {
@@ -19,6 +27,7 @@ export const getServerSideProps = (async (context) => {
     if (context.params?.parentId) {
         try {
             parentData = await getParentById(context.params.parentId, serverSideClient);
+            console.log(parentData)
             return {
                 props: {
                     selectedParent: parentData
@@ -33,14 +42,15 @@ export const getServerSideProps = (async (context) => {
     return {
         notFound: true
     };
-}) satisfies GetServerSideProps<{ selectedParent: ParentData }, { parentId: string }>;
+}) satisfies GetServerSideProps<{ selectedParent: ParentDataWithChildren }, { parentId: string }>;
 export default function Parent({selectedParent}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    const [parent, setParent] = useState<ParentData>(selectedParent)
+    const [parentWithChildren, setParentWithChildren] = useState<ParentDataWithChildren>(selectedParent)
+    const parent: ParentData = fromParentWithChildrenToParent(parentWithChildren)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const router = useRouter()
     const onParentUpdated = (newParent: ParentData) => {
-        setParent(newParent)
+        setParentWithChildren((prevState) => ({...prevState, ...newParent}))
     }
     const onParentDeleted = () => {
         router.push("/parents")
@@ -53,6 +63,9 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
     function handleDeleteClick() {
         setIsDeleteDialogOpen(true)
     }
+
+    const [isEditParentsModeEnabled, setIsEditParentsModeEnabled] = useState(false)
+    const [isEditModeBorderVisible, setIsEditModeBorderVisible] = useState(false)
 
     return (
         <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
@@ -99,6 +112,47 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                             </div>
                         ))}
                     </>
+                </div>
+                <div
+                    className={`mb-6 ${isEditModeBorderVisible && "border border-dashed border-gray-400  p-2 rounded"}`}>
+                    {isEditParentsModeEnabled ? (
+                            <>
+                                <div className={"flex justify-between mb-5 mt-3"}>
+                                    <div className={"flex w-4/5"}>
+                                        <AutoComplete
+                                            className={"w-2/3 mr-3"}
+                                            getPotential={getPotentialParents}
+                                            key={0}
+                                            isAdded={false}
+                                            isLoading={false}
+                                            disabled={false}
+                                            onValueChange={(value) => {
+                                                //if (value)
+                                                //setSelectedRelativeParentToAdd({id: value.id, isEmergencyContact: true})
+                                                //setSelectedParentDataToAdd(value)
+                                            }}
+                                            placeholder={"Select parents..."}
+                                            emptyMessage={"No parent found"}
+                                        />
+                                        <Button>
+                                            <><PlusSquare/> Add</>
+                                        </Button>
+                                    </div>
+                                    <Button
+                                        onClick={() => {
+                                            //handleParentEditClick()
+                                        }}>
+                                        Create
+                                    </Button>
+                                </div>
+                            </>) :
+                        <ShowTable tableFields={["Name", "isEmergencyContact"]}
+                                   value={parentWithChildren.childDtos?.map((child) => ({
+                                       name: child.givenName + " " + child.familyName,
+                                       birthData: child.birthDate
+                                   }))}
+                                   showDeleteButton={false}/>
+                    }
                 </div>
                 <div className="mb-6">
                     <Label>Address:</Label>

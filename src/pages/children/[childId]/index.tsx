@@ -14,7 +14,7 @@ import {useRouter} from "next/router";
 import {AlertTriangle, Pencil, PlusSquare, Trash} from "lucide-react";
 import DeleteData from "@/components/deleteData";
 import deleteChild from "@/api/graphql/child/deleteChild";
-import {AutoComplete} from "@/form/child/AutoComplete";
+import {AutoComplete} from "@/table/AutoComplete";
 import {Button} from "@/components/ui/button";
 import updateChild from "@/api/graphql/child/updateChild";
 import {toast} from "@/components/ui/use-toast";
@@ -24,6 +24,7 @@ import {ParentData, ParentDataWithEmergencyContact} from "@/model/parent-data";
 import SaveParentsDataToChild from "@/table/child/SaveParentsDataToChild";
 import ChildsParentTable from "@/table/child/ChildsParentTable";
 import fromChildWithParentsToChildData from "@/model/fromChildWithParentsToChildData";
+import getPotentialParents from "@/api/graphql/child/getPotentialParents";
 
 
 export const getServerSideProps = (async (context) => {
@@ -46,7 +47,7 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
     const currentChild: ChildData = fromChildWithParentsToChildData(childWithParents);
 
     const onChildUpdated = (newChild: ChildData) => {
-        setChildWithParents((prevState) => ({...prevState, childDto: newChild}))
+        setChildWithParents((prevState) => ({...prevState, ...newChild}))
     }
     const onChildDeleted = () => {
         router.push("/children")
@@ -75,7 +76,7 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
 
 
     const [isEditParentsModeEnabled, setIsEditParentsModeEnabled] = useState(false)
-    const [selectedParentToAdd, setSelectedParentToAdd] = useState<RelativeParent>()
+    const [selectedRelativeParentToAdd, setSelectedRelativeParentToAdd] = useState<RelativeParent>()
     const [selectedParentDataToAdd, setSelectedParentDataToAdd] = useState<ParentData>()
     const [isEditModeBorderVisible, setIsEditModeBorderVisible] = useState(false)
     const [parentAddedSuccessfully, setParentAddedSuccessfully] = useState(false)
@@ -100,7 +101,7 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
     function updateAndSaveChild(childWithoutUnnecessaryFields: Omit<ChildData, "hasRegularMedicines" | "modifiedDate" | "createdDate" | "hasDiagnosedDiseases">) {
         updateChild(childWithoutUnnecessaryFields)
             .then(value => {
-                setChildWithParents(prevState => ({...prevState, childDto: value}))
+                setChildWithParents(prevState => ({...prevState, ...value}))
                 toast({
                     title: "The currentChild is successfully updated",
                     description: `A child with name: ${currentChild.givenName} ${currentChild.familyName} updated`,
@@ -127,11 +128,11 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
         setParentAddedSuccessfully(true)
         setSelectedParentDataToAdd(undefined)
         const isParentAlreadyAdded = currentChild.relativeParents?.some(
-            (parent) => parent.id === selectedParentToAdd?.id
+            (parent) => parent.id === selectedRelativeParentToAdd?.id
         );
 
-        if (!isParentAlreadyAdded && selectedParentToAdd) {
-            setSelectedParentToAdd({id: selectedParentToAdd.id, isEmergencyContact: true});
+        if (!isParentAlreadyAdded && selectedRelativeParentToAdd) {
+            setSelectedRelativeParentToAdd({id: selectedRelativeParentToAdd.id, isEmergencyContact: true});
             const updatedParents = childWithParents.parents || [];
             updatedParents.push({
                 parentDto: selectedParentDataToAdd,
@@ -218,14 +219,15 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
                                     <div className={"flex w-4/5"}>
                                         <AutoComplete
                                             className={"w-2/3 mr-3"}
-                                            relativeParents={currentChild.relativeParents}
+                                            getPotential={getPotentialParents}
+                                            alreadyAddedData={currentChild.relativeParents}
                                             key={0}
                                             isAdded={parentAddedSuccessfully}
                                             isLoading={false}
                                             disabled={false}
                                             onValueChange={(value) => {
                                                 if (value)
-                                                    setSelectedParentToAdd({id: value.id, isEmergencyContact: true})
+                                                    setSelectedRelativeParentToAdd({id: value.id, isEmergencyContact: true})
                                                 setSelectedParentDataToAdd(value)
                                             }}
                                             placeholder={"Select parents..."}
