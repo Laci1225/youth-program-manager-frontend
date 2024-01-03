@@ -17,13 +17,13 @@ import deleteChild from "@/api/graphql/child/deleteChild";
 import {AutoComplete} from "@/form/child/AutoComplete";
 import {Button} from "@/components/ui/button";
 import updateChild from "@/api/graphql/child/updateChild";
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {toast} from "@/components/ui/use-toast";
 import HoverText from "@/components/hoverText";
 import ParentForm from "@/form/parent/ParentForm";
 import {ParentData, ParentDataWithEmergencyContact} from "@/model/parent-data";
 import SaveParentsDataToChild from "@/table/child/SaveParentsDataToChild";
 import ChildsParentTable from "@/table/child/ChildsParentTable";
+import fromChildWithParentsToChildData from "@/model/fromChildWithParentsToChildData";
 
 
 export const getServerSideProps = (async (context) => {
@@ -32,43 +32,19 @@ export const getServerSideProps = (async (context) => {
         try {
             childData = await getChildById(context.params.childId, serverSideClient);
             return {
-                props: {
-                    selectedChild: childData
-                }
+                props: {selectedChildData: childData}
             }
         } catch (error) {
-            return {
-                notFound: true
-            };
+            return {notFound: true};
         }
     }
-    return {
-        notFound: true
-    };
-}) satisfies GetServerSideProps<{ selectedChild: ChildDataWithParents }, { childId: string }>;
-export default function Child({selectedChild}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    const [childWithParents, setChildWithParents] = useState<ChildDataWithParents>(selectedChild)
-    const child: ChildData = {
-        id: childWithParents.id,
-        familyName: childWithParents.familyName,
-        givenName: childWithParents.givenName,
-        birthDate: childWithParents.birthDate,
-        birthPlace: childWithParents.birthPlace,
-        address: childWithParents.address,
-        relativeParents: childWithParents.parents?.map(value => ({
-            id: value.parentDto.id,
-            isEmergencyContact: value.isEmergencyContact,
-        })) || [],
-        diagnosedDiseases: childWithParents.diagnosedDiseases,
-        regularMedicines: childWithParents.regularMedicines,
-        createdDate: childWithParents.createdDate,
-        modifiedDate: childWithParents.modifiedDate,
-        hasDiagnosedDiseases: childWithParents.hasDiagnosedDiseases,
-        hasRegularMedicines: childWithParents.hasRegularMedicines
-    };
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+    return {notFound: true};
+}) satisfies GetServerSideProps<{ selectedChildData: ChildDataWithParents }, { childId: string }>;
+export default function Child({selectedChildData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
+    const [childWithParents, setChildWithParents] = useState<ChildDataWithParents>(selectedChildData)
+    const currentChild: ChildData = fromChildWithParentsToChildData(childWithParents);
+
     const onChildUpdated = (newChild: ChildData) => {
         setChildWithParents((prevState) => ({...prevState, childDto: newChild}))
     }
@@ -76,17 +52,17 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
         router.push("/children")
     }
 
+    const [isEditModeEnabled, setIsEditModeEnabled] = useState(false)
+    const [isDeleteModeEnabled, setIsDeleteModeEnabled] = useState(false)
+
     function handleEditClick() {
-        setIsEditDialogOpen(true)
+        setIsEditModeEnabled(true)
     }
 
     function handleDeleteClick() {
-        setIsDeleteDialogOpen(true)
+        setIsDeleteModeEnabled(true)
     }
 
-    const [isAutoCompleteShown, setIsAutoCompleteShown] = useState(false)
-    const [autocompleteRelativeParent, setAutocompleteRelativeParent] = useState<RelativeParent>()
-    const [autocompleteParent, setAutocompleteParent] = useState<ParentData>()
     const [isParentEditDialogOpen, setParentIsEditDialogOpen] = useState(false)
     const onParentAdded = (newParent: ParentData) => {
         const newParentData: ParentDataWithEmergencyContact = {
@@ -97,18 +73,23 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
         setChildWithParents({...childWithParents, parents: updatedParents})
     }
 
-    const [editBorderShown, setEditBorderShown] = useState(false)
+
+    const [isEditParentsModeEnabled, setIsEditParentsModeEnabled] = useState(false)
+    const [selectedParentToAdd, setSelectedParentToAdd] = useState<RelativeParent>()
+    const [selectedParentDataToAdd, setSelectedParentDataToAdd] = useState<ParentData>()
+    const [isEditModeBorderVisible, setIsEditModeBorderVisible] = useState(false)
+    const [parentAddedSuccessfully, setParentAddedSuccessfully] = useState(false)
 
     function onEditClicked() {
-        setIsAutoCompleteShown(!isAutoCompleteShown)
-        setEditBorderShown(!editBorderShown)
+        setIsEditParentsModeEnabled(!isEditParentsModeEnabled)
+        setIsEditModeBorderVisible(!isEditModeBorderVisible)
     }
 
     function onCancelClicked() {
-        getChildById(child.id)
+        getChildById(currentChild.id)
             .then(value => setChildWithParents(value))
-        setIsAutoCompleteShown(!isAutoCompleteShown)
-        setEditBorderShown(!editBorderShown)
+        setIsEditParentsModeEnabled(!isEditParentsModeEnabled)
+        setIsEditModeBorderVisible(!isEditModeBorderVisible)
     }
 
 
@@ -121,39 +102,39 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
             .then(value => {
                 setChildWithParents(prevState => ({...prevState, childDto: value}))
                 toast({
-                    title: "The child is successfully updated",
-                    description: `A child with name: ${child.givenName} ${child.familyName} updated`,
+                    title: "The currentChild is successfully updated",
+                    description: `A child with name: ${currentChild.givenName} ${currentChild.familyName} updated`,
                     duration: 2000
                 });
-                setIsAutoCompleteShown(false);
+                setIsEditParentsModeEnabled(false);
             })
             .catch(error => {
                 toast({
-                    title: `Child with name: ${child.givenName} ${child.familyName} cannot be updated updated`,
+                    title: `Child with name: ${currentChild.givenName} ${currentChild.familyName} cannot be updated updated`,
                     description: `${error.message}`,
                     duration: 2000,
                     variant: "destructive"
                 });
             })
             .then(() =>
-                getChildById(child.id)
+                getChildById(currentChild.id)
                     .then(value => setChildWithParents(value))
             )
     }
 
     function addParentToChild() {
-        if (!autocompleteParent) return;
-        setIsParentAdded(true)
-        setAutocompleteParent(undefined)
-        const isParentAlreadyAdded = child.relativeParents?.some(
-            (parent) => parent.id === autocompleteRelativeParent?.id
+        if (!selectedParentDataToAdd) return;
+        setParentAddedSuccessfully(true)
+        setSelectedParentDataToAdd(undefined)
+        const isParentAlreadyAdded = currentChild.relativeParents?.some(
+            (parent) => parent.id === selectedParentToAdd?.id
         );
 
-        if (!isParentAlreadyAdded && autocompleteRelativeParent) {
-            setAutocompleteRelativeParent({id: autocompleteRelativeParent.id, isEmergencyContact: true});
+        if (!isParentAlreadyAdded && selectedParentToAdd) {
+            setSelectedParentToAdd({id: selectedParentToAdd.id, isEmergencyContact: true});
             const updatedParents = childWithParents.parents || [];
             updatedParents.push({
-                parentDto: autocompleteParent,
+                parentDto: selectedParentDataToAdd,
                 isEmergencyContact: true,
             });
             setChildWithParents((prevState) => ({
@@ -169,7 +150,6 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
         }
     }
 
-    const [isParentAdded, setIsParentAdded] = useState(false)
     return (
         <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
             <div className={"flex justify-between px-6 pb-6 items-center"}>
@@ -180,7 +160,7 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                     Child details
                 </div>
                 <HoverText trigger={
-                    (!child.relativeParents || child.relativeParents?.length === 0) && (
+                    (!currentChild.relativeParents || currentChild.relativeParents?.length === 0) && (
                         <AlertTriangle className={"text-yellow-600 "}/>)
                 } content={"Parent not associated yet"}/>
                 <div className={"flex"}>
@@ -207,51 +187,52 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                 <div className="mb-6">
                     <Label>Full Name:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {child.givenName} {child.familyName}
+                        {currentChild.givenName} {currentChild.familyName}
                     </div>
                 </div>
                 <div className="mb-6">
                     <Label>Birth date and place:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {format(new Date(child.birthDate), "P")} {child.birthPlace}
+                        {format(new Date(currentChild.birthDate), "P")} {currentChild.birthPlace}
                     </div>
                 </div>
                 <div className="mb-6">
                     <Label>Address:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {child.address}
+                        {currentChild.address}
                     </div>
                 </div>
-                <div className={`mb-6 ${editBorderShown && "border border-dashed border-gray-400  p-2 rounded"}`}>
-                    <SaveParentsDataToChild child={child}
+                <div
+                    className={`mb-6 ${isEditModeBorderVisible && "border border-dashed border-gray-400  p-2 rounded"}`}>
+                    <SaveParentsDataToChild child={currentChild}
                                             onEdit={onEditClicked}
-                                            isAutoCompleteShown={isAutoCompleteShown}
+                                            isAutoCompleteShown={isEditParentsModeEnabled}
                                             updateAndSaveChild={updateAndSaveChild}
                                             onCancel={onCancelClicked}/>
-                    {isAutoCompleteShown ? (
+                    {isEditParentsModeEnabled ? (
                             <>
-                                <ChildsParentTable child={child}
+                                <ChildsParentTable child={currentChild}
                                                    childWithParents={childWithParents}
                                                    setChildWithParents={setChildWithParents}/>
                                 <div className={"flex justify-between mb-5 mt-3"}>
                                     <div className={"flex w-4/5"}>
                                         <AutoComplete
                                             className={"w-2/3 mr-3"}
-                                            relativeParents={child.relativeParents}
+                                            relativeParents={currentChild.relativeParents}
                                             key={0}
-                                            isAdded={isParentAdded}
+                                            isAdded={parentAddedSuccessfully}
                                             isLoading={false}
                                             disabled={false}
                                             onValueChange={(value) => {
                                                 if (value)
-                                                    setAutocompleteRelativeParent({id: value.id, isEmergencyContact: true})
-                                                setAutocompleteParent(value)
+                                                    setSelectedParentToAdd({id: value.id, isEmergencyContact: true})
+                                                setSelectedParentDataToAdd(value)
                                             }}
                                             placeholder={"Select parents..."}
                                             emptyMessage={"No parent found"}
                                         />
                                         <Button
-                                            disabled={!autocompleteParent}
+                                            disabled={!selectedParentDataToAdd}
                                             onClick={addParentToChild}>
                                             <><PlusSquare/> Add</>
                                         </Button>
@@ -273,10 +254,11 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                                    showDeleteButton={false}/>
                     }
                 </div>
-                <ShowTable className={"mb-6"} tableFields={["Name", "Diagnosed at"]} value={child.diagnosedDiseases}
+                <ShowTable className={"mb-6"} tableFields={["Name", "Diagnosed at"]}
+                           value={currentChild.diagnosedDiseases}
                            showDeleteButton={false}/>
                 <ShowTable tableFields={["Name", "Dose", "Taken since"]}
-                           value={child.regularMedicines}
+                           value={currentChild.regularMedicines}
                            showDeleteButton={false}/>
             </div>
             <Toaster/>
@@ -285,15 +267,15 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                 onOpenChange={setParentIsEditDialogOpen}
                 onParentModified={onParentAdded}
             />
-            <ChildForm existingChild={child ?? undefined}
-                       isOpen={isEditDialogOpen}
+            <ChildForm existingChild={currentChild ?? undefined}
+                       isOpen={isEditModeEnabled}
                        onChildModified={onChildUpdated}
-                       onOpenChange={setIsEditDialogOpen}
+                       onOpenChange={setIsEditModeEnabled}
             />
-            <DeleteData entityId={child.id}
-                        entityLabel={`${child.givenName} ${child.familyName}`}
-                        isOpen={isDeleteDialogOpen}
-                        onOpenChange={setIsDeleteDialogOpen}
+            <DeleteData entityId={currentChild.id}
+                        entityLabel={`${currentChild.givenName} ${currentChild.familyName}`}
+                        isOpen={isDeleteModeEnabled}
+                        onOpenChange={setIsDeleteModeEnabled}
                         onSuccess={onChildDeleted}
                         deleteFunction={deleteChild}
                         entityType={"Child"}
