@@ -22,9 +22,11 @@ interface ParentFormProps {
     existingParent?: ParentDataWithChildrenIds
     isOpen: boolean
     onOpenChange: (open: boolean) => void;
+    onChildFormClicked?: boolean
+
 }
 
-function ParentForm({onParentModified, existingParent, isOpen, onOpenChange}: ParentFormProps) {
+function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onChildFormClicked}: ParentFormProps) {
 
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof parentSchema>>({
@@ -90,7 +92,7 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange}: Pa
         form.reset({
             familyName: existingParent?.familyName ?? "",
             givenName: existingParent?.givenName ?? "",
-            phoneNumbers: existingParent?.phoneNumbers ?? [],
+            phoneNumbers: existingParent?.phoneNumbers ?? undefined,
             address: existingParent?.address ?? "",
         })
     }, [existingParent])
@@ -134,13 +136,13 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange}: Pa
                                         )}
                                     />
                                 </div>
-                                {!existingParent &&
+                                {!existingParent && !onChildFormClicked &&
                                     <FormField
                                         control={form.control}
                                         name="childId"
                                         render={({field}) => (
                                             <FormItem className={"flex-1"}>
-                                                <FormLabel>Parent</FormLabel>
+                                                <FormLabel>Child</FormLabel>
                                                 <FormControl>
                                                     <div className={"flex justify-between"}>
                                                         <AutoComplete

@@ -8,6 +8,7 @@ export default function addChild(values: ChildDataInput) {
         mutation: gql`
             mutation AddChild($child: ChildInput!) {
                 addChild(child: $child) {
+                    id
                     familyName
                     givenName
                     birthDate

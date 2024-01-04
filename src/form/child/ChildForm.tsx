@@ -27,6 +27,7 @@ interface ChildFormProps {
     existingChild?: ChildData
     isOpen: boolean
     onOpenChange: (open: boolean) => void;
+    onParentFormClicked?: boolean
 }
 
 
@@ -34,7 +35,8 @@ function ChildForm({
                        onChildModified,
                        existingChild,
                        isOpen,
-                       onOpenChange
+                       onOpenChange,
+                       onParentFormClicked
                    }: ChildFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof childSchema>>({
@@ -200,7 +202,7 @@ function ChildForm({
                                             </FormItem>
                                         )}
                                     />
-                                    {!existingChild &&
+                                    {!existingChild && !onParentFormClicked &&
                                         <FormField
                                             control={form.control}
                                             name="relativeParents"

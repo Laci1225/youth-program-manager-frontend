@@ -22,7 +22,7 @@ import HoverText from "@/components/hoverText";
 import ParentForm from "@/form/parent/ParentForm";
 import {ParentData, ParentDataWithEmergencyContact} from "@/model/parent-data";
 import SaveParentsDataToChild from "@/table/child/SaveParentsDataToChild";
-import ChildsParentTable from "@/table/child/ChildsParentTable";
+import ChildsParentsTable from "@/table/child/ChildsParentsTable";
 import fromChildWithParentsToChildData from "@/model/fromChildWithParentsToChildData";
 import getPotentialParents from "@/api/graphql/child/getPotentialParents";
 
@@ -53,18 +53,18 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
         router.push("/children")
     }
 
-    const [isEditModeEnabled, setIsEditModeEnabled] = useState(false)
+    const [isChildEditModeEnabled, setIsChildEditModeEnabled] = useState(false)
     const [isDeleteModeEnabled, setIsDeleteModeEnabled] = useState(false)
 
     function handleEditClick() {
-        setIsEditModeEnabled(true)
+        setIsChildEditModeEnabled(true)
     }
 
     function handleDeleteClick() {
         setIsDeleteModeEnabled(true)
     }
 
-    const [isParentEditDialogOpen, setParentIsEditDialogOpen] = useState(false)
+    const [isParentEditDialogOpen, setParentEditDialogOpen] = useState(false)
     const onParentAdded = (newParent: ParentData) => {
         const newParentData: ParentDataWithEmergencyContact = {
             parentDto: newParent,
@@ -95,7 +95,7 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
 
 
     function handleParentEditClick() {
-        setParentIsEditDialogOpen(true)
+        setParentEditDialogOpen(true)
     }
 
     function updateAndSaveChild(childWithoutUnnecessaryFields: Omit<ChildData, "hasRegularMedicines" | "modifiedDate" | "createdDate" | "hasDiagnosedDiseases">) {
@@ -103,7 +103,7 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
             .then(value => {
                 setChildWithParents(prevState => ({...prevState, ...value}))
                 toast({
-                    title: "The currentChild is successfully updated",
+                    title: "Child is successfully updated",
                     description: `A child with name: ${currentChild.givenName} ${currentChild.familyName} updated`,
                     duration: 2000
                 });
@@ -212,9 +212,9 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
                                             onCancel={onCancelClicked}/>
                     {isEditParentsModeEnabled ? (
                             <>
-                                <ChildsParentTable child={currentChild}
-                                                   childWithParents={childWithParents}
-                                                   setChildWithParents={setChildWithParents}/>
+                                <ChildsParentsTable child={currentChild}
+                                                    childWithParents={childWithParents}
+                                                    setChildWithParents={setChildWithParents}/>
                                 <div className={"flex justify-between mb-5 mt-3"}>
                                     <div className={"flex w-4/5"}>
                                         <AutoComplete
@@ -266,13 +266,15 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
             <Toaster/>
             <ParentForm
                 isOpen={isParentEditDialogOpen}
-                onOpenChange={setParentIsEditDialogOpen}
+                onOpenChange={setParentEditDialogOpen}
                 onParentModified={onParentAdded}
+                onChildFormClicked={true}
+
             />
             <ChildForm existingChild={currentChild ?? undefined}
-                       isOpen={isEditModeEnabled}
+                       isOpen={isChildEditModeEnabled}
                        onChildModified={onChildUpdated}
-                       onOpenChange={setIsEditModeEnabled}
+                       onOpenChange={setIsChildEditModeEnabled}
             />
             <DeleteData entityId={currentChild.id}
                         entityLabel={`${currentChild.givenName} ${currentChild.familyName}`}
