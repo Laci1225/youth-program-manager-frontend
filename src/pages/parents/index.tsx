@@ -29,7 +29,7 @@ import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
 import deleteParent from "@/api/graphql/parent/deleteParent";
 import DeleteData from "@/components/deleteData";
-import {ParentData} from "@/model/parent-data";
+import {ParentData, ParentDataWithChildrenIds} from "@/model/parent-data";
 import HoverText from "@/components/hoverText";
 import SettingsDropdown from "@/components/SettingsDropdown";
 
@@ -40,11 +40,11 @@ export const getServerSideProps = (async () => {
             parentsData: parents
         }
     };
-}) satisfies GetServerSideProps<{ parentsData: ParentData[] }>;
+}) satisfies GetServerSideProps<{ parentsData: ParentDataWithChildrenIds[] }>;
 
 export default function Parents({parentsData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
-    const [parents, setParents] = useState<ParentData[]>(parentsData)
+    const [parents, setParents] = useState<ParentDataWithChildrenIds[]>(parentsData)
     const onParentSaved = (savedParent: ParentData) => {
         if (editedParent) {
             const modifiedParents = parents.map((parent) =>
@@ -59,12 +59,12 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
         const updatedParents = parents.filter(p => p.id !== parent.id);
         setParents(updatedParents);
     }
-    const [editedParent, setEditedParent] = useState<ParentData | null>(null)
+    const [editedParent, setEditedParent] = useState<ParentDataWithChildrenIds | null>(null)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [deletedParent, setDeletedParent] = useState<ParentData>()
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-    function handleEditClick(parent: ParentData | null) {
+    function handleEditClick(parent: ParentDataWithChildrenIds | null) {
         setIsEditDialogOpen(true)
         setEditedParent(parent)
     }

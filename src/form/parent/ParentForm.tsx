@@ -12,16 +12,14 @@ import {parentSchema} from "@/form/parent/parentSchema";
 import addParent from "@/api/graphql/parent/addParent";
 import {InputPhoneNumbersHandler} from "@/form/parent/InputPhoneNumbersHandler";
 import updateParent from "@/api/graphql/parent/updateParent";
-import {ParentData} from "@/model/parent-data";
+import {ParentData, ParentDataWithChildrenIds} from "@/model/parent-data";
 import {AutoComplete} from "@/table/AutoComplete";
 import getPotentialChildren from "@/api/graphql/parent/getPotentialChildren";
-import getPotentialParents from "@/api/graphql/child/getPotentialParents";
 import {Button} from "@/components/ui/button";
-import updateChild from "@/api/graphql/child/updateChild";
 
 interface ParentFormProps {
     onParentModified: (parent: ParentData) => void;
-    existingParent?: ParentData
+    existingParent?: ParentDataWithChildrenIds
     isOpen: boolean
     onOpenChange: (open: boolean) => void;
 }
@@ -41,9 +39,13 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange}: Pa
 
     function onSubmit(values: z.infer<typeof parentSchema>) {
         setIsSubmitting(true)
-        console.log(values)
-        /*if (existingParent) {
-            updateParent(existingParent.id, values)
+        if (existingParent) {
+            const updateValues = {
+                ...values,
+                id: existingParent.id,
+                childIds: existingParent.childIds
+            };
+            updateParent(updateValues)
                 .then((result) => {
                     onParentModified(result)
                     toast({
@@ -61,34 +63,34 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange}: Pa
             }).finally(() => {
                 setIsSubmitting(false)
             })
-        } else {*/
-        addParent(values)
-            .then((result) => {
-                onParentModified(result)
-                console.log(result)
+        } else {
+            addParent(values)
+                .then((result) => {
+                    onParentModified(result)
+                    console.log(result)
+                    toast({
+                        title: "The parent is successfully added",
+                        description: `A parent with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,
+                        duration: 2000
+                    })
+                    onOpenChange(false)
+                }).catch(reason => {
                 toast({
-                    title: "The parent is successfully added",
-                    description: `A parent with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,
+                    variant: "destructive",
+                    title: reason.toString(),
                     duration: 2000
                 })
-                onOpenChange(false)
-            }).catch(reason => {
-            toast({
-                variant: "destructive",
-                title: reason.toString(),
-                duration: 2000
+            }).finally(() => {
+                setIsSubmitting(false)
             })
-        }).finally(() => {
-            setIsSubmitting(false)
-        })
-        //}
+        }
     }
 
     useEffect(() => {
         form.reset({
             familyName: existingParent?.familyName ?? "",
             givenName: existingParent?.givenName ?? "",
-            phoneNumbers: existingParent?.phoneNumbers,
+            phoneNumbers: existingParent?.phoneNumbers ?? [],
             address: existingParent?.address ?? "",
         })
     }, [existingParent])
@@ -132,41 +134,43 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange}: Pa
                                         )}
                                     />
                                 </div>
-                                <FormField
-                                    control={form.control}
-                                    name="childId"
-                                    render={({field}) => (
-                                        <FormItem className={"flex-1"}>
-                                            <FormLabel>Parent</FormLabel>
-                                            <FormControl>
-                                                <div className={"flex justify-between"}>
-                                                    <AutoComplete
-                                                        className={"w-2/3"}
-                                                        key={0}
-                                                        isLoading={false}
-                                                        disabled={false}
-                                                        getPotential={getPotentialChildren}
-                                                        isAdded={false}
-                                                        onValueChange={(value) => {
-                                                            if (value) {
-                                                                field.onChange(value.id);
-                                                            } else field.onChange(undefined);
-                                                        }}
-                                                        placeholder={"Select children..."}
-                                                        emptyMessage={"No child found"}
-                                                    />
-                                                    <Button type={"button"}
-                                                            onClick={() => {
-                                                                //handleParentEditClick()
-                                                            }}>
-                                                        Create
-                                                    </Button>
-                                                </div>
-                                            </FormControl>
-                                            <FormMessage/>
-                                        </FormItem>
-                                    )}
-                                />
+                                {!existingParent &&
+                                    <FormField
+                                        control={form.control}
+                                        name="childId"
+                                        render={({field}) => (
+                                            <FormItem className={"flex-1"}>
+                                                <FormLabel>Parent</FormLabel>
+                                                <FormControl>
+                                                    <div className={"flex justify-between"}>
+                                                        <AutoComplete
+                                                            className={"w-2/3"}
+                                                            key={0}
+                                                            isLoading={false}
+                                                            disabled={false}
+                                                            getPotential={getPotentialChildren}
+                                                            isAdded={false}
+                                                            onValueChange={(value) => {
+                                                                if (value) {
+                                                                    field.onChange(value.id);
+                                                                } else field.onChange(undefined);
+                                                            }}
+                                                            placeholder={"Select children..."}
+                                                            emptyMessage={"No child found"}
+                                                        />
+                                                        <Button type={"button"}
+                                                                onClick={() => {
+                                                                    //handleParentEditClick()
+                                                                }}>
+                                                            Create
+                                                        </Button>
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage/>
+                                            </FormItem>
+                                        )}
+                                    />
+                                }
                                 <FormField
                                     control={form.control}
                                     name="phoneNumbers"

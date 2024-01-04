@@ -12,13 +12,10 @@ import getParentById from "@/api/graphql/parent/getParentById";
 import deleteParent from "@/api/graphql/parent/deleteParent";
 import DeleteData from "@/components/deleteData";
 import {ParentData, ParentDataWithChildren} from "@/model/parent-data";
-import SaveParentsDataToChild from "@/table/child/SaveParentsDataToChild";
-import ChildsParentTable from "@/table/child/ChildsParentTable";
 import {AutoComplete} from "@/table/AutoComplete";
 import getPotentialParents from "@/api/graphql/child/getPotentialParents";
 import {Button} from "@/components/ui/button";
 import ShowTable from "@/form/ShowTable";
-import {RelativeParent} from "@/model/child-data";
 import fromParentWithChildrenToParent from "@/model/fromParentWithChildrenToParent";
 
 
@@ -162,7 +159,10 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                 </div>
             </div>
             <Toaster/>
-            <ParentForm existingParent={parent ?? undefined}
+            <ParentForm existingParent={{
+                ...parentWithChildren,
+                childIds: parentWithChildren.childDtos?.map(child => child.id)
+            } ?? undefined}
                         isOpen={isEditDialogOpen}
                         onParentModified={onParentUpdated}
                         onOpenChange={setIsEditDialogOpen}
