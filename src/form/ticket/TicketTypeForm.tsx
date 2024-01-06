@@ -71,7 +71,7 @@ function TicketTypeForm({onTicketModified, existingTicket, isOpen, onOpenChange}
                 }).catch(reason => {
                 toast({
                     variant: "destructive",
-                    title: reason.toString(),
+                    title: reason.message,
                     duration: 2000
                 })
             }).finally(() => {

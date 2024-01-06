@@ -24,12 +24,14 @@ import ParentForm from "@/form/parent/ParentForm";
 import {serverSideClient} from "@/api/graphql/client";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
 import getAllParents from "@/api/graphql/parent/getAllParents";
-import {Pencil, PlusSquare, Trash} from "lucide-react";
+import {AlertTriangle, Pencil, PlusSquare, Trash} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
 import deleteParent from "@/api/graphql/parent/deleteParent";
 import DeleteData from "@/components/deleteData";
-import {ParentData} from "@/model/parent-data";
+import {ParentData, ParentDataWithChildrenIds} from "@/model/parent-data";
+import HoverText from "@/components/hoverText";
+import SettingsDropdown from "@/components/SettingsDropdown";
 
 export const getServerSideProps = (async () => {
     const parents = await getAllParents(serverSideClient)
@@ -38,11 +40,11 @@ export const getServerSideProps = (async () => {
             parentsData: parents
         }
     };
-}) satisfies GetServerSideProps<{ parentsData: ParentData[] }>;
+}) satisfies GetServerSideProps<{ parentsData: ParentDataWithChildrenIds[] }>;
 
 export default function Parents({parentsData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
-    const [parents, setParents] = useState<ParentData[]>(parentsData)
+    const [parents, setParents] = useState<ParentDataWithChildrenIds[]>(parentsData)
     const onParentSaved = (savedParent: ParentData) => {
         if (editedParent) {
             const modifiedParents = parents.map((parent) =>
@@ -57,12 +59,12 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
         const updatedParents = parents.filter(p => p.id !== parent.id);
         setParents(updatedParents);
     }
-    const [editedParent, setEditedParent] = useState<ParentData | null>(null)
+    const [editedParent, setEditedParent] = useState<ParentDataWithChildrenIds | null>(null)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [deletedParent, setDeletedParent] = useState<ParentData>()
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-    function handleEditClick(parent: ParentData | null) {
+    function handleEditClick(parent: ParentDataWithChildrenIds | null) {
         setIsEditDialogOpen(true)
         setEditedParent(parent)
     }
@@ -104,53 +106,31 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
                                     <TableCell className="text-center">
                                         {parent.phoneNumbers.length > 1
                                             ? (
-                                                <TooltipProvider>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <div>
-                                                                {parent.phoneNumbers[0]} (+
-                                                                {parent.phoneNumbers.length - 1})
-                                                            </div>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            {parent.phoneNumbers.slice(1)
-                                                                .map((number, index) =>
-                                                                    <p key={index}>{number}</p>)}
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </TooltipProvider>
+                                                <HoverText trigger={
+                                                    <div>
+                                                        {parent.phoneNumbers[0]} (+
+                                                        {parent.phoneNumbers.length - 1})
+                                                    </div>
+                                                } content={
+                                                    parent.phoneNumbers.slice(1)
+                                                        .map((number, index) =>
+                                                            <p key={index}>{number}</p>)
+                                                }/>
                                             )
                                             : (<>{parent.phoneNumbers[0]}</>)}
                                     </TableCell>
+                                    <TableCell className={"text-right"}>
+                                        <HoverText trigger={
+                                            (!parent.childIds || parent.childIds?.length === 0) && (
+                                                <AlertTriangle className={"text-yellow-600 "}/>)
+                                        } content={"Child not associated yet"}/>
+                                    </TableCell>
                                     <TableCell className="p-1 text-center">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger onClick={event => event.preventDefault()}>
-                                                <span className="material-icons-outlined">more_horiz</span>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent className={"min-w-8"}>
-                                                <DropdownMenuSeparator/>
-                                                <DropdownMenuItem
-                                                    className={"justify-center hover:cursor-pointer"}
-                                                    onClick={(event) => {
-                                                        event.preventDefault()
-                                                        event.stopPropagation()
-                                                        handleEditClick(parent)
-                                                    }}>
-                                                    <Pencil className={"mx-1"}/>
-                                                    <span>Edit</span>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem
-                                                    className={"justify-center hover:cursor-pointer p-2 mx-5 bg-red-600 text-white"}
-                                                    onClick={event => {
-                                                        event.preventDefault()
-                                                        event.stopPropagation()
-                                                        handleDeleteClick(parent)
-                                                    }}>
-                                                    <Trash className={"mx-1"}/>
-                                                    <span>Delete</span>
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                        <SettingsDropdown
+                                            handleEditClick={handleEditClick}
+                                            handleDeleteClick={handleDeleteClick}
+                                            item={parent}
+                                        />
                                     </TableCell>
                                 </TableRow>
                             ))) : (

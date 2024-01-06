@@ -1,9 +1,9 @@
 import {ApolloClient, NormalizedCacheObject} from '@apollo/client';
 import {clientSideClient} from '@/api/graphql/client';
 import {gql} from '@apollo/client';
-import {ParentData} from "@/model/parent-data";
+import {ParentDataWithChildrenIds} from "@/model/parent-data";
 
-export default async function getAllParents(client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<ParentData[]> {
+export default async function getAllParents(client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<ParentDataWithChildrenIds[]> {
     let value = await client.query({
         query: gql`
             query {
@@ -13,6 +13,7 @@ export default async function getAllParents(client: ApolloClient<NormalizedCache
                     givenName
                     phoneNumbers
                     address
+                    childIds
                 }
             }
         `, fetchPolicy: "no-cache"

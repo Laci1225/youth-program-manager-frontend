@@ -24,6 +24,7 @@ import DeleteData from "@/components/deleteData";
 import {TicketData} from "@/model/ticket-data";
 import TicketTypeForm from "@/form/ticket/TicketTypeForm";
 import deletedTicketType from "@/api/graphql/ticket/deletedTicketType";
+import SettingsDropdown from "@/components/SettingsDropdown";
 
 export const getServerSideProps = (async () => {
     const tickets = await getAllTicketTypes(serverSideClient)
@@ -112,34 +113,11 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                                         {ticket.standardValidityPeriod} day(s)
                                     </TableCell>
                                     <TableCell className="p-1 text-center">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger onClick={event => event.preventDefault()}>
-                                                <span className="material-icons-outlined">more_horiz</span>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent className={"min-w-8"}>
-                                                <DropdownMenuSeparator/>
-                                                <DropdownMenuItem
-                                                    className={"justify-center hover:cursor-pointer"}
-                                                    onClick={(event) => {
-                                                        event.preventDefault()
-                                                        event.stopPropagation()
-                                                        handleEditClick(ticket)
-                                                    }}>
-                                                    <Pencil className={"mx-1"}/>
-                                                    <span>Edit</span>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem
-                                                    className={"justify-center hover:cursor-pointer p-2 mx-5 bg-red-600 text-white"}
-                                                    onClick={event => {
-                                                        event.preventDefault()
-                                                        event.stopPropagation()
-                                                        handleDeleteClick(ticket)
-                                                    }}>
-                                                    <Trash className={"mx-1"}/>
-                                                    <span>Delete</span>
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                        <SettingsDropdown
+                                            handleEditClick={handleEditClick}
+                                            handleDeleteClick={handleDeleteClick}
+                                            item={ticket}
+                                        />
                                     </TableCell>
                                 </TableRow>
                             ))) : (

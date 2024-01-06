@@ -32,13 +32,13 @@ interface ChildFormProps {
 }
 
 
-function ChildForm({
-                       onChildModified,
-                       existingChild,
-                       isOpen,
-                       onOpenChange,
-                       onParentFormClicked
-                   }: ChildFormProps) {
+function ChildForm2({
+                        onChildModified,
+                        existingChild,
+                        isOpen,
+                        onOpenChange,
+                        onParentFormClicked
+                    }: ChildFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof childSchema>>({
         resolver: zodResolver(childSchema),
@@ -297,14 +297,8 @@ function ChildForm({
                     </Form>
                 </DialogContent>
             </Dialog>
-            <ParentForm
-                isOpen={isParentEditDialogOpen}
-                onOpenChange={setParentIsEditDialogOpen}
-                onParentModified={onParentUpdated}
-                onChildFormClicked={true}
-            />
         </>
     );
 }
 
-export default ChildForm;
+export default ChildForm2;

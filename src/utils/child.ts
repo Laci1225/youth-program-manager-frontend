@@ -14,6 +14,6 @@ export const parseDateInMedicine = (array: Medicine[] | undefined): Medicine[] |
         if (item.takenSince) {
             return {...item, takenSince: new Date(item.takenSince)};
         }
-        return {...item};
+        return {...item, takenSince: undefined};
     });
 }

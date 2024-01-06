@@ -32,6 +32,12 @@ export const childSchema = z.object({
     birthDate: z.date().max(new Date(), 'Invalid date format'),
     birthPlace: z.string().min(2, 'Birth Place must be at least 2 characters.'),
     address: z.string().min(2, 'Address must be at least 2 characters.'),
+    relativeParents: z.array(
+        z.object({
+            id: z.string(),
+            isEmergencyContact: z.boolean()
+        }),
+    ).optional(),
     diagnosedDiseases:
         z.array(
             diseaseSchema

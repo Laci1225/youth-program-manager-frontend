@@ -7,8 +7,8 @@ import {FieldError, Merge} from "react-hook-form";
 
 interface InputHandlerProps {
     value?: string[];
-    onChange: (newValue: String[]) => void
-    errors: Merge<FieldError, (FieldError | undefined)[]>
+    onChange: (newValue: string[]) => void;
+    errors: Merge<FieldError, (FieldError | undefined)[]>;
 }
 
 export function InputPhoneNumbersHandler({value, onChange, errors}: InputHandlerProps) {
