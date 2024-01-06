@@ -6,9 +6,7 @@ import {cn} from "@/lib/utils"
 import {Check, XIcon} from "lucide-react"
 import {Skeleton} from "@/components/ui/skeleton";
 import {ParentData} from "@/model/parent-data";
-import getPotentialParents from "@/api/graphql/child/getPotentialParents";
 import {Button} from "@/components/ui/button";
-import getParentById from "@/api/graphql/parent/getParentById";
 import {ChildData, RelativeParent} from "@/model/child-data";
 import debounce from "@/utils/debounce";
 
@@ -46,12 +44,13 @@ export const AutoComplete = <T extends ParentData | ChildData>({
     const [options, setOptions] = useState<T[]>()
 
     useEffect(() => {
+        setInputValue(value ? `${value.familyName} ${value.givenName}` : undefined)
         if (isAdded) {
             setInputValue("")
             setSelected(undefined)
             setOptions(undefined)
         }
-    }, [isAdded]);
+    }, [isAdded, value]);
 
     const fetchPotentialParents = useCallback((name: string) => {
         getPotential(name)

@@ -16,6 +16,7 @@ import {ParentData, ParentDataWithChildrenIds} from "@/model/parent-data";
 import {AutoComplete} from "@/table/AutoComplete";
 import getPotentialChildren from "@/api/graphql/parent/getPotentialChildren";
 import {Button} from "@/components/ui/button";
+import {ChildData} from "@/model/child-data";
 
 interface ParentFormProps {
     onParentModified: (parent: ParentData) => void;
@@ -38,6 +39,8 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
             address: existingParent?.address,
         },
     })
+
+    const [isChildEditDialogOpen, setIsChildEditDialogOpen] = useState(false)
 
     function onSubmit(values: z.infer<typeof parentSchema>) {
         setIsSubmitting(true)
@@ -97,122 +100,136 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
         })
     }, [existingParent])
 
+    function onChildUpdated(child: ChildData) {
+        //form.setValue("childId", child.id)
+    }
+
     return (
-        <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[800px] h-[90vh] shadow-muted-foreground">
-                <DialogHeader>
-                    <DialogTitle>{existingParent ? "Update" : "Create"} a parent</DialogTitle>
-                </DialogHeader>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.log(errors))}
-                          className="flex justify-center flex-col space-y-4 mx-4">
-                        <ScrollArea className="h-[70vh]">
-                            <div className="mx-4">
-                                <div className="flex">
+        <>
+            <Dialog open={isOpen} onOpenChange={onOpenChange}>
+                <DialogContent className="sm:max-w-[800px] h-[90vh] shadow-muted-foreground">
+                    <DialogHeader>
+                        <DialogTitle>{existingParent ? "Update" : "Create"} a parent</DialogTitle>
+                    </DialogHeader>
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.log(errors))}
+                              className="flex justify-center flex-col space-y-4 mx-4">
+                            <ScrollArea className="h-[70vh]">
+                                <div className="mx-4">
+                                    <div className="flex">
+                                        <FormField
+                                            control={form.control}
+                                            name="familyName"
+                                            render={({field}) => (
+                                                <FormItem className="flex-1">
+                                                    <FormLabel>Family name*</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Family name" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="givenName"
+                                            render={({field}) => (
+                                                <FormItem className="flex-1">
+                                                    <FormLabel>Given name*</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Given name" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    {!existingParent && !onChildFormClicked &&
+                                        <FormField
+                                            control={form.control}
+                                            name="childId"
+                                            render={({field}) => (
+                                                <FormItem className={"flex-1"}>
+                                                    <FormLabel>Child</FormLabel>
+                                                    <FormControl>
+                                                        <div className={"flex justify-between"}>
+                                                            <AutoComplete
+                                                                className={"w-2/3"}
+                                                                key={0}
+                                                                isLoading={false}
+                                                                disabled={false}
+                                                                getPotential={getPotentialChildren}
+                                                                isAdded={false}
+                                                                onValueChange={(value) => {
+                                                                    if (value) {
+                                                                        field.onChange(value.id);
+                                                                    } else field.onChange(undefined);
+                                                                }}
+                                                                placeholder={"Select children..."}
+                                                                emptyMessage={"No child found"}
+                                                            />
+                                                            <Button type={"button"}
+                                                                    onClick={() => {
+                                                                        //handleParentEditClick()
+                                                                    }}>
+                                                                Create
+                                                            </Button>
+                                                        </div>
+                                                    </FormControl>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+                                    }
                                     <FormField
                                         control={form.control}
-                                        name="familyName"
+                                        name="phoneNumbers"
                                         render={({field}) => (
                                             <FormItem className="flex-1">
-                                                <FormLabel>Family name*</FormLabel>
+                                                <FormLabel>Phone numbers*</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Family name" {...field} />
+                                                    <InputPhoneNumbersHandler {...field}
+                                                                              errors={form.formState.errors.phoneNumbers || []}
+                                                    />
                                                 </FormControl>
-                                                <FormMessage/>
+                                                <FormMessage
+                                                    hidden={typeof form.formState.errors.phoneNumbers?.message === 'undefined'}/>
                                             </FormItem>
                                         )}
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="givenName"
+                                        name="address"
                                         render={({field}) => (
-                                            <FormItem className="flex-1">
-                                                <FormLabel>Given name*</FormLabel>
+                                            <FormItem className={"flex-1"}>
+                                                <FormLabel>Address</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Given name" {...field} />
+                                                    <Input placeholder="Address" {...field} />
                                                 </FormControl>
                                                 <FormMessage/>
                                             </FormItem>
                                         )}
                                     />
                                 </div>
-                                {!existingParent && !onChildFormClicked &&
-                                    <FormField
-                                        control={form.control}
-                                        name="childId"
-                                        render={({field}) => (
-                                            <FormItem className={"flex-1"}>
-                                                <FormLabel>Child</FormLabel>
-                                                <FormControl>
-                                                    <div className={"flex justify-between"}>
-                                                        <AutoComplete
-                                                            className={"w-2/3"}
-                                                            key={0}
-                                                            isLoading={false}
-                                                            disabled={false}
-                                                            getPotential={getPotentialChildren}
-                                                            isAdded={false}
-                                                            onValueChange={(value) => {
-                                                                if (value) {
-                                                                    field.onChange(value.id);
-                                                                } else field.onChange(undefined);
-                                                            }}
-                                                            placeholder={"Select children..."}
-                                                            emptyMessage={"No child found"}
-                                                        />
-                                                        <Button type={"button"}
-                                                                onClick={() => {
-                                                                    //handleParentEditClick()
-                                                                }}>
-                                                            Create
-                                                        </Button>
-                                                    </div>
-                                                </FormControl>
-                                                <FormMessage/>
-                                            </FormItem>
-                                        )}
-                                    />
-                                }
-                                <FormField
-                                    control={form.control}
-                                    name="phoneNumbers"
-                                    render={({field}) => (
-                                        <FormItem className="flex-1">
-                                            <FormLabel>Phone numbers*</FormLabel>
-                                            <FormControl>
-                                                <InputPhoneNumbersHandler {...field}
-                                                                          errors={form.formState.errors.phoneNumbers || []}
-                                                />
-                                            </FormControl>
-                                            <FormMessage
-                                                hidden={typeof form.formState.errors.phoneNumbers?.message === 'undefined'}/>
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="address"
-                                    render={({field}) => (
-                                        <FormItem className={"flex-1"}>
-                                            <FormLabel>Address</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Address" {...field} />
-                                            </FormControl>
-                                            <FormMessage/>
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-                        </ScrollArea>
-                        <DialogFooter>
-                            <LoadingButton isLoading={isSubmitting}>
-                                {existingParent ? "Update" : "Create"}
-                            </LoadingButton>
-                        </DialogFooter>
-                    </form>
-                </Form>
-            </DialogContent>
-        </Dialog>
+                            </ScrollArea>
+                            <DialogFooter>
+                                <LoadingButton isLoading={isSubmitting}>
+                                    {existingParent ? "Update" : "Create"}
+                                </LoadingButton>
+                            </DialogFooter>
+                        </form>
+                    </Form>
+                </DialogContent>
+            </Dialog>
+            {/*
+            //TODO max call stack
+            <ChildForm
+                isOpen={isChildEditDialogOpen}
+                onOpenChange={setIsChildEditDialogOpen}
+                onChildModified={onChildUpdated}
+            />
+            */}
+        </>
     );
 }
 

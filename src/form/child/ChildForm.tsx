@@ -21,6 +21,7 @@ import {AutoComplete} from "@/table/AutoComplete";
 import ParentForm from "@/form/parent/ParentForm";
 import {Button} from "@/components/ui/button";
 import getPotentialParents from "@/api/graphql/child/getPotentialParents";
+import {ParentData} from "@/model/parent-data";
 
 interface ChildFormProps {
     onChildModified: (child: ChildData) => void;
@@ -114,7 +115,10 @@ function ChildForm({
         })
     }, [existingChild]);
     const [isParentEditDialogOpen, setParentIsEditDialogOpen] = useState(false)
-    const onParentUpdated = () => {
+    const [autoCompleteValue, setAutoCompleteValue] = useState<ParentData>()
+    const onParentUpdated = (parent: ParentData) => {
+        form.setValue("relativeParents", [{id: parent.id, isEmergencyContact: true}])
+        setAutoCompleteValue(parent)
     }
 
     function handleParentEditClick() {
@@ -214,6 +218,7 @@ function ChildForm({
                                                             <AutoComplete
                                                                 className={"w-2/3"}
                                                                 key={0}
+                                                                value={autoCompleteValue ?? autoCompleteValue}
                                                                 isLoading={false}
                                                                 disabled={false}
                                                                 getPotential={getPotentialParents}
@@ -296,6 +301,7 @@ function ChildForm({
                 isOpen={isParentEditDialogOpen}
                 onOpenChange={setParentIsEditDialogOpen}
                 onParentModified={onParentUpdated}
+                onChildFormClicked={true}
             />
         </>
     );
