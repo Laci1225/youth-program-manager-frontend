@@ -160,10 +160,13 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
                 <div>
                     Child details
                 </div>
-                <HoverText trigger={
-                    (!currentChild.relativeParents || currentChild.relativeParents?.length === 0) && (
-                        <AlertTriangle className={"text-yellow-600 "}/>)
-                } content={"Parent not associated yet"}/>
+                <div className={"flex"}>
+                    <HoverText trigger={
+                        (!currentChild.relativeParents || currentChild.relativeParents?.length === 0) && (
+                            <AlertTriangle className={"text-yellow-600 "}/>)
+                    }/>
+                    Parent not associated yet
+                </div>
                 <div className={"flex"}>
                     <div className={" flex flex-row items-center hover:cursor-pointer px-5"}
                          onClick={(event) => {

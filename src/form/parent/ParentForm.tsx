@@ -17,6 +17,7 @@ import {AutoComplete} from "@/table/AutoComplete";
 import getPotentialChildren from "@/api/graphql/parent/getPotentialChildren";
 import {Button} from "@/components/ui/button";
 import {ChildData} from "@/model/child-data";
+import ChildForm2 from "@/form/child/ChildForm2";
 
 interface ParentFormProps {
     onParentModified: (parent: ParentData) => void;
@@ -41,6 +42,10 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
     })
 
     const [isChildEditDialogOpen, setIsChildEditDialogOpen] = useState(false)
+
+    function handleChildEditClick() {
+        setIsChildEditDialogOpen(true)
+    }
 
     function onSubmit(values: z.infer<typeof parentSchema>) {
         setIsSubmitting(true)
@@ -100,8 +105,11 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
         })
     }, [existingParent])
 
+    const [autoCompleteValue, setAutoCompleteValue] = useState<ChildData>()
+
     function onChildUpdated(child: ChildData) {
-        //form.setValue("childId", child.id)
+        form.setValue("childId", child.id)
+        setAutoCompleteValue(child)
     }
 
     return (
@@ -158,6 +166,7 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
                                                                 key={0}
                                                                 isLoading={false}
                                                                 disabled={false}
+                                                                value={autoCompleteValue}
                                                                 getPotential={getPotentialChildren}
                                                                 isAdded={false}
                                                                 onValueChange={(value) => {
@@ -170,7 +179,7 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
                                                             />
                                                             <Button type={"button"}
                                                                     onClick={() => {
-                                                                        //handleParentEditClick()
+                                                                        handleChildEditClick()
                                                                     }}>
                                                                 Create
                                                             </Button>
@@ -221,14 +230,12 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
                     </Form>
                 </DialogContent>
             </Dialog>
-            {/*
-            //TODO max call stack
-            <ChildForm
+            <ChildForm2
                 isOpen={isChildEditDialogOpen}
                 onOpenChange={setIsChildEditDialogOpen}
                 onChildModified={onChildUpdated}
+                onParentFormClicked={true}
             />
-            */}
         </>
     );
 }

@@ -119,6 +119,12 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
                                             )
                                             : (<>{parent.phoneNumbers[0]}</>)}
                                     </TableCell>
+                                    <TableCell className={"text-right"}>
+                                        <HoverText trigger={
+                                            (!parent.childIds || parent.childIds?.length === 0) && (
+                                                <AlertTriangle className={"text-yellow-600 "}/>)
+                                        } content={"Child not associated yet"}/>
+                                    </TableCell>
                                     <TableCell className="p-1 text-center">
                                         <SettingsDropdown
                                             handleEditClick={handleEditClick}

@@ -4,19 +4,26 @@ import React, {ReactNode} from "react";
 
 interface HoverTextProps {
     trigger: ReactNode,
-    content: ReactNode
+    content?: ReactNode
 }
 
 export default function HoverText({trigger, content}: HoverTextProps) {
 
-    return (<TooltipProvider>
-        <Tooltip>
-            <TooltipTrigger asChild>
-                {trigger}
-            </TooltipTrigger>
-            <TooltipContent>
-                {content}
-            </TooltipContent>
-        </Tooltip>
-    </TooltipProvider>)
+    return (
+        <>
+            {
+                content ?
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                {trigger}
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                {content}
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                    : trigger
+            }
+        </>)
 }

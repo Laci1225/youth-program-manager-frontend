@@ -4,7 +4,7 @@ import Link from "next/link";
 import {Toaster} from "@/components/ui/toaster";
 import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
-import {Pencil, PlusSquare, Trash} from "lucide-react";
+import {AlertTriangle, Pencil, PlusSquare, Trash} from "lucide-react";
 import {useRouter} from "next/router";
 import ParentForm from "@/form/parent/ParentForm";
 import {serverSideClient} from "@/api/graphql/client";
@@ -33,6 +33,7 @@ import {toast} from "@/components/ui/use-toast";
 import updateParent from "@/api/graphql/parent/updateParent";
 import getPotentialChildren from "@/api/graphql/parent/getPotentialChildren";
 import ChildForm from "@/form/child/ChildForm";
+import HoverText from "@/components/hoverText";
 
 
 export const getServerSideProps = (async (context) => {
@@ -143,6 +144,13 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                 </Link>
                 <div>
                     Parent details
+                </div>
+                <div className={"flex"}>
+                    <HoverText trigger={
+                        (!parentWithChildren.childDtos || parentWithChildren.childDtos?.length === 0) && (
+                            <AlertTriangle className={"text-yellow-600 "}/>)
+                    }/>
+                    Child not associated yet
                 </div>
                 <div className={"flex"}>
                     <div className={" flex flex-row items-center hover:cursor-pointer px-5"}
