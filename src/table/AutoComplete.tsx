@@ -9,6 +9,7 @@ import {ParentData} from "@/model/parent-data";
 import {Button} from "@/components/ui/button";
 import {ChildData, RelativeParent} from "@/model/child-data";
 import debounce from "@/utils/debounce";
+import {format} from "date-fns";
 
 
 type AutoCompleteProps<T> = {
@@ -34,7 +35,7 @@ export const AutoComplete = <T extends ParentData | ChildData>({
                                                                    onValueChange,
                                                                    disabled,
                                                                    isLoading = false,
-                                                                   getPotential
+                                                                   getPotential,
                                                                }: AutoCompleteProps<T>) => {
     const inputRef = useRef<HTMLInputElement>(null)
 
@@ -52,7 +53,7 @@ export const AutoComplete = <T extends ParentData | ChildData>({
         }
     }, [isAdded, value]);
 
-    const fetchPotentialParents = useCallback((name: string) => {
+    const fetchPotential = useCallback((name: string) => {
         getPotential(name)
             .then(parents => {
                 const filteredParents = parents.filter((parent) =>
@@ -69,14 +70,14 @@ export const AutoComplete = <T extends ParentData | ChildData>({
     }, [alreadyAddedData]);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    const debouncedFetchPotentialParents = useCallback(debounce(fetchPotentialParents), [fetchPotentialParents]);
+    const debouncedFetchPotential = useCallback(debounce(fetchPotential), [fetchPotential]);
 
-    function potentialParents(event: FormEvent<HTMLInputElement>) {
+    function potential(event: FormEvent<HTMLInputElement>) {
         const name = event.currentTarget.value
         setInputValue(name);
         if (name) {
             setOpen(name.length > 0);
-            debouncedFetchPotentialParents(name);
+            debouncedFetchPotential(name);
         } else {
             setOpen(false);
             setOptions(undefined);
@@ -145,7 +146,7 @@ export const AutoComplete = <T extends ParentData | ChildData>({
                         placeholder={placeholder}
                         disabled={disabled}
                         className="text-base"
-                        onInput={potentialParents}
+                        onInput={potential}
                     />
                 </div>
                 <div className="mt-1 relative">
@@ -176,7 +177,15 @@ export const AutoComplete = <T extends ParentData | ChildData>({
                                                     className={cn("flex items-center gap-2 w-full", !isSelected ? "pl-8" : null)}
                                                 >
                                                     {isSelected ? <Check className="w-4"/> : null}
-                                                    {option.familyName} {option.givenName}
+                                                    {option && ('birthDate' in option ? (
+                                                        <div>
+                                                            {option.familyName} {option.givenName} {format(new Date(option.birthDate), "P")}
+                                                        </div>
+                                                    ) : (
+                                                        <div>
+                                                            {option.familyName} {option.givenName} {option.phoneNumbers[0]}
+                                                        </div>
+                                                    ))}
                                                 </CommandItem>
                                             )
                                         })}
