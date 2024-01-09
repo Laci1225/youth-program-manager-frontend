@@ -72,7 +72,7 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
 
 
     //todo navigate to child by clicking on it
-
+    console.log(parentWithChildren)
 
     return (
         <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
@@ -140,7 +140,10 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                         <ShowTable tableFields={["Name", "isEmergencyContact"]}
                                    value={parentWithChildren.childDtos?.map((child) => ({
                                        name: child.givenName + " " + child.familyName,
-                                       birthData: child.birthDate
+                                       isEmergencyContact:
+                                           <span
+                                               className="material-icons-outlined">{child.relativeParents?.find(relative => relative.id == parent.id)?.isEmergencyContact ? 'check_box' : 'check_box_outline_blank'}</span>
+
                                    }))}
                                    showDeleteButton={false}/>
                     }

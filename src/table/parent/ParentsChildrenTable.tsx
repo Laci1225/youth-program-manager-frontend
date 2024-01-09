@@ -55,15 +55,22 @@ export default function ParentsChildrenTable({
                                                 ...child,
                                                 relativeParents: updatedChildren
                                             };
+
                                             setParentWithChildren(prevState => ({
                                                 ...prevState,
-                                                childDto: updatedChild,
+                                                childDtos: prevState.childDtos?.map(existingChild => {
+                                                    if (existingChild.id === updatedChild.id) {
+                                                        return updatedChild;
+                                                    }
+                                                    return existingChild;
+                                                })
                                             }));
                                         }
                                     }}
                                 >
                                     <span className={"material-icons-outlined"}>
-                                        {parent.phoneNumbers ? 'check_box' : 'check_box_outline_blank'}
+                                        {child.relativeParents?.find(parent => parent?.id === parentWithChildren.id)?.isEmergencyContact
+                                            ? 'check_box' : 'check_box_outline_blank'}
                                     </span>
                                 </Button>
                             </TableCell>

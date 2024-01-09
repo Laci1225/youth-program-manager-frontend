@@ -9,6 +9,7 @@ import {ChildData} from "@/model/child-data";
 import updateParent from "@/api/graphql/parent/updateParent";
 import {toast} from "@/components/ui/use-toast";
 import ChildForm from "@/form/child/ChildForm";
+import updateChild from "@/api/graphql/child/updateChild";
 
 interface ChildInEditModeProps {
     parent: ParentData
@@ -44,10 +45,6 @@ export default function ChildInEditMode({
 
     function updateAndSaveParent(parent: ParentDataWithChildren) {
         const {childDtos, ...others} = parent
-        console.log({
-            ...others,
-            childIds: childDtos?.map(child => child.id)
-        })
         updateParent({
             ...others,
             childIds: childDtos?.map(child => child.id)
@@ -69,12 +66,14 @@ export default function ChildInEditMode({
                     variant: "destructive"
                 });
             })
-            .then(() =>
-                setParentWithChildren(tempParentsWithChildren)
-            )
+            .then(() => setParentWithChildren(tempParentsWithChildren))
+        if (childDtos) {
+            childDtos.map(
+                childDto => updateChild(childDto)
+            );
+        }
     }
 
-    console.log(tempParentsWithChildren)
     return (
         <>
             <div className={"flex justify-between mb-5"}>
@@ -86,20 +85,25 @@ export default function ChildInEditMode({
                     <span>Cancel</span>
                 </Button>
                 <Button onClick={() => {
-                    //const emergencyContacts = child.relativeParents?.filter(parent => parent.isEmergencyContact);
-                    //if (emergencyContacts && emergencyContacts.length === 0 && childWithoutUnnecessaryFields.relativeParents?.length !== 0) {
-                    /*toast({
-                        title: "Error",
-                        description: "At least one parent should be marked as an emergency contact.",
-                        duration: 2000,
-                        variant: "destructive"
-                    });*/
-                    // } else {
-                    updateAndSaveParent(tempParentsWithChildren);
-                    // }
+                    const hasEmergencyContact = tempParentsWithChildren.childDtos?.every(child => {
+                        return child.relativeParents?.some(rp => rp.isEmergencyContact);
+                    });
+                    console.log(tempParentsWithChildren.childDtos)
+                    console.log(hasEmergencyContact)
+                    if (!hasEmergencyContact) {
+                        toast({
+                            title: "Error",
+                            description: "At least one emergency contact is needed for each child.",
+                            duration: 2000,
+                            variant: "destructive"
+                        });
+                    } else {
+                        updateAndSaveParent(tempParentsWithChildren);
+                    }
                 }}>
                     Save
                 </Button>
+
             </div>
             <ParentsChildrenTable parent={parent}
                                   parentWithChildren={tempParentsWithChildren}
