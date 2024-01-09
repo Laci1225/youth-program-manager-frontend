@@ -1,23 +1,23 @@
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {Button} from "@/components/ui/button";
 import React, {Dispatch, SetStateAction} from "react";
-import {ChildData, ChildDataWithParents} from "@/model/child-data";
-import {ParentData, ParentDataWithChildren, ParentDataWithEmergencyContact} from "@/model/parent-data";
+import {ChildData} from "@/model/child-data";
+import {ParentData, ParentDataWithChildren} from "@/model/parent-data";
 
 interface ChildsParentTableProps {
     parent: ParentData;
     parentWithChildren: ParentDataWithChildren;
-    setParentWithChidren: Dispatch<SetStateAction<ParentDataWithChildren>>
+    setParentWithChildren: Dispatch<SetStateAction<ParentDataWithChildren>>
 }
 
-export default function ParentsChidrenTable({
-                                                parent,
-                                                parentWithChildren,
-                                                setParentWithChidren
-                                            }: ChildsParentTableProps) {
+export default function ParentsChildrenTable({
+                                                 parent,
+                                                 parentWithChildren,
+                                                 setParentWithChildren
+                                             }: ChildsParentTableProps) {
     function deleteChildData(child: ChildData) {
         const updatedChildren = parentWithChildren.childDtos?.filter(value => value.id !== child.id)
-        setParentWithChidren(prevState => ({...prevState, childDtos: updatedChildren}))
+        setParentWithChildren(prevState => ({...prevState, childDtos: updatedChildren}))
     }
 
     return (
@@ -55,7 +55,7 @@ export default function ParentsChidrenTable({
                                                 ...child,
                                                 relativeParents: updatedChildren
                                             };
-                                            setParentWithChidren(prevState => ({
+                                            setParentWithChildren(prevState => ({
                                                 ...prevState,
                                                 childDto: updatedChild,
                                             }));
@@ -67,7 +67,6 @@ export default function ParentsChidrenTable({
                                     </span>
                                 </Button>
                             </TableCell>
-
                             <TableCell className={"text-center"}>
                                 <Button type={"button"} className="p-0"
                                         variant={"ghost"}

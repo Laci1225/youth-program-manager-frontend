@@ -4,7 +4,7 @@ import Link from "next/link";
 import {Toaster} from "@/components/ui/toaster";
 import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
-import {AlertTriangle, Pencil, PlusSquare, Trash} from "lucide-react";
+import {AlertTriangle, Pencil, Trash} from "lucide-react";
 import {useRouter} from "next/router";
 import ParentForm from "@/form/parent/ParentForm";
 import {serverSideClient} from "@/api/graphql/client";
@@ -14,26 +14,12 @@ import DeleteData from "@/components/deleteData";
 import {
     ParentData,
     ParentDataWithChildren,
-    ParentDataWithChildrenIds,
-    ParentDataWithEmergencyContact
 } from "@/model/parent-data";
-import {AutoComplete} from "@/table/AutoComplete";
-import getPotentialParents from "@/api/graphql/child/getPotentialParents";
-import {Button} from "@/components/ui/button";
 import ShowTable from "@/form/ShowTable";
 import fromParentWithChildrenToParent from "@/model/fromParentWithChildrenToParent";
-import ChildsParentsTable from "@/table/child/ChildsParentsTable";
-import ParentsChidrenTable from "@/table/parent/ParentsChidrenTable";
-import SaveParentsDataToChild from "@/table/child/SaveParentsDataToChild";
-import getChildById from "@/api/graphql/child/getChildById";
 import SaveChildrenDataToParent from "@/table/parent/SaveChildrenDataToParent";
-import {ChildData} from "@/model/child-data";
-import updateChild from "@/api/graphql/child/updateChild";
-import {toast} from "@/components/ui/use-toast";
-import updateParent from "@/api/graphql/parent/updateParent";
-import getPotentialChildren from "@/api/graphql/parent/getPotentialChildren";
-import ChildForm from "@/form/child/ChildForm";
 import HoverText from "@/components/hoverText";
+import ChildInEditMode from "@/table/parent/ChildInEditMode";
 
 
 export const getServerSideProps = (async (context) => {
@@ -71,15 +57,7 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
     }
 
     function onEditClicked() {
-        setIsEditChildrenModeEnabled(!isEditChildrenModeEnabled)
-        setIsEditModeBorderVisible(!isEditModeBorderVisible)
-    }
-
-    function onCancelClicked() {
-        getParentById(parent.id)
-            .then(value => setParentWithChildren(value))
-        setIsEditChildrenModeEnabled(!isEditChildrenModeEnabled)
-        setIsEditModeBorderVisible(!isEditModeBorderVisible)
+        setIsEditChildrenModeEnabled(true)
     }
 
     function handleEditClick() {
@@ -91,50 +69,10 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
     }
 
     const [isEditChildrenModeEnabled, setIsEditChildrenModeEnabled] = useState(false)
-    const [isEditModeBorderVisible, setIsEditModeBorderVisible] = useState(false)
 
-    const [isChildForm, setIsChildForm] = useState(false)
 
-    function updateAndSaveParent(parent: ParentDataWithChildren) {
-        console.log(parent)
-        const {childDtos, ...others} = parent
-        updateParent({
-            ...others,
-            childIds: parent.childDtos?.map(child => child.id)
-        })
-            .then(value => {
-                setParentWithChildren(prevState => ({...prevState, ...value}))
-                toast({
-                    title: "Parent is successfully updated",
-                    description: `A parent with name: ${parent.givenName} ${parent.familyName} updated`,
-                    duration: 2000
-                });
-                setIsEditChildrenModeEnabled(false);
-            })
-            .catch(error => {
-                toast({
-                    title: `Child with name: ${parent.givenName} ${parent.familyName} cannot be updated updated`,
-                    description: `${error.message}`,
-                    duration: 2000,
-                    variant: "destructive"
-                });
-            })
-            .then(() =>
-                getParentById(parent.id)
-                    .then(value => setParentWithChildren(value))
-            )
-    }
+    //todo navigate to child by clicking on it
 
-    const [selectedChildDataToAdd, setSelectedChildDataToAdd] = useState<ChildData>()
-
-    function onChildAdded(newChild: ChildData) {
-        const updatedChildren = parentWithChildren.childDtos ? [...parentWithChildren.childDtos, newChild] : [newChild];
-        setParentWithChildren({...parentWithChildren, childDtos: updatedChildren})
-    }
-
-    function handleChildEditClick() {
-        setIsChildForm(true)
-    }
 
     return (
         <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
@@ -145,13 +83,13 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                 <div>
                     Parent details
                 </div>
-                <div className={"flex"}>
-                    <HoverText trigger={
-                        (!parentWithChildren.childDtos || parentWithChildren.childDtos?.length === 0) && (
-                            <AlertTriangle className={"text-yellow-600 "}/>)
-                    }/>
-                    Child not associated yet
-                </div>
+                <HoverText trigger={
+                    (!parentWithChildren.childDtos || parentWithChildren.childDtos?.length === 0) && (
+                        <div className={"flex"}>
+                            <AlertTriangle className={"text-yellow-600 "}/>
+                            Child not associated yet
+                        </div>)
+                }/>
                 <div className={"flex"}>
                     <div className={" flex flex-row items-center hover:cursor-pointer px-5"}
                          onClick={(event) => {
@@ -190,50 +128,15 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                     </>
                 </div>
                 <div
-                    className={`mb-6 ${isEditModeBorderVisible && "border border-dashed border-gray-400  p-2 rounded"}`}>
-                    <SaveChildrenDataToParent parentWithChildren={parentWithChildren}
-                                              onEdit={onEditClicked}
-                                              isAutoCompleteShown={isEditChildrenModeEnabled}
-                                              updateAndSaveParent={updateAndSaveParent}
-                                              onCancel={onCancelClicked}/>
+                    className={`mb-6 ${isEditChildrenModeEnabled && "border border-dashed border-gray-400  p-2 rounded"}`}>
+                    <SaveChildrenDataToParent onEdit={onEditClicked}
+                                              isEditChildrenModeEnabled={isEditChildrenModeEnabled}/>
                     {isEditChildrenModeEnabled ? (
-                            <>
-                                <ParentsChidrenTable parent={parent}
-                                                     parentWithChildren={parentWithChildren}
-                                                     setParentWithChidren={setParentWithChildren}/>
-                                <div className={"flex justify-between mb-5 mt-3"}>
-                                    <div className={"flex w-4/5"}>
-                                        <AutoComplete
-                                            className={"w-2/3 mr-3"}
-                                            getPotential={getPotentialChildren}
-                                            key={0}
-                                            isAdded={false}
-                                            isLoading={false}
-                                            disabled={false}
-                                            onValueChange={(value) => {
-                                                //if (value)
-                                                //setSelectedRelativeParentToAdd({id: value.id, isEmergencyContact: true})
-                                                setSelectedChildDataToAdd(value)
-                                            }}
-                                            placeholder={"Select parents..."}
-                                            emptyMessage={"No parent found"}
-                                        />
-                                        <Button
-                                            onClick={() => {
-                                                if (selectedChildDataToAdd)
-                                                    onChildAdded(selectedChildDataToAdd)
-                                            }}>
-                                            <><PlusSquare/> Add</>
-                                        </Button>
-                                    </div>
-                                    <Button
-                                        onClick={() => {
-                                            handleChildEditClick()
-                                        }}>
-                                        Create
-                                    </Button>
-                                </div>
-                            </>) :
+                            <ChildInEditMode parent={parent}
+                                             parentWithChildren={parentWithChildren}
+                                             setParentWithChildren={setParentWithChildren}
+                                             setIsEditChildrenModeEnabled={setIsEditChildrenModeEnabled}/>
+                        ) :
                         <ShowTable tableFields={["Name", "isEmergencyContact"]}
                                    value={parentWithChildren.childDtos?.map((child) => ({
                                        name: child.givenName + " " + child.familyName,
@@ -257,11 +160,6 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                         isOpen={isParentEditDialogOpen}
                         onParentModified={onParentUpdated}
                         onOpenChange={setIsParentEditDialogOpen}
-            />
-            <ChildForm onChildModified={onChildAdded}
-                       isOpen={isChildForm}
-                       onOpenChange={setIsChildForm}
-                       onParentFormClicked={true}
             />
             <DeleteData entityId={parent.id}
                         entityLabel={`${parent.givenName} ${parent.familyName}`}

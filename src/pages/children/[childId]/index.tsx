@@ -1,5 +1,5 @@
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
-import {ChildData, ChildDataInput, ChildDataWithParents, RelativeParent} from "@/model/child-data";
+import {ChildData, ChildDataWithParents, RelativeParent} from "@/model/child-data";
 import getChildById from "@/api/graphql/child/getChildById";
 import React, {useState} from "react";
 import ChildForm from "@/form/child/ChildForm";
@@ -160,13 +160,13 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
                 <div>
                     Child details
                 </div>
-                <div className={"flex"}>
-                    <HoverText trigger={
-                        (!currentChild.relativeParents || currentChild.relativeParents?.length === 0) && (
-                            <AlertTriangle className={"text-yellow-600 "}/>)
-                    }/>
-                    Parent not associated yet
-                </div>
+                <HoverText trigger={
+                    (!currentChild.relativeParents || currentChild.relativeParents?.length === 0) && (
+                        <div className={"flex"}>
+                            <AlertTriangle className={"text-yellow-600 "}/>
+                            Parent not associated yet
+                        </div>)
+                }/>
                 <div className={"flex"}>
                     <div className={" flex flex-row items-center hover:cursor-pointer px-5"}
                          onClick={(event) => {
