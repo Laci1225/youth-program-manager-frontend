@@ -60,7 +60,7 @@ export default function ChildInEditMode({
             })
             .catch(error => {
                 toast({
-                    title: `Child with name: ${parent.givenName} ${parent.familyName} cannot be updated updated`,
+                    title: `Parent with name: ${parent.givenName} ${parent.familyName} cannot be updated updated`,
                     description: `${error.message}`,
                     duration: 2000,
                     variant: "destructive"
