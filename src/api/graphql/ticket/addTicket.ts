@@ -9,8 +9,16 @@ export default function addTicket(values: TicketDataInput) {
             mutation AddTicket($ticket: TicketInput!) {
                 addTicket(ticket: $ticket) {
                     id
-                    childId
-                    ticketTypeId
+                    child {
+                        givenName
+                        familyName
+                    }
+                    ticketType{
+                        name
+                        price
+                        numberOfParticipation
+                        standardValidityPeriod
+                    }
                     issueDate
                     expirationDate
                     price

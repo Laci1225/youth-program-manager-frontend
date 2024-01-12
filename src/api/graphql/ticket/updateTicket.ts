@@ -9,8 +9,16 @@ export default async function updateTicket(ticketId: string, ticketData: TicketD
             mutation UpdateTicket($id: String!,$ticket: TicketInput!) {
                 updateTicket(id : $id,ticket: $ticket){
                     id
-                    childId
-                    ticketTypeId
+                    child {
+                        givenName
+                        familyName
+                    }
+                    ticketType{
+                        name
+                        price
+                        numberOfParticipation
+                        standardValidityPeriod
+                    }
                     issueDate
                     expirationDate
                     price

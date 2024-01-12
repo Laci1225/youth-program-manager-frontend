@@ -6,29 +6,22 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table";
-import {
-    DropdownMenu,
-    DropdownMenuContent, DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
 import React, {useState} from "react";
 import {Toaster} from "@/components/ui/toaster";
 import {serverSideClient} from "@/api/graphql/client";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
-import getAllTicketTypes from "@/api/graphql/ticketType/getAllTicketTypes";
-import {Pencil, PlusSquare, Trash} from "lucide-react";
+import {PlusSquare} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
 import DeleteData from "@/components/deleteData";
 import {TicketTypeData} from "@/model/ticket-type-data";
-import TicketTypeForm from "@/form/ticket-type/TicketTypeForm";
 import deletedTicketType from "@/api/graphql/ticketType/deletedTicketType";
 import SettingsDropdown from "@/components/SettingsDropdown";
 import getAllTickets from "@/api/graphql/ticket/getAllTickets";
 import {TicketData} from "@/model/ticket-data";
 import {format} from "date-fns";
 import TicketForm from "@/form/ticket/TicketForm";
+import HoverText from "@/components/hoverText";
 
 export const getServerSideProps = (async () => {
     const tickets = await getAllTickets(serverSideClient)
@@ -89,10 +82,8 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                     <TableRow>
                         <TableHead className="text-center">Child</TableHead>
                         <TableHead className="text-center">Ticket</TableHead>
-                        <TableHead className="text-center">Issue Date</TableHead>
-                        <TableHead className="text-center">Expiration Date</TableHead>
-                        <TableHead className="text-center">Price</TableHead>
-                        <TableHead className="text-center"># of participation</TableHead>
+                        <TableHead className="text-center">Valid until</TableHead>
+                        <TableHead className="text-center">Participation</TableHead>
                         <TableHead className="px-5"></TableHead>
                     </TableRow>
                 </TableHeader>
@@ -103,22 +94,21 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                                 <TableRow key={ticket.id} className={"hover:bg-gray-300 hover:cursor-pointer"}
                                           onClick={() => router.push(`ticket-types/${ticket.id}`)}>
                                     <TableCell className="text-center">
-                                        {ticket.id}
+                                        {ticket.child.givenName} {ticket.child.familyName}
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        {ticket.ticketTypeId}
+                                        {ticket.ticketType.name}
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        {ticket.price} €
+                                        <HoverText trigger={
+                                            <div>
+                                                {ticket.ticketType.standardValidityPeriod} day(s)
+                                            </div>
+                                        }
+                                                   content={format(new Date(ticket.expirationDate), "P")}/>
                                     </TableCell>
                                     <TableCell className="text-center">
                                         {ticket.numberOfParticipation} pc(s)
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        {format(new Date(ticket.issueDate), "P")} day(s)
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        {format(new Date(ticket.expirationDate), "P")} day(s)
                                     </TableCell>
                                     <TableCell className="p-1 text-center">
                                         <SettingsDropdown

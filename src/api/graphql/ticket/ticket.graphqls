@@ -1,7 +1,7 @@
 type Ticket {
     id: ID!
-    childId: ID!
-    ticketTypeId: ID!
+    child: Child!
+    ticketType: TicketType!
     issueDate: LocalDateTime
     expirationDate: LocalDateTime
     price: Float!

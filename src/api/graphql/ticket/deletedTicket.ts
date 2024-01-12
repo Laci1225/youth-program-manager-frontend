@@ -9,8 +9,16 @@ export default async function deletedTicket(ticketId: string, client: ApolloClie
             mutation DeletedTicket($id: String!) {
                 deletedTicket(id : $id){
                     id
-                    childId
-                    ticketTypeId
+                    child {
+                        givenName
+                        familyName
+                    }
+                    ticketType{
+                        name
+                        price
+                        numberOfParticipation
+                        standardValidityPeriod
+                    }
                     issueDate
                     expirationDate
                     price

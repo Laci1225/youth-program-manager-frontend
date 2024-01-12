@@ -9,8 +9,16 @@ export default async function getTicketById(ticketId: string, client: ApolloClie
             query GetTicketById($id: String!){
                 getTicketById(id : $id){
                     id
-                    childId
-                    ticketTypeId
+                    child {
+                        givenName
+                        familyName
+                    }
+                    ticketType{
+                        name
+                        price
+                        numberOfParticipation
+                        standardValidityPeriod
+                    }
                     issueDate
                     expirationDate
                     price

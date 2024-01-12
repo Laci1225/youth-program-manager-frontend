@@ -9,8 +9,16 @@ export default async function getAllTickets(client: ApolloClient<NormalizedCache
             query {
                 getAllTickets {
                     id
-                    childId
-                    ticketTypeId
+                    child {
+                        givenName
+                        familyName
+                    }
+                    ticketType{
+                        name
+                        price
+                        numberOfParticipation
+                        standardValidityPeriod
+                    }
                     issueDate
                     expirationDate
                     price

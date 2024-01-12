@@ -1,7 +1,10 @@
+import {ChildData} from "@/model/child-data";
+import {TicketTypeData} from "@/model/ticket-type-data";
+
 export interface TicketData {
     id: string
-    childId: string
-    ticketTypeId: string,
+    child: ChildData
+    ticketType: TicketTypeData,
     issueDate: Date,
     expirationDate: Date
     price: number,
