@@ -1,16 +1,18 @@
 export interface TicketData {
     id: string
-    name: string,
-    description: string,
+    childId: string
+    ticketTypeId: string,
+    issueDate: Date,
+    expirationDate: Date
     price: number,
     numberOfParticipation: number
-    standardValidityPeriod: number
 }
 
 export interface TicketDataInput {
-    name: string,
-    description: string,
+    childId: string
+    ticketTypeId: string,
+    issueDate: Date,
+    expirationDate: Date
     price: number,
     numberOfParticipation: number
-    standardValidityPeriod: number
 }

@@ -6,12 +6,12 @@ import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
 import {Pencil, Trash} from "lucide-react";
 import {useRouter} from "next/router";
-import TicketTypeForm from "@/form/ticket/TicketTypeForm";
+import TicketTypeForm from "@/form/ticket-type/TicketTypeForm";
 import {serverSideClient} from "@/api/graphql/client";
-import getTicketTypeById from "@/api/graphql/ticket/getTicketTypeById";
-import deletedTicketType from "@/api/graphql/ticket/deletedTicketType";
+import getTicketTypeById from "@/api/graphql/ticketType/getTicketTypeById";
+import deletedTicketType from "@/api/graphql/ticketType/deletedTicketType";
 import DeleteData from "@/components/deleteData";
-import {TicketData} from "@/model/ticket-data";
+import {TicketTypeData} from "@/model/ticket-type-data";
 
 
 export const getServerSideProps = (async (context) => {
@@ -33,13 +33,13 @@ export const getServerSideProps = (async (context) => {
     return {
         notFound: true
     };
-}) satisfies GetServerSideProps<{ selectedTicket: TicketData }, { ticketId: string }>;
+}) satisfies GetServerSideProps<{ selectedTicket: TicketTypeData }, { ticketId: string }>;
 export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    const [ticket, setTicket] = useState<TicketData>(selectedTicket)
+    const [ticket, setTicket] = useState<TicketTypeData>(selectedTicket)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const router = useRouter()
-    const onTicketUpdated = (newTicket: TicketData) => {
+    const onTicketUpdated = (newTicket: TicketTypeData) => {
         setTicket(newTicket)
     }
     const onTicketDeleted = () => {

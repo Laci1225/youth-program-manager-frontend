@@ -2,18 +2,19 @@ import {clientSideClient} from "@/api/graphql/client";
 import {ApolloClient, gql, NormalizedCacheObject} from "@apollo/client";
 import {TicketData, TicketDataInput} from "@/model/ticket-data";
 
-export default async function updateTicketType(ticketId: string, ticketData: TicketDataInput, client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketData> {
+export default async function updateTicket(ticketId: string, ticketData: TicketDataInput, client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketData> {
     let value = await client
     .mutate({
         mutation: gql`
-            mutation UpdateTicketType($id: String!,$ticket: TicketTypeInput!) {
-                updateTicketType(id : $id,ticket: $ticket){
+            mutation UpdateTicket($id: String!,$ticket: TicketInput!) {
+                updateTicket(id : $id,ticket: $ticket){
                     id
-                    name
-                    description
+                    childId
+                    ticketTypeId
+                    issueDate
+                    expirationDate
                     price
                     numberOfParticipation
-                    standardValidityPeriod
                 }
             }
         `, fetchPolicy: "no-cache",
@@ -22,5 +23,5 @@ export default async function updateTicketType(ticketId: string, ticketData: Tic
             ticket: ticketData
         },
     });
-    return value.data.updateTicketType;
+    return value.data.updateTicket;
 }

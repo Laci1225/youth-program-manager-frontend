@@ -10,7 +10,7 @@ import {Button} from "@/components/ui/button";
 import {ChildData, RelativeParent} from "@/model/child-data";
 import debounce from "@/utils/debounce";
 import {format} from "date-fns";
-
+import {TicketTypeData} from "@/model/ticket-type-data";
 
 type AutoCompleteProps<T> = {
     emptyMessage: string
@@ -25,27 +25,37 @@ type AutoCompleteProps<T> = {
     getPotential: (name: string) => Promise<T[]>
 }
 
-export const AutoComplete = <T extends ParentData | ChildData>({
-                                                                   alreadyAddedData,
-                                                                   className,
-                                                                   isAdded,
-                                                                   placeholder,
-                                                                   emptyMessage,
-                                                                   value,
-                                                                   onValueChange,
-                                                                   disabled,
-                                                                   isLoading = false,
-                                                                   getPotential,
-                                                               }: AutoCompleteProps<T>) => {
+export const AutoComplete = <T extends ParentData | ChildData | TicketTypeData>({
+                                                                                    alreadyAddedData,
+                                                                                    className,
+                                                                                    isAdded,
+                                                                                    placeholder,
+                                                                                    emptyMessage,
+                                                                                    value,
+                                                                                    onValueChange,
+                                                                                    disabled,
+                                                                                    isLoading = false,
+                                                                                    getPotential,
+
+                                                                                }: AutoCompleteProps<T>) => {
+    const getDisplayName = (item: T): string => {
+        if ('familyName' in item && 'givenName' in item) {
+            return `${item.familyName} ${item.givenName}`;
+        } else if ('name' in item) {
+            return item.name;
+        } else {
+            return '';
+        }
+    };
     const inputRef = useRef<HTMLInputElement>(null)
 
     const [isOpen, setOpen] = useState(false)
     const [selected, setSelected] = useState<T | undefined>(value as T)
-    const [inputValue, setInputValue] = useState<string | undefined>(value ? `${value.familyName} ${value.givenName}` : undefined)
+    const [inputValue, setInputValue] = useState<string | undefined>(value ? getDisplayName(value) : undefined)
     const [options, setOptions] = useState<T[]>()
 
     useEffect(() => {
-        setInputValue(value ? `${value.familyName} ${value.givenName}` : undefined)
+        setInputValue(value ? getDisplayName(value) : undefined)
         if (isAdded) {
             setInputValue("")
             setSelected(undefined)
@@ -55,17 +65,17 @@ export const AutoComplete = <T extends ParentData | ChildData>({
 
     const fetchPotential = useCallback((name: string) => {
         getPotential(name)
-            .then(parents => {
-                const filteredParents = parents.filter((parent) =>
+            .then(items => {
+                const filteredItems = items.filter((item) =>
                     !alreadyAddedData?.some(
-                        (relativeParent) => relativeParent.id === parent.id
+                        (addedItem) => addedItem.id === item.id
                     )
                 );
-                setOptions(filteredParents)
-                //todo limit for options
+                setOptions(filteredItems)
+                // todo limit for options
             })
             .catch(reason => {
-                console.error("Failed to get potential parents:", reason);
+                console.error("Failed to get potential items:", reason);
             });
     }, [alreadyAddedData]);
 
@@ -96,7 +106,7 @@ export const AutoComplete = <T extends ParentData | ChildData>({
                 setOpen(true)
             }
 
-            // This is not a default behaviour of the <input /> field
+            // This is not a default behavior of the <input /> field
             if (event.key === "Enter" && input.id !== "") {
                 const optionToSelect = options?.find((option) => option.id === input.id)
                 if (optionToSelect) {
@@ -114,12 +124,12 @@ export const AutoComplete = <T extends ParentData | ChildData>({
 
     const handleBlur = useCallback(() => {
         setOpen(false)
-        setInputValue(selected ? `${selected.familyName} ${selected.givenName}` : undefined)
+        setInputValue(selected ? getDisplayName(selected) : undefined)
     }, [selected])
 
     const handleSelectOption = useCallback(
         (selectedOption: T) => {
-            setInputValue(selectedOption ? `${selectedOption.familyName} ${selectedOption.givenName}` : undefined)
+            setInputValue(selectedOption ? getDisplayName(selectedOption) : undefined)
 
             setSelected(selectedOption)
             onValueChange?.(selectedOption)
@@ -168,7 +178,7 @@ export const AutoComplete = <T extends ParentData | ChildData>({
                                             return (
                                                 <CommandItem
                                                     key={option.id}
-                                                    value={option ? `${option.familyName} ${option.givenName}` : undefined}
+                                                    value={getDisplayName(option)}
                                                     onMouseDown={(event) => {
                                                         event.preventDefault()
                                                         event.stopPropagation()
@@ -183,7 +193,7 @@ export const AutoComplete = <T extends ParentData | ChildData>({
                                                         </div>
                                                     ) : (
                                                         <div>
-                                                            {option.familyName} {option.givenName} {option.phoneNumbers[0]}
+                                                            {getDisplayName(option)}
                                                         </div>
                                                     ))}
                                                 </CommandItem>

@@ -6,6 +6,12 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table";
+import {
+    DropdownMenu,
+    DropdownMenuContent, DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 import React, {useState} from "react";
 import {Toaster} from "@/components/ui/toaster";
 import {serverSideClient} from "@/api/graphql/client";
@@ -19,45 +25,49 @@ import {TicketTypeData} from "@/model/ticket-type-data";
 import TicketTypeForm from "@/form/ticket-type/TicketTypeForm";
 import deletedTicketType from "@/api/graphql/ticketType/deletedTicketType";
 import SettingsDropdown from "@/components/SettingsDropdown";
+import getAllTickets from "@/api/graphql/ticket/getAllTickets";
+import {TicketData} from "@/model/ticket-data";
+import {format} from "date-fns";
+import TicketForm from "@/form/ticket/TicketForm";
 
 export const getServerSideProps = (async () => {
-    const tickets = await getAllTicketTypes(serverSideClient)
+    const tickets = await getAllTickets(serverSideClient)
     return {
         props: {
             ticketsData: tickets
         }
     };
-}) satisfies GetServerSideProps<{ ticketsData: TicketTypeData[] }>;
+}) satisfies GetServerSideProps<{ ticketsData: TicketData[] }>;
 
 export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
-    const [ticketTypes, setTicketTypes] = useState<TicketTypeData[]>(ticketsData)
-    const onTicketTypeSaved = (savedTicket: TicketTypeData) => {
-        if (editedTicketType) {
-            const modifiedTickets = ticketTypes.map((ticket) =>
+    const [tickets, setTickets] = useState<TicketData[]>(ticketsData)
+    const onTicketSaved = (savedTicket: TicketData) => {
+        if (editedTicket) {
+            const modifiedTickets = tickets.map((ticket) =>
                 ticket.id === savedTicket.id ? savedTicket : ticket
             );
-            setTicketTypes(modifiedTickets)
+            setTickets(modifiedTickets)
         } else {
-            setTicketTypes(prevState => [...prevState, savedTicket])
+            setTickets(prevState => [...prevState, savedTicket])
         }
-        setEditedTicketType(null)
+        setEditedTicket(null)
     }
-    const onTicketTypeDeleted = (ticket: TicketTypeData) => {
-        const updatedTickets = ticketTypes.filter(p => p.id !== ticket.id);
-        setTicketTypes(updatedTickets);
+    const onTicketDeleted = (ticket: TicketTypeData) => {
+        const updatedTickets = tickets.filter(p => p.id !== ticket.id);
+        setTickets(updatedTickets);
     }
-    const [editedTicketType, setEditedTicketType] = useState<TicketTypeData | null>(null)
+    const [editedTicket, setEditedTicket] = useState<TicketData | null>(null)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-    const [deletedTicket, setDeletedTicket] = useState<TicketTypeData>()
+    const [deletedTicket, setDeletedTicket] = useState<TicketData>()
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-    function handleEditClick(ticket: TicketTypeData | null) {
+    function handleEditClick(ticket: TicketData | null) {
         setIsEditDialogOpen(true)
-        setEditedTicketType(ticket)
+        setEditedTicket(ticket)
     }
 
-    function handleDeleteClick(ticket: TicketTypeData) {
+    function handleDeleteClick(ticket: TicketData) {
         setIsDeleteDialogOpen(true)
         setDeletedTicket(ticket)
     }
@@ -77,25 +87,26 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
             <Table className={"border border-gray-700 rounded"}>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="text-center">Name</TableHead>
-                        <TableHead className="text-center">Description</TableHead>
+                        <TableHead className="text-center">Child</TableHead>
+                        <TableHead className="text-center">Ticket</TableHead>
+                        <TableHead className="text-center">Issue Date</TableHead>
+                        <TableHead className="text-center">Expiration Date</TableHead>
                         <TableHead className="text-center">Price</TableHead>
                         <TableHead className="text-center"># of participation</TableHead>
-                        <TableHead className="text-center">Valid for</TableHead>
                         <TableHead className="px-5"></TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {
-                        ticketTypes && ticketTypes.length !== 0 ? (
-                            ticketTypes.map((ticket) => (
+                        tickets && tickets.length !== 0 ? (
+                            tickets.map((ticket) => (
                                 <TableRow key={ticket.id} className={"hover:bg-gray-300 hover:cursor-pointer"}
                                           onClick={() => router.push(`ticket-types/${ticket.id}`)}>
                                     <TableCell className="text-center">
-                                        {ticket.name}
+                                        {ticket.id}
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        {ticket.description}
+                                        {ticket.ticketTypeId}
                                     </TableCell>
                                     <TableCell className="text-center">
                                         {ticket.price} €
@@ -104,7 +115,10 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                                         {ticket.numberOfParticipation} pc(s)
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        {ticket.standardValidityPeriod} day(s)
+                                        {format(new Date(ticket.issueDate), "P")} day(s)
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        {format(new Date(ticket.expirationDate), "P")} day(s)
                                     </TableCell>
                                     <TableCell className="p-1 text-center">
                                         <SettingsDropdown
@@ -122,16 +136,16 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                 </TableBody>
             </Table>
             <Toaster/>
-            <TicketTypeForm existingTicket={editedTicketType ?? undefined}
-                            isOpen={isEditDialogOpen}
-                            onTicketModified={onTicketTypeSaved}
-                            onOpenChange={setIsEditDialogOpen}
+            <TicketForm existingTicket={editedTicket ?? undefined}
+                        isOpen={isEditDialogOpen}
+                        onTicketModified={onTicketSaved}
+                        onOpenChange={setIsEditDialogOpen}
             />
             <DeleteData entityId={deletedTicket?.id}
-                        entityLabel={`${deletedTicket?.name}`}
+                        entityLabel={`${deletedTicket?.id}`}
                         isOpen={isDeleteDialogOpen}
                         onOpenChange={setIsDeleteDialogOpen}
-                        onSuccess={onTicketTypeDeleted}
+                        onSuccess={onTicketDeleted}
                         deleteFunction={deletedTicketType}
                         entityType={"Ticket"}
             />
