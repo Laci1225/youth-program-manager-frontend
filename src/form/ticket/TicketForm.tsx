@@ -8,21 +8,16 @@ import {toast} from "@/components/ui/use-toast";
 import {ScrollArea} from "@/components/ui/scroll-area"
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import LoadingButton from "@/components/loading-button";
-import addTicketType from "@/api/graphql/ticketType/addTicketType";
-import {TicketTypeData} from "@/model/ticket-type-data";
-import {ticketTypeSchema} from "@/form/ticket-type/ticketTypeSchema";
-import {Textarea} from "@/components/ui/textarea"
-import updateTicketType from "@/api/graphql/ticketType/updateTicketType";
 import {ticketSchema} from "@/form/ticket/ticketSchema";
 import CalendarInput from "@/form/CalendarInput";
 import {AutoComplete} from "@/table/AutoComplete";
-import getPotentialParents from "@/api/graphql/child/getPotentialParents";
 import {Button} from "@/components/ui/button";
 import getPotentialChildren from "@/api/graphql/parent/getPotentialChildren";
 import {TicketData} from "@/model/ticket-data";
 import updateTicket from "@/api/graphql/ticket/updateTicket";
 import addTicket from "@/api/graphql/ticket/addTicket";
 import getPotentialTicketTypes from "@/api/graphql/ticket/getPotentialTicketTyoes";
+import {addDays, differenceInDays} from "date-fns";
 
 
 interface TicketFormProps {
@@ -99,23 +94,47 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
         })*/
     }, [existingTicket])
 
+    const [days, setDays] = useState<number>(0)
+    const calcDateByGivenDay = (givenDay?: number) => {
+        if (givenDay) {
+            const issueDate = form.getValues("issueDate");
+            const result = addDays(issueDate, givenDay)
+            form.setValue("expirationDate", result);
+            setDays(givenDay)
+        } else {
+            const issueDate = form.getValues("issueDate");
+            const result = addDays(issueDate, days)
+            form.setValue("expirationDate", result);
+        }
+    }
+    const [disable, setDisable] = useState<boolean>()
+
+
+    function calcDateByGivenDate() {
+        const issueDate = form.getValues("issueDate");
+        const expirationDate = form.getValues("expirationDate");
+        if (issueDate && expirationDate) {
+            setDays(differenceInDays(expirationDate, issueDate));
+        }
+    }
+
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[800px] h-[90vh] shadow-muted-foreground">
+            <DialogContent className="sm:max-w-[700px] h-[90vh] shadow-muted-foreground">
                 <DialogHeader>
                     <DialogTitle>{existingTicket ? "Update" : "Create"} a ticket</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.log(errors))}
                           className="flex justify-center flex-col space-y-4 mx-4">
-                        <ScrollArea className="h-[70vh]">
+                        <ScrollArea className="h-70vh]">
                             <div className="mx-4">
                                 <FormField
                                     control={form.control}
                                     name="childId"
                                     render={({field}) => (
                                         <FormItem className="flex-1">
-                                            <FormLabel>Name*</FormLabel>
+                                            <FormLabel>Child Name*</FormLabel>
                                             <FormControl>
                                                 <div className={"flex justify-between"}>
                                                     <AutoComplete
@@ -152,7 +171,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                     name="ticketTypeId"
                                     render={({field}) => (
                                         <FormItem className="flex-1">
-                                            <FormLabel>Description*</FormLabel>
+                                            <FormLabel>Ticket type*</FormLabel>
                                             <FormControl>
                                                 <div className={"flex justify-between"}>
                                                     <AutoComplete
@@ -168,6 +187,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                                 field.onChange(value.id);
                                                                 form.setValue("price", value.price)
                                                                 form.setValue("numberOfParticipation", value.numberOfParticipation)
+                                                                setDays(value.standardValidityPeriod)
                                                             } else field.onChange(undefined);
 
                                                         }}
@@ -186,23 +206,23 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                         </FormItem>
                                     )}
                                 />
-                                <div className={"flex w-full justify-between"}>
+                                <div className={"flex w-full"}>
                                     <FormField
                                         control={form.control}
                                         name="price"
                                         render={({field}) => (
-                                            <FormItem className="w-36">
+                                            <FormItem className="w-1/3">
                                                 <FormLabel>Price*</FormLabel>
                                                 <FormControl>
-                                                    <div className="relative w-24">
+                                                    <div className="relative w-full">
                                                         <Input
-                                                            placeholder="12.5"
+                                                            placeholder="12500"
                                                             {...field}
                                                             className="pr-5"
                                                         />
                                                         <span
                                                             className="absolute inset-y-0 right-0 flex items-center pr-2">
-                                                        €
+                                                        Huf
                                                     </span>
                                                     </div>
                                                 </FormControl>
@@ -214,10 +234,10 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                         control={form.control}
                                         name="numberOfParticipation"
                                         render={({field}) => (
-                                            <FormItem className="w-48">
+                                            <FormItem className="w-1/3">
                                                 <FormLabel>Number Of Participation*</FormLabel>
                                                 <FormControl>
-                                                    <div className="relative w-20">
+                                                    <div className="relative w-full">
                                                         <Input
                                                             placeholder="12"
                                                             {...field}
@@ -235,25 +255,41 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="expirationDate"
+                                        name="issueDate"
                                         render={({field}) => (
-                                            <FormItem className="w-48">
+                                            <FormItem className="w-1/3">
                                                 <FormLabel>Standard Validity Period*</FormLabel>
                                                 <FormControl>
-                                                    <CalendarInput {...field} shownYear={2010}/>
+                                                    <CalendarInput {...field} shownYear={2010}
+                                                                   reCalc={calcDateByGivenDay}/>
                                                 </FormControl>
                                                 <FormMessage/>
                                             </FormItem>
                                         )}
                                     />
+                                </div>
+                                <div>
                                     <FormField
                                         control={form.control}
-                                        name="issueDate"
+                                        name="expirationDate"
                                         render={({field}) => (
-                                            <FormItem className="w-48">
+                                            <FormItem className="w-full">
                                                 <FormLabel>Standard Validity Period*</FormLabel>
+                                                <div onClick={() => setDisable(!disable)}>Switch to other date format
+                                                </div>
                                                 <FormControl>
-                                                    <CalendarInput {...field} shownYear={2010}/>
+                                                    <div className={"flex"}>
+                                                        <CalendarInput {...field} shownYear={2010}
+                                                                       reCalc={calcDateByGivenDate}
+                                                                       disabled={!disable}/>
+                                                        <Input disabled={disable}
+                                                               onClick={() => setDisable(false)}
+                                                               onInput={(event) => {
+                                                                   calcDateByGivenDay(Number(event.currentTarget.value))
+                                                               }}
+                                                               value={days}
+                                                        />
+                                                    </div>
                                                 </FormControl>
                                                 <FormMessage/>
                                             </FormItem>

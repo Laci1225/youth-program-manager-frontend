@@ -19,7 +19,7 @@ import deletedTicketType from "@/api/graphql/ticketType/deletedTicketType";
 import SettingsDropdown from "@/components/SettingsDropdown";
 import getAllTickets from "@/api/graphql/ticket/getAllTickets";
 import {TicketData} from "@/model/ticket-data";
-import {format} from "date-fns";
+import {differenceInDays, format} from "date-fns";
 import TicketForm from "@/form/ticket/TicketForm";
 import HoverText from "@/components/hoverText";
 
@@ -102,7 +102,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                                     <TableCell className="text-center">
                                         <HoverText trigger={
                                             <div>
-                                                {ticket.ticketType.standardValidityPeriod} day(s)
+                                                {differenceInDays(new Date(ticket.expirationDate), new Date(ticket.issueDate))} day(s)
                                             </div>
                                         }
                                                    content={format(new Date(ticket.expirationDate), "P")}/>

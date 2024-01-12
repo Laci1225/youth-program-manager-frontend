@@ -10,13 +10,15 @@ export interface CalendarInputProps {
     value: any;
     onChange: (newValue: any) => void;
     shownYear: number
+    reCalc?: () => void
+    disabled?: boolean
 }
 
-export default function CalendarInput({value, onChange, shownYear}: CalendarInputProps) {
+export default function CalendarInput({value, onChange, shownYear, reCalc, disabled}: CalendarInputProps) {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     return (
         <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-            <PopoverTrigger className={cn(
+            <PopoverTrigger disabled={disabled} className={cn(
                 fieldAppearance,
                 !value && "text-muted-foreground"
             )} type={"button"} onClick={() => setIsPopoverOpen(true)}>
@@ -34,6 +36,7 @@ export default function CalendarInput({value, onChange, shownYear}: CalendarInpu
                     onSelect={(newDate) => {
                         onChange(newDate ? newDate : undefined);
                         setIsPopoverOpen(false);
+                        reCalc && reCalc();
                     }}
                     defaultMonth={new Date(shownYear, 1)}
                     toDate={new Date()}
