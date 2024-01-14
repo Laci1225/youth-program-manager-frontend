@@ -10,10 +10,12 @@ export default async function deletedTicket(ticketId: string, client: ApolloClie
                 deletedTicket(id : $id){
                     id
                     child {
+                        id
                         givenName
                         familyName
                     }
                     ticketType{
+                        id
                         name
                         price
                         numberOfParticipation
@@ -30,5 +32,5 @@ export default async function deletedTicket(ticketId: string, client: ApolloClie
             id: ticketId,
         },
     });
-    return value.data.deleteTicket;
+    return value.data.deletedTicket;
 }

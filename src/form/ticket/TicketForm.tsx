@@ -222,7 +222,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                         />
                                                         <span
                                                             className="absolute inset-y-0 right-0 flex items-center pr-2">
-                                                        Huf
+                                                        HUF
                                                     </span>
                                                     </div>
                                                 </FormControl>

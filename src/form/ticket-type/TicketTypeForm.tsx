@@ -135,18 +135,18 @@ function TicketTypeForm({onTicketModified, existingTicket, isOpen, onOpenChange}
                                         control={form.control}
                                         name="price"
                                         render={({field}) => (
-                                            <FormItem className="w-36">
+                                            <FormItem className="w-48">
                                                 <FormLabel>Price*</FormLabel>
                                                 <FormControl>
-                                                    <div className="relative w-24">
+                                                    <div className="relative w-36">
                                                         <Input
-                                                            placeholder="12.5"
+                                                            placeholder="125000"
                                                             {...field}
                                                             className="pr-5"
                                                         />
                                                         <span
                                                             className="absolute inset-y-0 right-0 flex items-center pr-2">
-                                                        €
+                                                        HUF
                                                     </span>
                                                     </div>
                                                 </FormControl>
@@ -161,7 +161,7 @@ function TicketTypeForm({onTicketModified, existingTicket, isOpen, onOpenChange}
                                             <FormItem className="w-48">
                                                 <FormLabel>Number Of Participation*</FormLabel>
                                                 <FormControl>
-                                                    <div className="relative w-20">
+                                                    <div className="relative w-24">
                                                         <Input
                                                             placeholder="12"
                                                             {...field}

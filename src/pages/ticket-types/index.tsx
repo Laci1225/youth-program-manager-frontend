@@ -11,7 +11,7 @@ import {Toaster} from "@/components/ui/toaster";
 import {serverSideClient} from "@/api/graphql/client";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
 import getAllTicketTypes from "@/api/graphql/ticketType/getAllTicketTypes";
-import {Pencil, PlusSquare, Trash} from "lucide-react";
+import {PlusSquare} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
 import DeleteData from "@/components/deleteData";
@@ -77,11 +77,11 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
             <Table className={"border border-gray-700 rounded"}>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="text-center">Name</TableHead>
+                        <TableHead className="text-center w-2/12">Name</TableHead>
                         <TableHead className="text-center">Description</TableHead>
-                        <TableHead className="text-center">Price</TableHead>
-                        <TableHead className="text-center"># of participation</TableHead>
-                        <TableHead className="text-center">Valid for</TableHead>
+                        <TableHead className="text-center w-2/12">Price</TableHead>
+                        <TableHead className="text-center w-1/12"># of participation</TableHead>
+                        <TableHead className="text-center w-2/12">Valid for</TableHead>
                         <TableHead className="px-5"></TableHead>
                     </TableRow>
                 </TableHeader>
@@ -98,7 +98,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                                         {ticket.description}
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        {ticket.price} €
+                                        {ticket.price} HUF
                                     </TableCell>
                                     <TableCell className="text-center">
                                         {ticket.numberOfParticipation} pc(s)

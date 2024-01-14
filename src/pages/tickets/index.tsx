@@ -14,14 +14,13 @@ import {PlusSquare} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
 import DeleteData from "@/components/deleteData";
-import {TicketTypeData} from "@/model/ticket-type-data";
-import deletedTicketType from "@/api/graphql/ticketType/deletedTicketType";
 import SettingsDropdown from "@/components/SettingsDropdown";
 import getAllTickets from "@/api/graphql/ticket/getAllTickets";
 import {TicketData} from "@/model/ticket-data";
 import {differenceInDays, format} from "date-fns";
 import TicketForm from "@/form/ticket/TicketForm";
 import HoverText from "@/components/hoverText";
+import deletedTicket from "@/api/graphql/ticket/deletedTicket";
 
 export const getServerSideProps = (async () => {
     const tickets = await getAllTickets(serverSideClient)
@@ -46,13 +45,13 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
         }
         setEditedTicket(null)
     }
-    const onTicketDeleted = (ticket: TicketTypeData) => {
+    const onTicketDeleted = (ticket: TicketData) => {
         const updatedTickets = tickets.filter(p => p.id !== ticket.id);
         setTickets(updatedTickets);
     }
     const [editedTicket, setEditedTicket] = useState<TicketData | null>(null)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-    const [deletedTicket, setDeletedTicket] = useState<TicketData>()
+    const [deletedTicketState, setDeletedTicketState] = useState<TicketData>()
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
     function handleEditClick(ticket: TicketData | null) {
@@ -62,7 +61,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
 
     function handleDeleteClick(ticket: TicketData) {
         setIsDeleteDialogOpen(true)
-        setDeletedTicket(ticket)
+        setDeletedTicketState(ticket)
     }
 
     return (
@@ -131,12 +130,12 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                         onTicketModified={onTicketSaved}
                         onOpenChange={setIsEditDialogOpen}
             />
-            <DeleteData entityId={deletedTicket?.id}
-                        entityLabel={`${deletedTicket?.id}`}
+            <DeleteData entityId={deletedTicketState?.id}
+                        entityLabel={`${deletedTicketState?.id}`}
                         isOpen={isDeleteDialogOpen}
                         onOpenChange={setIsDeleteDialogOpen}
                         onSuccess={onTicketDeleted}
-                        deleteFunction={deletedTicketType}
+                        deleteFunction={deletedTicket}
                         entityType={"Ticket"}
             />
         </div>

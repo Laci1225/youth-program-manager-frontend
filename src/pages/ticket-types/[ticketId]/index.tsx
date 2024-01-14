@@ -100,7 +100,7 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                     <div className="mb-6 flex-1">
                         <Label>Price:</Label>
                         <div className={`${fieldAppearance} mt-2`}>
-                            {ticket.price} €
+                            {ticket.price} HUF
                         </div>
                     </div>
                     <div className="mb-6 flex-1">
