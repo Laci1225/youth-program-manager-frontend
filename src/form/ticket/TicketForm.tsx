@@ -144,7 +144,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                         key={0}
                                                         value={existingTicket?.child}
                                                         isLoading={false}
-                                                        disabled={false}
+                                                        disabled={!!existingTicket}
                                                         getPotential={getPotentialChildren}
                                                         isAdded={false}
                                                         onValueChange={(value) => {
@@ -156,12 +156,14 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                         placeholder={"Select parents..."}
                                                         emptyMessage={"No parent found"}
                                                     />
-                                                    <Button type={"button"}
-                                                            onClick={() => {
-                                                                //handleParentEditClick()
-                                                            }}>
-                                                        Create
-                                                    </Button>
+                                                    {!existingTicket &&
+                                                        <Button type={"button"}
+                                                                onClick={() => {
+                                                                    //handleParentEditClick()
+                                                                }}>
+                                                            Create
+                                                        </Button>
+                                                    }
                                                 </div>
                                             </FormControl>
                                             <FormMessage/>

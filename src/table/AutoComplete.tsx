@@ -213,19 +213,21 @@ export const AutoComplete = <T extends ParentData | ChildData | TicketTypeData>(
                     ) : null}
                 </div>
             </CommandPrimitive>
-            <Button
-                type="button"
-                variant={"ghost"}
-                className="absolute top-1 right-1 text-red-500 p-0 mt-1 mr-1 h-fit"
-                onClick={() => {
-                    onValueChange?.(undefined)
-                    setInputValue("")
-                    setSelected(undefined)
-                    setOptions(undefined)
-                }}
-            >
-                <XIcon/>
-            </Button>
+            {!disabled &&
+                <Button
+                    type="button"
+                    variant={"ghost"}
+                    className="absolute top-1 right-1 text-red-500 p-0 mt-1 mr-1 h-fit"
+                    onClick={() => {
+                        onValueChange?.(undefined)
+                        setInputValue("")
+                        setSelected(undefined)
+                        setOptions(undefined)
+                    }}
+                >
+                    <XIcon/>
+                </Button>
+            }
         </div>
     )
 }
