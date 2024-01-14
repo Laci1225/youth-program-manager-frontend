@@ -15,11 +15,12 @@ import {
     ParentData,
     ParentDataWithChildren,
 } from "@/model/parent-data";
-import ShowTable from "@/form/ShowTable";
 import fromParentWithChildrenToParent from "@/model/fromParentWithChildrenToParent";
 import SaveChildrenDataToParent from "@/table/parent/SaveChildrenDataToParent";
 import HoverText from "@/components/hoverText";
 import ChildInEditMode from "@/table/parent/ChildInEditMode";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
+import {ChildData} from "@/model/child-data";
 
 
 export const getServerSideProps = (async (context) => {
@@ -69,10 +70,6 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
     }
 
     const [isEditChildrenModeEnabled, setIsEditChildrenModeEnabled] = useState(false)
-
-
-    //todo navigate to child by clicking on it
-    console.log(parentWithChildren)
 
     return (
         <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
@@ -137,15 +134,40 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                                              setParentWithChildren={setParentWithChildren}
                                              setIsEditChildrenModeEnabled={setIsEditChildrenModeEnabled}/>
                         ) :
-                        <ShowTable tableFields={["Name", "isEmergencyContact"]}
-                                   value={parentWithChildren.childDtos?.map((child) => ({
-                                       name: child.givenName + " " + child.familyName,
-                                       isEmergencyContact:
-                                           <span
-                                               className="material-icons-outlined">{child.relativeParents?.find(relative => relative.id == parent.id)?.isEmergencyContact ? 'check_box' : 'check_box_outline_blank'}</span>
+                        <div className={`w-full`}>
+                            <Table className={"w-full border border-gray-200"}>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className={"text-center"}>Name</TableHead>
+                                        <TableHead className={"text-center"}>IsEmergencyContact</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>{
+                                    parentWithChildren.childDtos && parentWithChildren.childDtos?.length !== 0 ? (
+                                        parentWithChildren.childDtos.map((child: ChildData, index: number) => (
+                                            <TableRow key={index} className={"hover:bg-gray-300 hover:cursor-pointer"}
+                                                      onClick={() => router.push(`/children/${child.id}`, `/children/${child.id}`)}>
+                                                <TableCell className={"text-center"}>
+                                                    {child.givenName + " " + child.familyName}
+                                                </TableCell>
+                                                <TableCell className={"text-center"}>
+                                                <span className="material-icons-outlined">
+                                                    {child.relativeParents?.find(relative => relative.id == parent.id)?.isEmergencyContact ? 'check_box' : 'check_box_outline_blank'}
+                                                </span>
+                                                </TableCell>
 
-                                   }))}
-                                   showDeleteButton={false}/>
+                                            </TableRow>
+                                        ))) : (
+                                        <TableRow>
+                                            <TableCell className={"text-center text-gray-400"}
+                                                       colSpan={2}>
+                                                Nothing added yet
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
                     }
                 </div>
                 <div className="mb-6">

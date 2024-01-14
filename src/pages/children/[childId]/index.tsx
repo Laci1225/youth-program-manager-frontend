@@ -14,13 +14,12 @@ import {useRouter} from "next/router";
 import {AlertTriangle, Pencil, Trash} from "lucide-react";
 import DeleteData from "@/components/deleteData";
 import deleteChild from "@/api/graphql/child/deleteChild";
-import updateChild from "@/api/graphql/child/updateChild";
-import {toast} from "@/components/ui/use-toast";
 import HoverText from "@/components/hoverText";
-import {ParentData} from "@/model/parent-data";
+import {ParentDataWithEmergencyContact} from "@/model/parent-data";
 import SaveParentsDataToChild from "@/table/child/SaveParentsDataToChild";
 import fromChildWithParentsToChildData from "@/model/fromChildWithParentsToChildData";
 import ParentInEditMode from "@/table/child/ParentInEditMode";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 
 
 export const getServerSideProps = (async (context) => {
@@ -60,53 +59,12 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
         setIsDeleteModeEnabled(true)
     }
 
-    const [isParentEditDialogOpen, setParentEditDialogOpen] = useState(false)
-
-
     const [isEditParentsModeEnabled, setIsEditParentsModeEnabled] = useState(false)
-    const [selectedParentDataToAdd, setSelectedParentDataToAdd] = useState<ParentData>()
     const [isEditModeBorderVisible, setIsEditModeBorderVisible] = useState(false)
 
     function onEditClicked() {
         setIsEditParentsModeEnabled(!isEditParentsModeEnabled)
         setIsEditModeBorderVisible(!isEditModeBorderVisible)
-    }
-
-    function onCancelClicked() {
-        getChildById(currentChild.id)
-            .then(value => setChildWithParents(value))
-        setIsEditParentsModeEnabled(!isEditParentsModeEnabled)
-        setIsEditModeBorderVisible(!isEditModeBorderVisible)
-    }
-
-
-    function handleParentEditClick() {
-        setParentEditDialogOpen(true)
-    }
-
-    function updateAndSaveChild(childWithoutUnnecessaryFields: Omit<ChildData, "hasRegularMedicines" | "modifiedDate" | "createdDate" | "hasDiagnosedDiseases">) {
-        updateChild(childWithoutUnnecessaryFields)
-            .then(value => {
-                setChildWithParents(prevState => ({...prevState, ...value}))
-                toast({
-                    title: "Child is successfully updated",
-                    description: `A child with name: ${currentChild.givenName} ${currentChild.familyName} updated`,
-                    duration: 2000
-                });
-                setIsEditParentsModeEnabled(false);
-            })
-            .catch(error => {
-                toast({
-                    title: `Child with name: ${currentChild.givenName} ${currentChild.familyName} cannot be updated updated`,
-                    description: `${error.message}`,
-                    duration: 2000,
-                    variant: "destructive"
-                });
-            })
-            .then(() =>
-                getChildById(currentChild.id)
-                    .then(value => setChildWithParents(value))
-            )
     }
 
     return (
@@ -175,13 +133,42 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
                                                   setChildWithParents={setChildWithParents}
                                                   setIsEditParentsModeEnabled={setIsEditParentsModeEnabled}/>
                             </>) :
-                        <ShowTable tableFields={["Name", "isEmergencyContact"]}
-                                   value={childWithParents.parents?.map((parent) => ({
-                                       name: parent.parentDto.givenName + " " + parent.parentDto.familyName,
-                                       isEmergencyContact: <span
-                                           className="material-icons-outlined">{parent.isEmergencyContact ? 'check_box' : 'check_box_outline_blank'}</span>
-                                   }))}
-                                   showDeleteButton={false}/>
+                        <div className={`w-full`}>
+                            <Table className={"w-full border border-gray-200"}>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className={"text-center"}>Name</TableHead>
+                                        <TableHead className={"text-center"}>IsEmergencyContact</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>{
+                                    childWithParents.parents && childWithParents.parents?.length !== 0 ? (
+                                        childWithParents.parents.map((parent: ParentDataWithEmergencyContact, index: number) => (
+                                            <TableRow key={index} className={"hover:bg-gray-300 hover:cursor-pointer"}
+                                                      onClick={() => router.push(`/parents/${parent.parentDto.id}`, `/parents/${parent.parentDto.id}`)}>
+                                                <TableCell className={"text-center"}>
+                                                    {parent.parentDto.givenName + " " + parent.parentDto.familyName}
+                                                </TableCell>
+                                                <TableCell className={"text-center"}>
+                                                <span className="material-icons-outlined">
+                                                    <span className="material-icons-outlined">
+                                                        {parent.isEmergencyContact ? 'check_box' : 'check_box_outline_blank'}
+                                                    </span>
+                                                </span>
+                                                </TableCell>
+
+                                            </TableRow>
+                                        ))) : (
+                                        <TableRow>
+                                            <TableCell className={"text-center text-gray-400"}
+                                                       colSpan={2}>
+                                                Nothing added yet
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
                     }
                 </div>
                 <ShowTable className={"mb-6"} tableFields={["Name", "Diagnosed at"]}
