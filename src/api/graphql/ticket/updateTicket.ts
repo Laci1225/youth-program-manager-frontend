@@ -10,10 +10,12 @@ export default async function updateTicket(ticketId: string, ticketData: TicketD
                 updateTicket(id : $id,ticket: $ticket){
                     id
                     child {
+                        id
                         givenName
                         familyName
                     }
                     ticketType{
+                        id
                         name
                         price
                         numberOfParticipation

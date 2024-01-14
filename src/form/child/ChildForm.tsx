@@ -83,7 +83,6 @@ function ChildForm({
             addChild(values)
                 .then((result) => {
                     onChildModified(result)
-                    console.log(result)
                     toast({
                         title: "The child is successfully added",
                         description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,

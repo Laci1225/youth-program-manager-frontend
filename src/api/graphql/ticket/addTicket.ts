@@ -10,10 +10,12 @@ export default function addTicket(values: TicketDataInput) {
                 addTicket(ticket: $ticket) {
                     id
                     child {
+                        id
                         givenName
                         familyName
                     }
                     ticketType{
+                        id
                         name
                         price
                         numberOfParticipation

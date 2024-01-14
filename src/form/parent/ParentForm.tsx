@@ -77,7 +77,6 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
             addParent(values)
                 .then((result) => {
                     onParentModified(result)
-                    console.log(result)
                     toast({
                         title: "The parent is successfully added",
                         description: `A parent with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,

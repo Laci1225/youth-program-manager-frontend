@@ -28,7 +28,6 @@ export const getServerSideProps = (async (context) => {
     if (context.params?.parentId) {
         try {
             parentData = await getParentById(context.params.parentId, serverSideClient);
-            console.log(parentData)
             return {
                 props: {
                     selectedParent: parentData

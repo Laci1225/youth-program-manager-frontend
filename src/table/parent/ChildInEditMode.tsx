@@ -88,8 +88,6 @@ export default function ChildInEditMode({
                     const hasEmergencyContact = tempParentsWithChildren.childDtos?.every(child => {
                         return child.relativeParents?.some(rp => rp.isEmergencyContact);
                     });
-                    console.log(tempParentsWithChildren.childDtos)
-                    console.log(hasEmergencyContact)
                     if (!hasEmergencyContact) {
                         toast({
                             title: "Error",

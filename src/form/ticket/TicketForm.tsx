@@ -32,12 +32,13 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof ticketSchema>>({
         resolver: zodResolver(ticketSchema),
-        defaultValues: {/*
-            name: existingTicket?.name,
-            description: existingTicket?.description,
+        defaultValues: {
+            childId: existingTicket?.child.id,
+            ticketTypeId: existingTicket?.ticketType.id,
             price: existingTicket?.price,
             numberOfParticipation: existingTicket?.numberOfParticipation,
-            standardValidityPeriod: existingTicket?.standardValidityPeriod,*/
+            issueDate: existingTicket?.issueDate ? new Date(existingTicket.issueDate) : undefined,
+            expirationDate: existingTicket?.expirationDate ? new Date(existingTicket.expirationDate) : undefined,
         },
     })
 
@@ -83,15 +84,16 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
             })
     }
 
-
-    useEffect(() => {/*
+    useEffect(() => {
         form.reset({
-            name: existingTicket?.name,
-            description: existingTicket?.description,
+            childId: existingTicket?.child.id,
+            ticketTypeId: existingTicket?.ticketType.id,
             price: existingTicket?.price,
             numberOfParticipation: existingTicket?.numberOfParticipation,
-            standardValidityPeriod: existingTicket?.standardValidityPeriod,
-        })*/
+            issueDate: existingTicket?.issueDate ? new Date(existingTicket.issueDate) : undefined,
+            expirationDate: existingTicket?.expirationDate ? new Date(existingTicket.expirationDate) : undefined,
+        })
+        calcDateByGivenDate()
     }, [existingTicket])
 
     const [days, setDays] = useState<number>(0)
@@ -140,7 +142,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                     <AutoComplete
                                                         className={"w-2/3"}
                                                         key={0}
-                                                        value={undefined/*autoCompleteValue ?? autoCompleteValue*/}
+                                                        value={existingTicket?.child}
                                                         isLoading={false}
                                                         disabled={false}
                                                         getPotential={getPotentialChildren}
@@ -177,7 +179,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                     <AutoComplete
                                                         className={"w-2/3"}
                                                         key={0}
-                                                        value={undefined/*autoCompleteValue ?? autoCompleteValue*/}
+                                                        value={existingTicket?.ticketType}
                                                         isLoading={false}
                                                         disabled={false}
                                                         getPotential={getPotentialTicketTypes}

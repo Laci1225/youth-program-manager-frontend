@@ -37,7 +37,6 @@ function TicketTypeForm({onTicketModified, existingTicket, isOpen, onOpenChange}
     })
 
     function onSubmit(values: z.infer<typeof ticketTypeSchema>) {
-        console.log(values)
         setIsSubmitting(true)
         if (existingTicket) {
             updateTicketType(existingTicket.id, values)

@@ -10,10 +10,12 @@ export default async function getTicketById(ticketId: string, client: ApolloClie
                 getTicketById(id : $id){
                     id
                     child {
+                        id
                         givenName
                         familyName
                     }
                     ticketType{
+                        id
                         name
                         price
                         numberOfParticipation

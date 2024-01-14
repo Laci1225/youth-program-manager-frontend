@@ -47,7 +47,6 @@ export default function ParentInEditMode({
     }
 
     function updateAndSaveChild(child: Omit<ChildData, "hasRegularMedicines" | "modifiedDate" | "createdDate" | "hasDiagnosedDiseases">) {
-        console.log(child)
         updateChild(
             child
         )

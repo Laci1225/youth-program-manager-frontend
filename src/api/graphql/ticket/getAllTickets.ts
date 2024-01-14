@@ -10,10 +10,12 @@ export default async function getAllTickets(client: ApolloClient<NormalizedCache
                 getAllTickets {
                     id
                     child {
+                        id
                         givenName
                         familyName
                     }
                     ticketType{
+                        id
                         name
                         price
                         numberOfParticipation
