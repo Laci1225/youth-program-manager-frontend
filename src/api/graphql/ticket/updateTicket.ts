@@ -25,6 +25,10 @@ export default async function updateTicket(ticketId: string, ticketData: TicketD
                     expirationDate
                     price
                     numberOfParticipation
+                    historyLog {
+                        date
+                        reporter
+                    }
                 }
             }
         `, fetchPolicy: "no-cache",

@@ -7,13 +7,13 @@ import {fieldAppearance} from "@/components/fieldAppearance";
 import {Pencil, Trash} from "lucide-react";
 import {useRouter} from "next/router";
 import {serverSideClient} from "@/api/graphql/client";
-import getTicketTypeById from "@/api/graphql/ticketType/getTicketTypeById";
 import deletedTicketType from "@/api/graphql/ticketType/deletedTicketType";
 import DeleteData from "@/components/deleteData";
 import getTicketById from "@/api/graphql/ticket/getTicketById";
 import {TicketData} from "@/model/ticket-data";
 import {differenceInDays, format} from "date-fns";
 import TicketForm from "@/form/ticket/TicketForm";
+import ShowTable from "@/form/ShowTable";
 
 
 export const getServerSideProps = (async (context) => {
@@ -120,7 +120,6 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                     </div>
                 </div>
                 <div className={"flex"}>
-
                     <div className="mb-6 flex-1">
                         <Label>Issue date :</Label>
                         <div className={`${fieldAppearance} mt-2`}>
@@ -133,6 +132,20 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                             {format(new Date(ticket.expirationDate), "P")}
                         </div>
                     </div>
+                </div>
+            </div>
+            <div className="mb-6 flex-1">
+                <Label>Expiration date :</Label>
+                <div className={`${fieldAppearance} mt-2`}>
+                    <ShowTable
+                        tableFields={["#", "Date"]}
+                        value={ticket.historyLog?.map((value, index) => ({
+                            id: index,
+                            date: format(new Date(value.date), "P")
+                        }))}
+                        showDeleteButton={false}
+                    />
+
                 </div>
             </div>
             <Toaster/>

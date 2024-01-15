@@ -25,6 +25,10 @@ export default async function getAllTickets(client: ApolloClient<NormalizedCache
                     expirationDate
                     price
                     numberOfParticipation
+                    historyLog {
+                        date
+                        reporter
+                    }
                 }
             }
         `, fetchPolicy: "no-cache"

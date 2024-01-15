@@ -25,6 +25,10 @@ export default function addTicket(values: TicketDataInput) {
                     expirationDate
                     price
                     numberOfParticipation
+                    historyLog {
+                        date
+                        reporter
+                    }
                 }
             }
         `, fetchPolicy: "no-cache",

@@ -6,6 +6,11 @@ type Ticket {
     expirationDate: LocalDateTime
     price: Float!
     numberOfParticipation: Int!
+    historyLog: [HistoryData]
+}
+type HistoryData{
+    date: LocalDateTime!
+    reporter: String!
 }
 
 input TicketInput {

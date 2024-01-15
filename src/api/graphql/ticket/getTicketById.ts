@@ -25,6 +25,10 @@ export default async function getTicketById(ticketId: string, client: ApolloClie
                     expirationDate
                     price
                     numberOfParticipation
+                    historyLog {
+                        date
+                        reporter
+                    }
                 }
             }
         `, fetchPolicy: "no-cache",

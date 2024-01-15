@@ -9,6 +9,12 @@ export interface TicketData {
     expirationDate: Date
     price: number,
     numberOfParticipation: number
+    historyLog?: HistoryData[]
+}
+
+interface HistoryData {
+    date: Date,
+    reporter: string
 }
 
 export interface TicketDataInput {
