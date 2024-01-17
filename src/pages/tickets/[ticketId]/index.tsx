@@ -14,6 +14,10 @@ import {TicketData} from "@/model/ticket-data";
 import {differenceInDays, format} from "date-fns";
 import TicketForm from "@/form/ticket/TicketForm";
 import ShowTable from "@/form/ShowTable";
+import {Button} from "@/components/ui/button";
+import ConfirmDialog from "@/components/confirmDialog";
+import updateTicket from "@/api/graphql/ticket/updateTicket";
+import fromTicketDataToTicketInputData from "@/model/fromTicketDataToTicketInputData";
 
 
 export const getServerSideProps = (async (context) => {
@@ -55,6 +59,29 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
     function handleDeleteClick() {
         setIsDeleteDialogOpen(true)
     }
+
+    const [isReportParticipationClicked, setIsReportParticipationClicked] = useState<boolean>(false)
+
+    function reportParticipation() {
+        setIsReportParticipationClicked(true)
+    }
+
+    function handleReport() {
+        const updatedHistoryLog = [
+            ...(ticket.historyLog || []),
+            {date: new Date(), reporter: ""}
+        ];
+        setTicket(prevState => ({
+            ...prevState,
+            historyLog: updatedHistoryLog
+        }));
+
+        updateTicket(ticket.id, fromTicketDataToTicketInputData({...ticket, historyLog: updatedHistoryLog}))
+            .then(value => {
+                setTicket(value)
+            })
+    }
+
 
     return (
         <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
@@ -107,8 +134,9 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                     </div>
                     <div className="mb-6 flex-1">
                         <Label>Number of participation:</Label>
-                        <div className={`${fieldAppearance} mt-2`}>
-                            {ticket.numberOfParticipation} pc(s)
+                        <div className={`${fieldAppearance} mt-2`}>oöö
+                            {ticket.historyLog ? ticket.numberOfParticipation - ticket.historyLog.length
+                                : ticket.numberOfParticipation} pc(s)
                         </div>
                     </div>
                 </div>
@@ -135,18 +163,21 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                 </div>
             </div>
             <div className="mb-6 flex-1">
-                <Label>Expiration date :</Label>
+                <Label>Report Participation:</Label>
                 <div className={`${fieldAppearance} mt-2`}>
-                    <ShowTable
-                        tableFields={["#", "Date"]}
-                        value={ticket.historyLog?.map((value, index) => ({
-                            id: index,
-                            date: format(new Date(value.date), "P")
-                        }))}
-                        showDeleteButton={false}
-                    />
-
+                    <Button onClick={reportParticipation}/>
                 </div>
+            </div>
+            <div className="mb-6 flex-1">
+                <ShowTable
+                    tableFields={["#", "Date"]}
+                    value={ticket.historyLog?.map((value, index) => ({
+                        id: index + 1,
+                        date: format(new Date(value.date), "P")
+                    }))}
+                    showDeleteButton={false}
+                />
+
             </div>
             <Toaster/>
             <TicketForm existingTicket={ticket ?? undefined}
@@ -161,6 +192,14 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                         onSuccess={onTicketDeleted}
                         deleteFunction={deletedTicketType}
                         entityType={"Ticket"}
+            />
+            <ConfirmDialog
+                isOpen={isReportParticipationClicked}
+                onOpenChange={setIsReportParticipationClicked}
+                title={"Are you absolutely sure?"}
+                description={"This action cannot be undone. This will permanently delete your" +
+                    " account and remove your data from our servers."}
+                onContinue={handleReport}
             />
         </div>
     )

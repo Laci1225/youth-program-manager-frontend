@@ -187,8 +187,8 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                             } else field.onChange(undefined);
 
                                                         }}
-                                                        placeholder={"Select parents..."}
-                                                        emptyMessage={"No parent found"}
+                                                        placeholder={"Select children..."}
+                                                        emptyMessage={"No child found"}
                                                     />
                                                     {!existingTicket &&
                                                         <Button type={"button"}
@@ -217,7 +217,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                         key={0}
                                                         value={ticketTypeAutocompleteValue ? ticketTypeAutocompleteValue : existingTicket?.ticketType}
                                                         isLoading={false}
-                                                        disabled={false}
+                                                        disabled={!!existingTicket}
                                                         getPotential={getPotentialTicketTypes}
                                                         isAdded={false}
                                                         onValueChange={(value) => {
@@ -229,8 +229,8 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                             } else field.onChange(undefined);
 
                                                         }}
-                                                        placeholder={"Select parents..."}
-                                                        emptyMessage={"No parent found"}
+                                                        placeholder={"Select ticket type..."}
+                                                        emptyMessage={"No ticket type found"}
                                                     />
                                                     <Button type={"button"}
                                                             onClick={() => {
@@ -298,7 +298,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                 name="issueDate"
                                                 render={({field}) => (
                                                     <FormItem className="w-1/3">
-                                                        <FormLabel>Standard Validity Period*</FormLabel>
+                                                        <FormLabel>Valid from*</FormLabel>
                                                         <FormControl>
                                                             <CalendarInput {...field} shownYear={2010}
                                                                            reCalc={calcDateByGivenDay}/>
@@ -314,7 +314,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                 name="expirationDate"
                                                 render={({field}) => (
                                                     <FormItem className="w-full">
-                                                        <FormLabel>Standard Validity Period*</FormLabel>
+                                                        <FormLabel>Valid until*</FormLabel>
                                                         <div onClick={() => setDisable(!disable)}>Switch to other date
                                                             format
                                                         </div>
