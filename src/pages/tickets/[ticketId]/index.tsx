@@ -18,6 +18,7 @@ import {Button} from "@/components/ui/button";
 import ConfirmDialog from "@/components/confirmDialog";
 import updateTicket from "@/api/graphql/ticket/updateTicket";
 import fromTicketDataToTicketInputData from "@/model/fromTicketDataToTicketInputData";
+import {toast} from "@/components/ui/use-toast";
 
 
 export const getServerSideProps = (async (context) => {
@@ -79,7 +80,15 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
         updateTicket(ticket.id, fromTicketDataToTicketInputData({...ticket, historyLog: updatedHistoryLog}))
             .then(value => {
                 setTicket(value)
+            }).then(() =>
+            toast({
+                variant: "default",
+                title: `${ticket.child.givenName} ${ticket.child.familyName}'s ticket data reported successfully`,
+                description: `${ticket.ticketType.name} reported`,
+                duration: 2000
             })
+        )
+
     }
 
 
@@ -134,7 +143,8 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                     </div>
                     <div className="mb-6 flex-1">
                         <Label>Number of participation:</Label>
-                        <div className={`${fieldAppearance} mt-2`}>oöö
+                        <div className={`${fieldAppearance} mt-2 ${ticket.historyLog &&
+                        (ticket.numberOfParticipation - ticket.historyLog.length) <= 0 && "bg-red-700 text-white"}`}>
                             {ticket.historyLog ? ticket.numberOfParticipation - ticket.historyLog.length
                                 : ticket.numberOfParticipation} pc(s)
                         </div>
@@ -143,8 +153,14 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                 <div className="mb-6 flex-1">
                     <Label>Valid for :</Label> {/*todo warning logic*/}
                     <div className={`${fieldAppearance}  
-                    ${differenceInDays(new Date(ticket.expirationDate), new Date(ticket.issueDate)) <= 1 && "bg-red-700 text-white"} mt-2`}>
-                        {differenceInDays(new Date(ticket.expirationDate), new Date(ticket.issueDate))} day(s)
+                    ${differenceInDays(new Date(ticket.expirationDate), new Date()) <= 5 && "bg-red-700 text-white"} mt-2`}>
+                        {differenceInDays(new Date(ticket.expirationDate), new Date()) > 0 ? (
+                                <>{
+                                    differenceInDays(new Date(ticket.expirationDate), new Date())}
+                                    <span> day(s)</span>
+                                </>) :
+                            <>Expired</>
+                        }
                     </div>
                 </div>
                 <div className={"flex"}>
@@ -161,23 +177,31 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                         </div>
                     </div>
                 </div>
-            </div>
-            <div className="mb-6 flex-1">
-                <Label>Report Participation:</Label>
-                <div className={`${fieldAppearance} mt-2`}>
-                    <Button onClick={reportParticipation}/>
-                </div>
-            </div>
-            <div className="mb-6 flex-1">
-                <ShowTable
-                    tableFields={["#", "Date"]}
-                    value={ticket.historyLog?.map((value, index) => ({
-                        id: index + 1,
-                        date: format(new Date(value.date), "P")
-                    }))}
-                    showDeleteButton={false}
-                />
+                <div className="mb-6 flex justify-between">
+                    <Label className={"items-center"}>Report Participation:</Label>
+                    <Button
+                        onClick={() =>
+                            !(ticket.historyLog && ticket.numberOfParticipation - ticket.historyLog.length <= 0
+                                || differenceInDays(new Date(ticket.expirationDate), new Date()) <= 0)
+                                ?
+                                reportParticipation()
+                                : alert("Cannot report attendance as participation limit reached or report attendance as ticket is expired")
+                        }>
 
+                        Report participation
+                    </Button>
+                </div>
+                <div className="mb-6 flex-1">
+                    <ShowTable
+                        tableFields={["#", "Date"]}
+                        value={ticket.historyLog?.map((value, index) => ({
+                            id: index + 1,
+                            date: format(new Date(value.date), "P")
+                        }))}
+                        showDeleteButton={false}
+                    />
+
+                </div>
             </div>
             <Toaster/>
             <TicketForm existingTicket={ticket ?? undefined}

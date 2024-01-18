@@ -12,9 +12,10 @@ export interface CalendarInputProps {
     shownYear: number
     reCalc?: () => void
     disabled?: boolean
+    canBeFuture?: boolean
 }
 
-export default function CalendarInput({value, onChange, shownYear, reCalc, disabled}: CalendarInputProps) {
+export default function CalendarInput({value, onChange, shownYear, reCalc, disabled, canBeFuture}: CalendarInputProps) {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     return (
         <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
@@ -39,7 +40,7 @@ export default function CalendarInput({value, onChange, shownYear, reCalc, disab
                         reCalc && reCalc();
                     }}
                     defaultMonth={new Date(shownYear, 1)}
-                    toDate={new Date()}
+                    toDate={canBeFuture ? undefined : new Date()}
                 />
             </PopoverContent>
         </Popover>

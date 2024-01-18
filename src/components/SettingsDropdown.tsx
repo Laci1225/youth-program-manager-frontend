@@ -11,18 +11,15 @@ interface SettingsDropdownProps {
     handleEditClick: (item: any | null) => void
     handleDeleteClick: (item: any | null) => void
     item: Object
+    additionalItem?: React.ReactNode;
 }
 
 const SettingsDropdown = ({
                               handleEditClick,
                               handleDeleteClick,
                               item,
+                              additionalItem
                           }: SettingsDropdownProps) => {
-    const [isOpen, setIsOpen] = useState(false);
-
-    const toggleDropdown = () => {
-        setIsOpen(!isOpen);
-    };
     return (
         <DropdownMenu>
             <DropdownMenuTrigger onClick={event => event.preventDefault()}>
@@ -50,6 +47,7 @@ const SettingsDropdown = ({
                     <Trash className={"mx-1"}/>
                     <span>Delete</span>
                 </DropdownMenuItem>
+                {additionalItem}
             </DropdownMenuContent>
         </DropdownMenu>
     );

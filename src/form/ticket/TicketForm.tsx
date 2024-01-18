@@ -87,6 +87,8 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
             })
     }
 
+    const [days, setDays] = useState<number>(0)
+
     useEffect(() => {
         form.reset({
             childId: existingTicket?.child.id,
@@ -99,7 +101,6 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
         calcDateByGivenDate()
     }, [existingTicket])
 
-    const [days, setDays] = useState<number>(0)
     const calcDateByGivenDay = (givenDay?: number) => {
         if (givenDay) {
             const issueDate = form.getValues("issueDate");
@@ -119,7 +120,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
         const issueDate = form.getValues("issueDate");
         const expirationDate = form.getValues("expirationDate");
         if (issueDate && expirationDate) {
-            setDays(differenceInDays(expirationDate, issueDate));
+            setDays(differenceInDays(expirationDate, new Date()));
         }
     }
 
@@ -225,7 +226,9 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                                 field.onChange(value.id);
                                                                 form.setValue("price", value.price)
                                                                 form.setValue("numberOfParticipation", value.numberOfParticipation)
+                                                                form.setValue("issueDate", new Date())
                                                                 setDays(value.standardValidityPeriod)
+                                                                calcDateByGivenDay(value.standardValidityPeriod)
                                                             } else field.onChange(undefined);
 
                                                         }}
@@ -300,8 +303,10 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                     <FormItem className="w-1/3">
                                                         <FormLabel>Valid from*</FormLabel>
                                                         <FormControl>
-                                                            <CalendarInput {...field} shownYear={2010}
-                                                                           reCalc={calcDateByGivenDay}/>
+                                                            <CalendarInput {...field}
+                                                                           shownYear={new Date().getFullYear()}
+                                                                           reCalc={calcDateByGivenDay}
+                                                                           canBeFuture={true}/>
                                                         </FormControl>
                                                         <FormMessage/>
                                                     </FormItem>
@@ -320,9 +325,11 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                         </div>
                                                         <FormControl>
                                                             <div className={"flex"}>
-                                                                <CalendarInput {...field} shownYear={2010}
+                                                                <CalendarInput {...field}
+                                                                               shownYear={new Date().getFullYear()}
                                                                                reCalc={calcDateByGivenDate}
-                                                                               disabled={!disable}/>
+                                                                               disabled={!disable}
+                                                                               canBeFuture={true}/>
                                                                 <Input disabled={disable}
                                                                        onClick={() => setDisable(false)}
                                                                        onInput={(event) => {
