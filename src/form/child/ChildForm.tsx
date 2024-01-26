@@ -17,7 +17,7 @@ import {ChildData} from "@/model/child-data";
 import LoadingButton from "@/components/loading-button";
 import updateChild from "@/api/graphql/child/updateChild";
 import {parseDateInDisease, parseDateInMedicine} from "@/utils/child";
-import {AutoComplete} from "@/table/AutoComplete";
+import {AutoComplete} from "@/form/AutoComplete";
 import ParentForm from "@/form/parent/ParentForm";
 import {Button} from "@/components/ui/button";
 import getPotentialParents from "@/api/graphql/child/getPotentialParents";
@@ -83,7 +83,6 @@ function ChildForm({
             addChild(values)
                 .then((result) => {
                     onChildModified(result)
-                    console.log(result)
                     toast({
                         title: "The child is successfully added",
                         description: `A child with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,
@@ -217,27 +216,24 @@ function ChildForm({
                                                         <div className={"flex justify-between"}>
                                                             <AutoComplete
                                                                 className={"w-2/3"}
-                                                                key={0}
-                                                                value={autoCompleteValue ?? autoCompleteValue}
+                                                                value={autoCompleteValue && autoCompleteValue}
                                                                 isLoading={false}
                                                                 disabled={false}
                                                                 getPotential={getPotentialParents}
                                                                 isAdded={false}
                                                                 onValueChange={(value) => {
-                                                                    if (value) {
-                                                                        const selectedParent = {
+                                                                    if (!value) {
+                                                                        field.onChange(undefined);
+                                                                        return;
+                                                                    }
+                                                                    field.onChange([{
                                                                             id: value.id,
-                                                                            isEmergencyContact: true
-                                                                        };
-                                                                        const updatedParents = [
-                                                                            selectedParent
-                                                                        ];
-                                                                        field.onChange(updatedParents);
-                                                                    } else field.onChange(undefined);
-
+                                                                            isEmergencyContact: true,
+                                                                        }]
+                                                                    )
                                                                 }}
-                                                                placeholder={"Select parents..."}
-                                                                emptyMessage={"No parent found"}
+                                                                placeholder="Select parents..."
+                                                                emptyMessage="No parent found"
                                                             />
                                                             <Button type={"button"}
                                                                     onClick={() => {

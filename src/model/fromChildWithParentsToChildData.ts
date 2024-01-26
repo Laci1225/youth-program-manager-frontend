@@ -11,7 +11,7 @@ export default function fromChildWithParentsToChildData(childWithParents: ChildD
         relativeParents: childWithParents.parents?.map(value => ({
             id: value.parentDto.id,
             isEmergencyContact: value.isEmergencyContact,
-        })) || [],
+        })) ?? [],
         diagnosedDiseases: childWithParents.diagnosedDiseases,
         regularMedicines: childWithParents.regularMedicines,
         createdDate: childWithParents.createdDate,

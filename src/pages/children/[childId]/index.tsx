@@ -14,13 +14,11 @@ import {useRouter} from "next/router";
 import {AlertTriangle, Pencil, Trash} from "lucide-react";
 import DeleteData from "@/components/deleteData";
 import deleteChild from "@/api/graphql/child/deleteChild";
-import updateChild from "@/api/graphql/child/updateChild";
-import {toast} from "@/components/ui/use-toast";
 import HoverText from "@/components/hoverText";
-import {ParentData} from "@/model/parent-data";
 import SaveParentsDataToChild from "@/table/child/SaveParentsDataToChild";
 import fromChildWithParentsToChildData from "@/model/fromChildWithParentsToChildData";
 import ParentInEditMode from "@/table/child/ParentInEditMode";
+import {cn} from "@/lib/utils";
 
 
 export const getServerSideProps = (async (context) => {
@@ -60,11 +58,7 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
         setIsDeleteModeEnabled(true)
     }
 
-    const [isParentEditDialogOpen, setParentEditDialogOpen] = useState(false)
-
-
     const [isEditParentsModeEnabled, setIsEditParentsModeEnabled] = useState(false)
-    const [selectedParentDataToAdd, setSelectedParentDataToAdd] = useState<ParentData>()
     const [isEditModeBorderVisible, setIsEditModeBorderVisible] = useState(false)
 
     function onEditClicked() {
@@ -72,75 +66,40 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
         setIsEditModeBorderVisible(!isEditModeBorderVisible)
     }
 
-    function onCancelClicked() {
-        getChildById(currentChild.id)
-            .then(value => setChildWithParents(value))
-        setIsEditParentsModeEnabled(!isEditParentsModeEnabled)
-        setIsEditModeBorderVisible(!isEditModeBorderVisible)
-    }
-
-
-    function handleParentEditClick() {
-        setParentEditDialogOpen(true)
-    }
-
-    function updateAndSaveChild(childWithoutUnnecessaryFields: Omit<ChildData, "hasRegularMedicines" | "modifiedDate" | "createdDate" | "hasDiagnosedDiseases">) {
-        updateChild(childWithoutUnnecessaryFields)
-            .then(value => {
-                setChildWithParents(prevState => ({...prevState, ...value}))
-                toast({
-                    title: "Child is successfully updated",
-                    description: `A child with name: ${currentChild.givenName} ${currentChild.familyName} updated`,
-                    duration: 2000
-                });
-                setIsEditParentsModeEnabled(false);
-            })
-            .catch(error => {
-                toast({
-                    title: `Child with name: ${currentChild.givenName} ${currentChild.familyName} cannot be updated updated`,
-                    description: `${error.message}`,
-                    duration: 2000,
-                    variant: "destructive"
-                });
-            })
-            .then(() =>
-                getChildById(currentChild.id)
-                    .then(value => setChildWithParents(value))
-            )
-    }
-
     return (
-        <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
-            <div className={"flex justify-between px-6 pb-6 items-center"}>
-                <Link href={"/children"}>
+        <div className="container w-3/6 py-10 h-[100vh] overflow-auto">
+            <div className="flex justify-between px-6 pb-6 items-center">
+                <Link href="/children">
                     <span className="material-icons-outlined">arrow_back</span>
                 </Link>
                 <div>
                     Child details
                 </div>
-                <HoverText trigger={
-                    (!currentChild.relativeParents || currentChild.relativeParents?.length === 0) && (
-                        <div className={"flex"}>
-                            <AlertTriangle className={"text-yellow-600 "}/>
-                            Parent not associated yet
-                        </div>)
-                }/>
-                <div className={"flex"}>
-                    <div className={" flex flex-row items-center hover:cursor-pointer px-5"}
+                <HoverText>
+                    {
+                        (!currentChild.relativeParents?.length) && (
+                            <div className="flex">
+                                <AlertTriangle className="text-yellow-600"/>
+                                Parent not associated yet
+                            </div>)
+                    }
+                </HoverText>
+                <div className="flex">
+                    <div className="flex flex-row items-center hover:cursor-pointer px-5"
                          onClick={(event) => {
                              event.preventDefault()
                              handleEditClick()
                          }}>
-                        <Pencil className={"mx-1"}/>
+                        <Pencil className="mx-1"/>
                         <span>Edit</span>
                     </div>
                     <div
-                        className={"flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"}
+                        className="flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"
                         onClick={(event) => {
                             event.preventDefault()
                             handleDeleteClick()
                         }}>
-                        <Trash className={"mx-1"}/>
+                        <Trash className="mx-1"/>
                         <span>Delete</span>
                     </div>
                 </div>
@@ -165,16 +124,16 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
                     </div>
                 </div>
                 <div
-                    className={`mb-6 ${isEditModeBorderVisible && "border border-dashed border-gray-400  p-2 rounded"}`}>
+                    className={cn(`mb-6`, isEditModeBorderVisible && "border border-dashed border-gray-400  p-2 rounded")}>
                     <SaveParentsDataToChild onEdit={onEditClicked}
                                             isEditParentsModeEnabled={isEditParentsModeEnabled}/>
-                    {isEditParentsModeEnabled ? (
-                            <>
-                                <ParentInEditMode child={currentChild}
-                                                  childWithParents={childWithParents}
-                                                  setChildWithParents={setChildWithParents}
-                                                  setIsEditParentsModeEnabled={setIsEditParentsModeEnabled}/>
-                            </>) :
+                    {isEditParentsModeEnabled ?
+                        <>
+                            <ParentInEditMode child={currentChild}
+                                              childWithParents={childWithParents}
+                                              setChildWithParents={setChildWithParents}
+                                              setIsEditParentsModeEnabled={setIsEditParentsModeEnabled}/>
+                        </> :
                         <ShowTable tableFields={["Name", "isEmergencyContact"]}
                                    value={childWithParents.parents?.map((parent) => ({
                                        name: parent.parentDto.givenName + " " + parent.parentDto.familyName,
@@ -184,7 +143,7 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
                                    showDeleteButton={false}/>
                     }
                 </div>
-                <ShowTable className={"mb-6"} tableFields={["Name", "Diagnosed at"]}
+                <ShowTable className="mb-6" tableFields={["Name", "Diagnosed at"]}
                            value={currentChild.diagnosedDiseases}
                            showDeleteButton={false}/>
                 <ShowTable tableFields={["Name", "Dose", "Taken since"]}
@@ -203,7 +162,7 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
                         onOpenChange={setIsDeleteModeEnabled}
                         onSuccess={onChildDeleted}
                         deleteFunction={deleteChild}
-                        entityType={"Child"}
+                        entityType="Child"
             />
         </div>
     )

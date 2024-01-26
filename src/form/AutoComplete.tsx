@@ -55,14 +55,13 @@ export const AutoComplete = <T extends ParentData | ChildData>({
 
     const fetchPotential = useCallback((name: string) => {
         getPotential(name)
-            .then(parents => {
-                const filteredParents = parents.filter((parent) =>
+            .then(items => {
+                const filteredParents = items.filter((item) =>
                     !alreadyAddedData?.some(
-                        (relativeParent) => relativeParent.id === parent.id
+                        (addedItem) => addedItem.id === item.id
                     )
                 );
-                setOptions(filteredParents)
-                //todo limit for options
+                setOptions(filteredParents.slice(0, 5))
             })
             .catch(reason => {
                 console.error("Failed to get potential parents:", reason);
@@ -72,7 +71,7 @@ export const AutoComplete = <T extends ParentData | ChildData>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const debouncedFetchPotential = useCallback(debounce(fetchPotential), [fetchPotential]);
 
-    function potential(event: FormEvent<HTMLInputElement>) {
+    function handleOnInput(event: FormEvent<HTMLInputElement>) {
         const name = event.currentTarget.value
         setInputValue(name);
         if (name) {
@@ -128,7 +127,7 @@ export const AutoComplete = <T extends ParentData | ChildData>({
             // We can call this hack: "The next tick"
             setTimeout(() => {
                 inputRef?.current?.blur()
-            }, 0)
+            })
         },
         [onValueChange]
     )
@@ -146,7 +145,7 @@ export const AutoComplete = <T extends ParentData | ChildData>({
                         placeholder={placeholder}
                         disabled={disabled}
                         className="text-base"
-                        onInput={potential}
+                        onInput={handleOnInput}
                     />
                 </div>
                 <div className="mt-1 relative">
@@ -161,9 +160,9 @@ export const AutoComplete = <T extends ParentData | ChildData>({
                                         </div>
                                     </CommandPrimitive.Loading>
                                 ) : null}
-                                {options && options.length > 0 ? (
+                                {options?.length && (
                                     <CommandGroup>
-                                        {options.map((option) => {
+                                        {options?.map((option) => {
                                             const isSelected = selected?.id === option.id
                                             return (
                                                 <CommandItem
@@ -174,7 +173,7 @@ export const AutoComplete = <T extends ParentData | ChildData>({
                                                         event.stopPropagation()
                                                     }}
                                                     onSelect={() => handleSelectOption(option)}
-                                                    className={cn("flex items-center gap-2 w-full", !isSelected ? "pl-8" : null)}
+                                                    className={cn("flex items-center gap-2 w-full", !isSelected && "pl-8")}
                                                 >
                                                     {isSelected ? <Check className="w-4"/> : null}
                                                     {option && ('birthDate' in option ? (
@@ -190,7 +189,7 @@ export const AutoComplete = <T extends ParentData | ChildData>({
                                             )
                                         })}
                                     </CommandGroup>
-                                ) : null}
+                                )}
                                 {!isLoading ? (
                                     <CommandPrimitive.Empty
                                         className="select-none rounded-sm px-2 py-3 text-sm text-center">

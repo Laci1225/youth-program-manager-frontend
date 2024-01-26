@@ -1,4 +1,3 @@
-import React, {useState} from "react";
 import {
     DropdownMenu,
     DropdownMenuContent, DropdownMenuItem,
@@ -8,21 +7,14 @@ import {
 import {Pencil, Trash} from "lucide-react";
 
 interface SettingsDropdownProps {
-    handleEditClick: (item: any | null) => void
-    handleDeleteClick: (item: any | null) => void
-    item: Object
+    handleEditClick: () => void
+    handleDeleteClick: () => void
 }
 
 const SettingsDropdown = ({
                               handleEditClick,
                               handleDeleteClick,
-                              item,
                           }: SettingsDropdownProps) => {
-    const [isOpen, setIsOpen] = useState(false);
-
-    const toggleDropdown = () => {
-        setIsOpen(!isOpen);
-    };
     return (
         <DropdownMenu>
             <DropdownMenuTrigger onClick={event => event.preventDefault()}>
@@ -35,7 +27,7 @@ const SettingsDropdown = ({
                     onClick={(event) => {
                         event.preventDefault()
                         event.stopPropagation()
-                        handleEditClick(item)
+                        handleEditClick()
                     }}>
                     <Pencil className={"mx-1"}/>
                     <span>Edit</span>
@@ -45,7 +37,7 @@ const SettingsDropdown = ({
                     onClick={event => {
                         event.preventDefault()
                         event.stopPropagation()
-                        handleDeleteClick(item)
+                        handleDeleteClick()
                     }}>
                     <Trash className={"mx-1"}/>
                     <span>Delete</span>

@@ -1,5 +1,5 @@
 import ParentsChildrenTable from "@/table/parent/ParentsChildrenTable";
-import {AutoComplete} from "@/table/AutoComplete";
+import {AutoComplete} from "@/form/AutoComplete";
 import getPotentialChildren from "@/api/graphql/parent/getPotentialChildren";
 import {Button} from "@/components/ui/button";
 import {PlusSquare} from "lucide-react";
@@ -57,6 +57,7 @@ export default function ChildInEditMode({
                     duration: 2000
                 });
                 setIsEditChildrenModeEnabled(false);
+                setParentWithChildren(tempParentsWithChildren)
             })
             .catch(error => {
                 toast({
@@ -66,7 +67,6 @@ export default function ChildInEditMode({
                     variant: "destructive"
                 });
             })
-            .then(() => setParentWithChildren(tempParentsWithChildren))
         if (childDtos) {
             childDtos.map(
                 childDto => updateChild(childDto)
@@ -88,8 +88,6 @@ export default function ChildInEditMode({
                     const hasEmergencyContact = tempParentsWithChildren.childDtos?.every(child => {
                         return child.relativeParents?.some(rp => rp.isEmergencyContact);
                     });
-                    console.log(tempParentsWithChildren.childDtos)
-                    console.log(hasEmergencyContact)
                     if (!hasEmergencyContact) {
                         toast({
                             title: "Error",

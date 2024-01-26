@@ -6,18 +6,12 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table";
-import {
-    DropdownMenu,
-    DropdownMenuContent, DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
 import React, {useState} from "react";
 import {Toaster} from "@/components/ui/toaster";
 import {serverSideClient} from "@/api/graphql/client";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
 import getAllTicketTypes from "@/api/graphql/ticket/getAllTicketTypes";
-import {Pencil, PlusSquare, Trash} from "lucide-react";
+import {PlusSquare} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
 import DeleteData from "@/components/deleteData";
@@ -69,8 +63,8 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
     }
 
     return (
-        <div className={"container w-4/6 py-28"}>
-            <div className={"flex justify-between px-6 pb-6"}>
+        <div className="container w-4/6 py-28">
+            <div className="flex justify-between px-6 pb-6">
                 <span>Tickets</span>
                 <Button onClick={(event) => {
                     event.preventDefault()
@@ -80,7 +74,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                     <span>Create</span>
                 </Button>
             </div>
-            <Table className={"border border-gray-700 rounded"}>
+            <Table className="border border-gray-700 rounded">
                 <TableHeader>
                     <TableRow>
                         <TableHead className="text-center">Name</TableHead>
@@ -95,7 +89,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                     {
                         tickets && tickets.length !== 0 ? (
                             tickets.map((ticket) => (
-                                <TableRow key={ticket.id} className={"hover:bg-gray-300 hover:cursor-pointer"}
+                                <TableRow key={ticket.id} className="hover:bg-gray-300 hover:cursor-pointer"
                                           onClick={() => router.push(`ticket-types/${ticket.id}`)}>
                                     <TableCell className="text-center">
                                         {ticket.name}
@@ -114,9 +108,8 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                                     </TableCell>
                                     <TableCell className="p-1 text-center">
                                         <SettingsDropdown
-                                            handleEditClick={handleEditClick}
-                                            handleDeleteClick={handleDeleteClick}
-                                            item={ticket}
+                                            handleEditClick={() => handleEditClick(ticket)}
+                                            handleDeleteClick={() => handleDeleteClick(ticket)}
                                         />
                                     </TableCell>
                                 </TableRow>
@@ -139,7 +132,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                         onOpenChange={setIsDeleteDialogOpen}
                         onSuccess={onTicketDeleted}
                         deleteFunction={deletedTicketType}
-                        entityType={"Ticket"}
+                        entityType="Ticket"
             />
         </div>
     )
