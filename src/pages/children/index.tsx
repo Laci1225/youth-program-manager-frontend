@@ -15,17 +15,10 @@ import getAllChildren from "@/api/graphql/child/getAllChildren";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
 import {serverSideClient} from "@/api/graphql/client";
 import deleteChild from "@/api/graphql/child/deleteChild";
-import {
-    DropdownMenu,
-    DropdownMenuContent, DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import {AlertTriangle, Pencil, PlusSquare, Trash} from "lucide-react"
+import {AlertTriangle, PlusSquare} from "lucide-react"
 import {useRouter} from "next/router";
 import {Button} from "@/components/ui/button";
 import DeleteData from "@/components/deleteData";
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import HoverText from "@/components/hoverText";
 import SettingsDropdown from "@/components/SettingsDropdown";
 
