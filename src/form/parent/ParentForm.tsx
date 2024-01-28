@@ -13,11 +13,11 @@ import addParent from "@/api/graphql/parent/addParent";
 import {InputPhoneNumbersHandler} from "@/form/parent/InputPhoneNumbersHandler";
 import updateParent from "@/api/graphql/parent/updateParent";
 import {ParentData, ParentDataWithChildrenIds} from "@/model/parent-data";
-import {AutoComplete} from "@/table/AutoComplete";
+import {AutoComplete} from "@/form/AutoComplete";
 import getPotentialChildren from "@/api/graphql/parent/getPotentialChildren";
 import {Button} from "@/components/ui/button";
 import {ChildData} from "@/model/child-data";
-import ChildForm2 from "@/form/child/ChildForm2";
+import ChildForm from "@/form/child/ChildForm";
 
 interface ParentFormProps {
     onParentModified: (parent: ParentData) => void;
@@ -74,7 +74,11 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
                 setIsSubmitting(false)
             })
         } else {
-            addParent(values)
+            const {
+                child,
+                ...parentFields
+            } = values;
+            addParent({...parentFields, childId: child?.id})
                 .then((result) => {
                     onParentModified(result)
                     console.log(result)
@@ -108,7 +112,7 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
     const [autoCompleteValue, setAutoCompleteValue] = useState<ChildData>()
 
     function onChildUpdated(child: ChildData) {
-        form.setValue("childId", child.id)
+        form.setValue("child", child)
         setAutoCompleteValue(child)
     }
 
@@ -155,29 +159,30 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
                                     {!existingParent && !onChildFormClicked &&
                                         <FormField
                                             control={form.control}
-                                            name="childId"
+                                            name="child"
                                             render={({field}) => (
-                                                <FormItem className={"flex-1"}>
+                                                <FormItem className="flex-1">
                                                     <FormLabel>Child</FormLabel>
                                                     <FormControl>
-                                                        <div className={"flex justify-between"}>
+                                                        <div className="flex justify-between">
                                                             <AutoComplete
-                                                                className={"w-2/3"}
-                                                                key={0}
+                                                                className="w-2/3"
                                                                 isLoading={false}
                                                                 disabled={false}
                                                                 value={autoCompleteValue}
                                                                 getPotential={getPotentialChildren}
                                                                 isAdded={false}
                                                                 onValueChange={(value) => {
-                                                                    if (value) {
-                                                                        field.onChange(value.id);
-                                                                    } else field.onChange(undefined);
+                                                                    if (!value) {
+                                                                        field.onChange(undefined);
+                                                                        return;
+                                                                    }
+                                                                    field.onChange(value)
                                                                 }}
-                                                                placeholder={"Select children..."}
-                                                                emptyMessage={"No child found"}
+                                                                placeholder="Select children..."
+                                                                emptyMessage="No child found"
                                                             />
-                                                            <Button type={"button"}
+                                                            <Button type="button"
                                                                     onClick={() => {
                                                                         handleChildEditClick()
                                                                     }}>
@@ -202,7 +207,7 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
                                                     />
                                                 </FormControl>
                                                 <FormMessage
-                                                    hidden={typeof form.formState.errors.phoneNumbers?.message === 'undefined'}/>
+                                                    hidden={!form.formState.errors.phoneNumbers?.message}/>
                                             </FormItem>
                                         )}
                                     />
@@ -210,7 +215,7 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
                                         control={form.control}
                                         name="address"
                                         render={({field}) => (
-                                            <FormItem className={"flex-1"}>
+                                            <FormItem className="flex-1">
                                                 <FormLabel>Address</FormLabel>
                                                 <FormControl>
                                                     <Input placeholder="Address" {...field} />
@@ -230,12 +235,13 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
                     </Form>
                 </DialogContent>
             </Dialog>
-            <ChildForm2
-                isOpen={isChildEditDialogOpen}
-                onOpenChange={setIsChildEditDialogOpen}
-                onChildModified={onChildUpdated}
-                onParentFormClicked={true}
-            />
+            {isChildEditDialogOpen &&
+                <ChildForm
+                    isOpen={isChildEditDialogOpen}
+                    onOpenChange={setIsChildEditDialogOpen}
+                    onChildModified={onChildUpdated}
+                    onParentFormClicked={true}
+                />}
         </>
     );
 }
