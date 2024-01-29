@@ -7,7 +7,7 @@ import {Check, XIcon} from "lucide-react"
 import {Skeleton} from "@/components/ui/skeleton";
 import {ParentData} from "@/model/parent-data";
 import {Button} from "@/components/ui/button";
-import {ChildData, RelativeParent} from "@/model/child-data";
+import {ChildNameData, RelativeParent} from "@/model/child-data";
 import debounce from "@/utils/debounce";
 import {format} from "date-fns";
 
@@ -20,23 +20,23 @@ type AutoCompleteProps<T> = {
     disabled?: boolean
     placeholder?: string
     className?: string
-    alreadyAddedData?: ChildData[] | RelativeParent[]
+    alreadyAddedData?: ChildNameData[] | RelativeParent[]
     isAdded: boolean
-    getPotential: (name: string) => Promise<T[]>
+    getPotential: (name: string, limit: number) => Promise<T[]>
 }
 
-export const AutoComplete = <T extends ParentData | ChildData>({
-                                                                   alreadyAddedData,
-                                                                   className,
-                                                                   isAdded,
-                                                                   placeholder,
-                                                                   emptyMessage,
-                                                                   value,
-                                                                   onValueChange,
-                                                                   disabled,
-                                                                   isLoading = false,
-                                                                   getPotential,
-                                                               }: AutoCompleteProps<T>) => {
+export const AutoComplete = <T extends ParentData | ChildNameData>({
+                                                                       alreadyAddedData,
+                                                                       className,
+                                                                       isAdded,
+                                                                       placeholder,
+                                                                       emptyMessage,
+                                                                       value,
+                                                                       onValueChange,
+                                                                       disabled,
+                                                                       isLoading = false,
+                                                                       getPotential,
+                                                                   }: AutoCompleteProps<T>) => {
     const inputRef = useRef<HTMLInputElement>(null)
 
     const [isOpen, setOpen] = useState(false)
@@ -54,14 +54,14 @@ export const AutoComplete = <T extends ParentData | ChildData>({
     }, [isAdded, value]);
 
     const fetchPotential = useCallback((name: string) => {
-        getPotential(name)
+        getPotential(name, 5)
             .then(items => {
-                const filteredParents = items.filter((item) =>
+                const filteredItems = items.filter((item) =>
                     !alreadyAddedData?.some(
                         (addedItem) => addedItem.id === item.id
                     )
                 );
-                setOptions(filteredParents.slice(0, 5))
+                setOptions(filteredItems)
             })
             .catch(reason => {
                 console.error("Failed to get potential parents:", reason);

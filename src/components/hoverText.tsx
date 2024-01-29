@@ -1,4 +1,4 @@
-import React, {ReactNode} from "react";
+import React, {PropsWithChildren, ReactNode} from "react";
 import {
     Tooltip,
     TooltipContent,
@@ -8,10 +8,9 @@ import {
 
 interface HoverTextProps {
     content?: ReactNode;
-    children: ReactNode;
 }
 
-export default function HoverText({children, content}: HoverTextProps) {
+export default function HoverText({children, content}: PropsWithChildren<HoverTextProps>) {
     return (
         <>
             {content ? (

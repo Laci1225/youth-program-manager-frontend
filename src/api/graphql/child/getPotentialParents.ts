@@ -1,9 +1,8 @@
 import {clientSideClient} from "@/api/graphql/client";
 import {ApolloClient, gql, NormalizedCacheObject} from "@apollo/client";
-import {ChildData} from "@/model/child-data";
 import {ParentData} from "@/model/parent-data";
 
-export default async function getPotentialParents(parentName: string, client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<ParentData[]> {
+export default async function getPotentialParents(parentName: string, limit: number, client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<ParentData[]> {
     return client
     .query({
         query: gql`
@@ -19,5 +18,5 @@ export default async function getPotentialParents(parentName: string, client: Ap
         variables: {
             name: parentName,
         },
-    }).then(value => value.data.getPotentialParents);
+    }).then(value => value.data.getPotentialParents.slice(0, limit));
 }

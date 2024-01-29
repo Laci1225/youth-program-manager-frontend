@@ -18,6 +18,13 @@ export interface ChildData {
     modifiedDate: string
 }
 
+export interface ChildNameData {
+    id: string,
+    familyName: string,
+    givenName: string,
+    birthDate: Date,
+}
+
 export interface ChildDataWithParents {
     id: string,
     familyName: string,
@@ -45,7 +52,7 @@ export interface ChildDataInput {
     birthDate: Date,
     birthPlace: string,
     address: string,
-    relativeParents?: RelativeParent[],
+    relativeParent?: RelativeParent,
     diagnosedDiseases?: Disease[],
     regularMedicines?: Medicine[],
 }

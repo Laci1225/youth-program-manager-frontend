@@ -109,11 +109,8 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
         })
     }, [existingParent])
 
-    const [autoCompleteValue, setAutoCompleteValue] = useState<ChildData>()
-
     function onChildUpdated(child: ChildData) {
-        form.setValue("child", child)
-        setAutoCompleteValue(child)
+        form.setValue("child", {...child, birthDate: new Date(child.birthDate)})
     }
 
     return (
@@ -169,7 +166,7 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
                                                                 className="w-2/3"
                                                                 isLoading={false}
                                                                 disabled={false}
-                                                                value={autoCompleteValue}
+                                                                value={field.value && field.value}
                                                                 getPotential={getPotentialChildren}
                                                                 isAdded={false}
                                                                 onValueChange={(value) => {
@@ -177,7 +174,10 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
                                                                         field.onChange(undefined);
                                                                         return;
                                                                     }
-                                                                    field.onChange(value)
+                                                                    field.onChange({
+                                                                        ...value,
+                                                                        birthDate: new Date(value.birthDate)
+                                                                    })
                                                                 }}
                                                                 placeholder="Select children..."
                                                                 emptyMessage="No child found"
