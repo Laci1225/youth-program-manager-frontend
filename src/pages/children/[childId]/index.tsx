@@ -1,5 +1,5 @@
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
-import {ChildData} from "@/model/child-data";
+import {ChildData, ChildDataWithParents} from "@/model/child-data";
 import getChildById from "@/api/graphql/child/getChildById";
 import React, {useState} from "react";
 import ChildForm from "@/form/child/ChildForm";
@@ -11,9 +11,14 @@ import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
 import {serverSideClient} from "@/api/graphql/client";
 import {useRouter} from "next/router";
-import {Pencil, Trash} from "lucide-react";
+import {AlertTriangle, Pencil, Trash} from "lucide-react";
 import DeleteData from "@/components/deleteData";
 import deleteChild from "@/api/graphql/child/deleteChild";
+import HoverText from "@/components/hoverText";
+import SaveParentsDataToChild from "@/table/child/SaveParentsDataToChild";
+import fromChildWithParentsToChildData from "@/model/fromChildWithParentsToChildData";
+import ParentInEditMode from "@/table/child/ParentInEditMode";
+import {cn} from "@/lib/utils";
 
 
 export const getServerSideProps = (async (context) => {
@@ -22,65 +27,79 @@ export const getServerSideProps = (async (context) => {
         try {
             childData = await getChildById(context.params.childId, serverSideClient);
             return {
-                props: {
-                    selectedChild: childData
-                }
+                props: {selectedChildData: childData}
             }
         } catch (error) {
-            return {
-                notFound: true
-            };
+            return {notFound: true};
         }
     }
-    return {
-        notFound: true
-    };
-}) satisfies GetServerSideProps<{ selectedChild: ChildData }, { childId: string }>;
-export default function Child({selectedChild}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    const [child, setChild] = useState<ChildData>(selectedChild)
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+    return {notFound: true};
+}) satisfies GetServerSideProps<{ selectedChildData: ChildDataWithParents }, { childId: string }>;
+export default function Child({selectedChildData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
+    const [childWithParents, setChildWithParents] = useState<ChildDataWithParents>(selectedChildData)
+    const currentChild: ChildData = fromChildWithParentsToChildData(childWithParents);
+
     const onChildUpdated = (newChild: ChildData) => {
-        setChild(newChild)
+        setChildWithParents((prevState) => ({...prevState, ...newChild}))
     }
     const onChildDeleted = () => {
         router.push("/children")
     }
 
+    const [isChildEditModeEnabled, setIsChildEditModeEnabled] = useState(false)
+    const [isDeleteModeEnabled, setIsDeleteModeEnabled] = useState(false)
+
     function handleEditClick() {
-        setIsEditDialogOpen(true)
+        setIsChildEditModeEnabled(true)
     }
 
     function handleDeleteClick() {
-        setIsDeleteDialogOpen(true)
+        setIsDeleteModeEnabled(true)
+    }
+
+    const [isEditParentsModeEnabled, setIsEditParentsModeEnabled] = useState(false)
+    const [isEditModeBorderVisible, setIsEditModeBorderVisible] = useState(false)
+
+    function onEditClicked() {
+        setIsEditParentsModeEnabled(!isEditParentsModeEnabled)
+        setIsEditModeBorderVisible(!isEditModeBorderVisible)
     }
 
     return (
-        <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
-            <div className={"flex justify-between px-6 pb-6 items-center"}>
-                <Link href={"/children"}>
+        <div className="container w-3/6 py-10 h-[100vh] overflow-auto">
+            <div className="flex justify-between px-6 pb-6 items-center">
+                <Link href="/children">
                     <span className="material-icons-outlined">arrow_back</span>
                 </Link>
                 <div>
                     Child details
                 </div>
-                <div className={"flex"}>
-                    <div className={" flex flex-row items-center hover:cursor-pointer px-5"}
+                <HoverText>
+                    {
+                        (!currentChild.relativeParents?.length) && (
+                            <div className="flex">
+                                <AlertTriangle className="text-yellow-600"/>
+                                Parent not associated yet
+                            </div>)
+                    }
+                </HoverText>
+                <div className="flex">
+                    <div className="flex flex-row items-center hover:cursor-pointer px-5"
                          onClick={(event) => {
                              event.preventDefault()
                              handleEditClick()
                          }}>
-                        <Pencil className={"mx-1"}/>
+                        <Pencil className="mx-1"/>
                         <span>Edit</span>
                     </div>
                     <div
-                        className={"flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"}
+                        className="flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"
                         onClick={(event) => {
                             event.preventDefault()
                             handleDeleteClick()
                         }}>
-                        <Trash className={"mx-1"}/>
+                        <Trash className="mx-1"/>
                         <span>Delete</span>
                     </div>
                 </div>
@@ -89,39 +108,61 @@ export default function Child({selectedChild}: InferGetServerSidePropsType<typeo
                 <div className="mb-6">
                     <Label>Full Name:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {child.givenName} {child.familyName}
+                        {currentChild.givenName} {currentChild.familyName}
                     </div>
                 </div>
                 <div className="mb-6">
                     <Label>Birth date and place:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {format(new Date(child.birthDate), "P")} {child.birthPlace}
+                        {format(new Date(currentChild.birthDate), "P")} {currentChild.birthPlace}
                     </div>
                 </div>
                 <div className="mb-6">
                     <Label>Address:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {child.address}
+                        {currentChild.address}
                     </div>
                 </div>
-                <ShowTable tableFields={["Name", "Diagnosed at"]} value={child.diagnosedDiseases}
+                <div
+                    className={cn(`mb-6`, isEditModeBorderVisible && "border border-dashed border-gray-400  p-2 rounded")}>
+                    <SaveParentsDataToChild onEdit={onEditClicked}
+                                            isEditParentsModeEnabled={isEditParentsModeEnabled}/>
+                    {isEditParentsModeEnabled ?
+                        <>
+                            <ParentInEditMode child={currentChild}
+                                              childWithParents={childWithParents}
+                                              setChildWithParents={setChildWithParents}
+                                              setIsEditParentsModeEnabled={setIsEditParentsModeEnabled}/>
+                        </> :
+                        <ShowTable tableFields={["Name", "isEmergencyContact"]}
+                                   value={childWithParents.parents?.map((parent) => ({
+                                       name: parent.parentDto.givenName + " " + parent.parentDto.familyName,
+                                       isEmergencyContact: <span
+                                           className="material-icons-outlined">{parent.isEmergencyContact ? 'check_box' : 'check_box_outline_blank'}</span>
+                                   }))}
+                                   showDeleteButton={false}/>
+                    }
+                </div>
+                <ShowTable className="mb-6" tableFields={["Name", "Diagnosed at"]}
+                           value={currentChild.diagnosedDiseases}
                            showDeleteButton={false}/>
-                <ShowTable tableFields={["Name", "Dose", "Taken since"]} value={child.regularMedicines}
+                <ShowTable tableFields={["Name", "Dose", "Taken since"]}
+                           value={currentChild.regularMedicines}
                            showDeleteButton={false}/>
             </div>
             <Toaster/>
-            <ChildForm existingChild={child ?? undefined}
-                       isOpen={isEditDialogOpen}
+            <ChildForm existingChild={currentChild ?? undefined}
+                       isOpen={isChildEditModeEnabled}
                        onChildModified={onChildUpdated}
-                       onOpenChange={setIsEditDialogOpen}
+                       onOpenChange={setIsChildEditModeEnabled}
             />
-            <DeleteData entityId={child.id}
-                        entityLabel={`${child.givenName} ${child.familyName}`}
-                        isOpen={isDeleteDialogOpen}
-                        onOpenChange={setIsDeleteDialogOpen}
+            <DeleteData entityId={currentChild.id}
+                        entityLabel={`${currentChild.givenName} ${currentChild.familyName}`}
+                        isOpen={isDeleteModeEnabled}
+                        onOpenChange={setIsDeleteModeEnabled}
                         onSuccess={onChildDeleted}
                         deleteFunction={deleteChild}
-                        entityType={"Child"}
+                        entityType="Child"
             />
         </div>
     )

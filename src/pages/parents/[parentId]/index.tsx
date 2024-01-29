@@ -4,14 +4,23 @@ import Link from "next/link";
 import {Toaster} from "@/components/ui/toaster";
 import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
-import {Pencil, Trash} from "lucide-react";
+import {AlertTriangle, Pencil, Trash} from "lucide-react";
 import {useRouter} from "next/router";
 import ParentForm from "@/form/parent/ParentForm";
 import {serverSideClient} from "@/api/graphql/client";
 import getParentById from "@/api/graphql/parent/getParentById";
 import deleteParent from "@/api/graphql/parent/deleteParent";
 import DeleteData from "@/components/deleteData";
-import {ParentData} from "@/model/parent-data";
+import {
+    ParentData,
+    ParentDataWithChildren,
+} from "@/model/parent-data";
+import ShowTable from "@/form/ShowTable";
+import fromParentWithChildrenToParent from "@/model/fromParentWithChildrenToParent";
+import SaveChildrenDataToParent from "@/table/parent/SaveChildrenDataToParent";
+import HoverText from "@/components/hoverText";
+import ChildInEditMode from "@/table/parent/ChildInEditMode";
+import {cn} from "@/lib/utils";
 
 
 export const getServerSideProps = (async (context) => {
@@ -33,52 +42,68 @@ export const getServerSideProps = (async (context) => {
     return {
         notFound: true
     };
-}) satisfies GetServerSideProps<{ selectedParent: ParentData }, { parentId: string }>;
+}) satisfies GetServerSideProps<{ selectedParent: ParentDataWithChildren }, { parentId: string }>;
 export default function Parent({selectedParent}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    const [parent, setParent] = useState<ParentData>(selectedParent)
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+    const [parentWithChildren, setParentWithChildren] = useState<ParentDataWithChildren>(selectedParent)
+    const parent: ParentData = fromParentWithChildrenToParent(parentWithChildren)
+    const [isParentEditDialogOpen, setIsParentEditDialogOpen] = useState(false)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const router = useRouter()
     const onParentUpdated = (newParent: ParentData) => {
-        setParent(newParent)
+        setParentWithChildren((prevState) => ({...prevState, ...newParent}))
     }
     const onParentDeleted = () => {
         router.push("/parents")
     }
 
+    function onEditClicked() {
+        setIsEditChildrenModeEnabled(true)
+    }
+
     function handleEditClick() {
-        setIsEditDialogOpen(true)
+        setIsParentEditDialogOpen(true)
     }
 
     function handleDeleteClick() {
         setIsDeleteDialogOpen(true)
     }
 
+    const [isEditChildrenModeEnabled, setIsEditChildrenModeEnabled] = useState(false)
+
     return (
-        <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
-            <div className={"flex justify-between px-6 pb-6 items-center"}>
-                <Link href={"/parents"}>
+        <div className="container w-3/6 py-10 h-[100vh] overflow-auto">
+            <div className="flex justify-between px-6 pb-6 items-center">
+                <Link href="/parents">
                     <span className="material-icons-outlined">arrow_back</span>
                 </Link>
                 <div>
                     Parent details
                 </div>
-                <div className={"flex"}>
-                    <div className={" flex flex-row items-center hover:cursor-pointer px-5"}
+                <HoverText>
+                    {
+                        (!parentWithChildren.childDtos?.length) && (
+                            <div className="flex">
+                                <AlertTriangle className="text-yellow-600 "/>
+                                Child not associated yet
+                            </div>)
+                    }
+                </HoverText>
+                <div className="flex">
+                    <div className=" flex flex-row items-center hover:cursor-pointer px-5"
                          onClick={(event) => {
                              event.preventDefault()
                              handleEditClick()
                          }}>
-                        <Pencil className={"mx-1"}/>
+                        <Pencil className="mx-1"/>
                         <span>Edit</span>
                     </div>
                     <div
-                        className={"flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"}
+                        className="flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"
                         onClick={(event) => {
                             event.preventDefault()
                             handleDeleteClick()
                         }}>
-                        <Trash className={"mx-1"}/>
+                        <Trash className="mx-1"/>
                         <span>Delete</span>
                     </div>
                 </div>
@@ -100,18 +125,42 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                         ))}
                     </>
                 </div>
+                <div
+                    className={cn(`mb-6`, isEditChildrenModeEnabled && "border border-dashed border-gray-400  p-2 rounded")}>
+                    <SaveChildrenDataToParent onEdit={onEditClicked}
+                                              isEditChildrenModeEnabled={isEditChildrenModeEnabled}/>
+                    {isEditChildrenModeEnabled ? (
+                            <ChildInEditMode parent={parent}
+                                             parentWithChildren={parentWithChildren}
+                                             setParentWithChildren={setParentWithChildren}
+                                             setIsEditChildrenModeEnabled={setIsEditChildrenModeEnabled}/>
+                        ) :
+                        <ShowTable tableFields={["Name", "isEmergencyContact"]}
+                                   value={parentWithChildren.childDtos?.map((child) => ({
+                                       name: child.givenName + " " + child.familyName,
+                                       isEmergencyContact:
+                                           <span
+                                               className="material-icons-outlined">{child.relativeParents?.find(relative => relative.id == parent.id)?.isEmergencyContact ? 'check_box' : 'check_box_outline_blank'}</span>
+
+                                   }))}
+                                   showDeleteButton={false}/>
+                    }
+                </div>
                 <div className="mb-6">
                     <Label>Address:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {parent.address ?? <div className={"text-gray-400"}>Not added yet </div>}
+                        {parent.address ?? <div className="text-gray-400">Not added yet </div>}
                     </div>
                 </div>
             </div>
             <Toaster/>
-            <ParentForm existingParent={parent ?? undefined}
-                        isOpen={isEditDialogOpen}
+            <ParentForm existingParent={{
+                ...parentWithChildren,
+                childIds: parentWithChildren.childDtos?.map(child => child.id)
+            } ?? undefined}
+                        isOpen={isParentEditDialogOpen}
                         onParentModified={onParentUpdated}
-                        onOpenChange={setIsEditDialogOpen}
+                        onOpenChange={setIsParentEditDialogOpen}
             />
             <DeleteData entityId={parent.id}
                         entityLabel={`${parent.givenName} ${parent.familyName}`}
@@ -119,7 +168,7 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                         onOpenChange={setIsDeleteDialogOpen}
                         onSuccess={onParentDeleted}
                         deleteFunction={deleteParent}
-                        entityType={"Parent"}
+                        entityType="Parent"
             />
         </div>
     )

@@ -8,11 +8,16 @@ export default function addChild(values: ChildDataInput) {
         mutation: gql`
             mutation AddChild($child: ChildInput!) {
                 addChild(child: $child) {
+                    id
                     familyName
                     givenName
                     birthDate
                     birthPlace
                     address
+                    relativeParents {
+                        id
+                        isEmergencyContact
+                    }
                     diagnosedDiseases {
                         name
                         diagnosedAt
@@ -34,6 +39,10 @@ export default function addChild(values: ChildDataInput) {
                 birthDate: values.birthDate,
                 birthPlace: values.birthPlace,
                 address: values.address,
+                relativeParent: {
+                    id: values.relativeParent?.id,
+                    isEmergencyContact: values.relativeParent?.isEmergencyContact
+                },
                 diagnosedDiseases: values.diagnosedDiseases?.map(disease => ({
                     name: disease.name,
                     diagnosedAt: disease.diagnosedAt
