@@ -166,7 +166,7 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
                                                                 className="w-2/3"
                                                                 isLoading={false}
                                                                 disabled={false}
-                                                                value={field.value && field.value}
+                                                                value={field.value}
                                                                 getPotential={getPotentialChildren}
                                                                 isAdded={false}
                                                                 onValueChange={(value) => {

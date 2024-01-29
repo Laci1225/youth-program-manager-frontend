@@ -40,7 +40,6 @@ export const AutoComplete = <T extends ParentData | ChildNameData>({
     const inputRef = useRef<HTMLInputElement>(null)
 
     const [isOpen, setOpen] = useState(false)
-    const [selected, setSelected] = useState<T | undefined>(value as T)
     const [inputValue, setInputValue] = useState<string | undefined>(value ? `${value.familyName} ${value.givenName}` : undefined)
     const [options, setOptions] = useState<T[]>()
 
@@ -48,7 +47,7 @@ export const AutoComplete = <T extends ParentData | ChildNameData>({
         setInputValue(value ? `${value.familyName} ${value.givenName}` : undefined)
         if (isAdded) {
             setInputValue("")
-            setSelected(undefined)
+            onValueChange?.(undefined)
             setOptions(undefined)
         }
     }, [isAdded, value]);
@@ -99,7 +98,6 @@ export const AutoComplete = <T extends ParentData | ChildNameData>({
             if (event.key === "Enter" && input.id !== "") {
                 const optionToSelect = options?.find((option) => option.id === input.id)
                 if (optionToSelect) {
-                    setSelected(optionToSelect)
                     onValueChange?.(optionToSelect)
                 }
             }
@@ -113,14 +111,13 @@ export const AutoComplete = <T extends ParentData | ChildNameData>({
 
     const handleBlur = useCallback(() => {
         setOpen(false)
-        setInputValue(selected ? `${selected.familyName} ${selected.givenName}` : undefined)
-    }, [selected])
+        setInputValue(value ? `${value.familyName} ${value.givenName}` : undefined)
+    }, [value])
 
     const handleSelectOption = useCallback(
         (selectedOption: T) => {
             setInputValue(selectedOption ? `${selectedOption.familyName} ${selectedOption.givenName}` : undefined)
 
-            setSelected(selectedOption)
             onValueChange?.(selectedOption)
 
             // This is a hack to prevent the input from being focused after the user selects an option
@@ -160,10 +157,10 @@ export const AutoComplete = <T extends ParentData | ChildNameData>({
                                         </div>
                                     </CommandPrimitive.Loading>
                                 ) : null}
-                                {options?.length && (
+                                {!!options?.length && (
                                     <CommandGroup>
                                         {options?.map((option) => {
-                                            const isSelected = selected?.id === option.id
+                                            const isSelected = value?.id === option.id
                                             return (
                                                 <CommandItem
                                                     key={option.id}
@@ -209,7 +206,6 @@ export const AutoComplete = <T extends ParentData | ChildNameData>({
                 onClick={() => {
                     onValueChange?.(undefined)
                     setInputValue("")
-                    setSelected(undefined)
                     setOptions(undefined)
                 }}
             >

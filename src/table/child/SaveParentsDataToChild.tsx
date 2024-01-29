@@ -11,22 +11,21 @@ export default function SaveParentsDataToChild({
                                                    onEdit,
                                                    isEditParentsModeEnabled
                                                }: SaveParentsDataToChildProps) {
+
+    if (isEditParentsModeEnabled)
+        return null
     return (
-        <>            {
-            !isEditParentsModeEnabled &&
-            <div className={"flex justify-between mb-5"}>
-                <Button
-                    type={"button"}
-                    variant={"ghost"}
-                    onClick={onEdit}
-                >
-                    <>
-                        <Pencil/>
-                        <span>Edit parents</span>
-                    </>
-                </Button>
-            </div>
-        }
-        </>
+        <div className={"flex justify-between mb-5"}>
+            <Button
+                type={"button"}
+                variant={"ghost"}
+                onClick={onEdit}
+            >
+                <>
+                    <Pencil/>
+                    <span>Edit parents</span>
+                </>
+            </Button>
+        </div>
     )
 }

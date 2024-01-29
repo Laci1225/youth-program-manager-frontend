@@ -220,7 +220,7 @@ function ChildForm({
                                                         <div className={"flex justify-between"}>
                                                             <AutoComplete
                                                                 className={"w-2/3"}
-                                                                value={field.value && field.value}
+                                                                value={field.value}
                                                                 isLoading={false}
                                                                 disabled={false}
                                                                 getPotential={getPotentialParents}
