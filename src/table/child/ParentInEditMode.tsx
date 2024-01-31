@@ -1,4 +1,4 @@
-import {AutoComplete} from "@/table/AutoComplete";
+import {AutoComplete} from "@/form/AutoComplete";
 import {Button} from "@/components/ui/button";
 import {PlusSquare} from "lucide-react";
 import React, {Dispatch, SetStateAction, useState} from "react";
@@ -80,7 +80,7 @@ export default function ParentInEditMode({
 
         if (!isParentAlreadyAdded && selectedRelativeParentToAdd) {
             setSelectedRelativeParentToAdd({id: selectedRelativeParentToAdd.id, isEmergencyContact: true});
-            const updatedParents = tempChildWithParents.parents || [];
+            const updatedParents = tempChildWithParents.parents ?? [];
             updatedParents.push({
                 parentDto: selectedParentDataToAdd,
                 isEmergencyContact: true,

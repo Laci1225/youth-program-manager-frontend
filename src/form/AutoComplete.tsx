@@ -7,7 +7,7 @@ import {Check, XIcon} from "lucide-react"
 import {Skeleton} from "@/components/ui/skeleton";
 import {ParentData} from "@/model/parent-data";
 import {Button} from "@/components/ui/button";
-import {ChildData, RelativeParent} from "@/model/child-data";
+import {ChildNameData, RelativeParent} from "@/model/child-data";
 import debounce from "@/utils/debounce";
 import {format} from "date-fns";
 import {TicketTypeData} from "@/model/ticket-type-data";
@@ -20,24 +20,23 @@ type AutoCompleteProps<T> = {
     disabled?: boolean
     placeholder?: string
     className?: string
-    alreadyAddedData?: ChildData[] | RelativeParent[]
+    alreadyAddedData?: ChildNameData[] | RelativeParent[]
     isAdded: boolean
-    getPotential: (name: string) => Promise<T[]>
+    getPotential: (name: string, limit: number) => Promise<T[]>
 }
 
-export const AutoComplete = <T extends ParentData | ChildData | TicketTypeData>({
-                                                                                    alreadyAddedData,
-                                                                                    className,
-                                                                                    isAdded,
-                                                                                    placeholder,
-                                                                                    emptyMessage,
-                                                                                    value,
-                                                                                    onValueChange,
-                                                                                    disabled,
-                                                                                    isLoading = false,
-                                                                                    getPotential,
-
-                                                                                }: AutoCompleteProps<T>) => {
+export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeData>({
+                                                                       alreadyAddedData,
+                                                                       className,
+                                                                       isAdded,
+                                                                       placeholder,
+                                                                       emptyMessage,
+                                                                       value,
+                                                                       onValueChange,
+                                                                       disabled,
+                                                                       isLoading = false,
+                                                                       getPotential,
+                                                                   }: AutoCompleteProps<T>) => {
     const getDisplayName = (item: T): string => {
         if ('familyName' in item && 'givenName' in item) {
             return `${item.familyName} ${item.givenName}`;
@@ -50,21 +49,20 @@ export const AutoComplete = <T extends ParentData | ChildData | TicketTypeData>(
     const inputRef = useRef<HTMLInputElement>(null)
 
     const [isOpen, setOpen] = useState(false)
-    const [selected, setSelected] = useState<T | undefined>(value as T)
-    const [inputValue, setInputValue] = useState<string | undefined>(value ? getDisplayName(value) : undefined)
+    const [inputValue, setInputValue] = useState<string | undefined>(value ? `${value.familyName} ${value.givenName}` : undefined)
     const [options, setOptions] = useState<T[]>()
 
     useEffect(() => {
         setInputValue(value ? getDisplayName(value) : undefined)
         if (isAdded) {
             setInputValue("")
-            setSelected(undefined)
+            onValueChange?.(undefined)
             setOptions(undefined)
         }
     }, [isAdded, value]);
 
     const fetchPotential = useCallback((name: string) => {
-        getPotential(name)
+        getPotential(name, 5)
             .then(items => {
                 const filteredItems = items.filter((item) =>
                     !alreadyAddedData?.some(
@@ -72,7 +70,6 @@ export const AutoComplete = <T extends ParentData | ChildData | TicketTypeData>(
                     )
                 );
                 setOptions(filteredItems)
-                // todo limit for options
             })
             .catch(reason => {
                 console.error("Failed to get potential items:", reason);
@@ -82,7 +79,7 @@ export const AutoComplete = <T extends ParentData | ChildData | TicketTypeData>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const debouncedFetchPotential = useCallback(debounce(fetchPotential), [fetchPotential]);
 
-    function potential(event: FormEvent<HTMLInputElement>) {
+    function handleOnInput(event: FormEvent<HTMLInputElement>) {
         const name = event.currentTarget.value
         setInputValue(name);
         if (name) {
@@ -106,11 +103,10 @@ export const AutoComplete = <T extends ParentData | ChildData | TicketTypeData>(
                 setOpen(true)
             }
 
-            // This is not a default behavior of the <input /> field
+            // This is not a default behaviour of the <input /> field
             if (event.key === "Enter" && input.id !== "") {
                 const optionToSelect = options?.find((option) => option.id === input.id)
                 if (optionToSelect) {
-                    setSelected(optionToSelect)
                     onValueChange?.(optionToSelect)
                 }
             }
@@ -131,14 +127,13 @@ export const AutoComplete = <T extends ParentData | ChildData | TicketTypeData>(
         (selectedOption: T) => {
             setInputValue(selectedOption ? getDisplayName(selectedOption) : undefined)
 
-            setSelected(selectedOption)
             onValueChange?.(selectedOption)
 
             // This is a hack to prevent the input from being focused after the user selects an option
             // We can call this hack: "The next tick"
             setTimeout(() => {
                 inputRef?.current?.blur()
-            }, 0)
+            })
         },
         [onValueChange]
     )
@@ -156,7 +151,7 @@ export const AutoComplete = <T extends ParentData | ChildData | TicketTypeData>(
                         placeholder={placeholder}
                         disabled={disabled}
                         className="text-base"
-                        onInput={potential}
+                        onInput={handleOnInput}
                     />
                 </div>
                 <div className="mt-1 relative">
@@ -171,10 +166,10 @@ export const AutoComplete = <T extends ParentData | ChildData | TicketTypeData>(
                                         </div>
                                     </CommandPrimitive.Loading>
                                 ) : null}
-                                {options && options.length > 0 ? (
+                                {!!options?.length && (
                                     <CommandGroup>
-                                        {options.map((option) => {
-                                            const isSelected = selected?.id === option.id
+                                        {options?.map((option) => {
+                                            const isSelected = value?.id === option.id
                                             return (
                                                 <CommandItem
                                                     key={option.id}
@@ -184,7 +179,7 @@ export const AutoComplete = <T extends ParentData | ChildData | TicketTypeData>(
                                                         event.stopPropagation()
                                                     }}
                                                     onSelect={() => handleSelectOption(option)}
-                                                    className={cn("flex items-center gap-2 w-full", !isSelected ? "pl-8" : null)}
+                                                    className={cn("flex items-center gap-2 w-full", !isSelected && "pl-8")}
                                                 >
                                                     {isSelected ? <Check className="w-4"/> : null}
                                                     {option && ('birthDate' in option ? (
@@ -200,7 +195,7 @@ export const AutoComplete = <T extends ParentData | ChildData | TicketTypeData>(
                                             )
                                         })}
                                     </CommandGroup>
-                                ) : null}
+                                )}
                                 {!isLoading ? (
                                     <CommandPrimitive.Empty
                                         className="select-none rounded-sm px-2 py-3 text-sm text-center">
@@ -221,7 +216,6 @@ export const AutoComplete = <T extends ParentData | ChildData | TicketTypeData>(
                     onClick={() => {
                         onValueChange?.(undefined)
                         setInputValue("")
-                        setSelected(undefined)
                         setOptions(undefined)
                     }}
                 >

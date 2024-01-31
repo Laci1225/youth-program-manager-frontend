@@ -6,25 +6,13 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip"
-import {
-    DropdownMenu,
-    DropdownMenuContent, DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
 import React, {useState} from "react";
 import {Toaster} from "@/components/ui/toaster";
 import ParentForm from "@/form/parent/ParentForm";
 import {serverSideClient} from "@/api/graphql/client";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
 import getAllParents from "@/api/graphql/parent/getAllParents";
-import {AlertTriangle, Pencil, PlusSquare, Trash} from "lucide-react";
+import {AlertTriangle, PlusSquare} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
 import deleteParent from "@/api/graphql/parent/deleteParent";
@@ -75,8 +63,8 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
     }
 
     return (
-        <div className={"container w-4/6 py-28"}>
-            <div className={"flex justify-between px-6 pb-6"}>
+        <div className="container w-4/6 py-28">
+            <div className="flex justify-between px-6 pb-6">
                 <span>Parents</span>
                 <Button onClick={(event) => {
                     event.preventDefault()
@@ -86,7 +74,7 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
                     <span>Create</span>
                 </Button>
             </div>
-            <Table className={"border border-gray-700 rounded"}>
+            <Table className="border border-gray-700 rounded">
                 <TableHeader>
                     <TableRow>
                         <TableHead className="text-center">Name</TableHead>
@@ -98,7 +86,7 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
                     {
                         parents && parents.length !== 0 ? (
                             parents.map((parent) => (
-                                <TableRow key={parent.id} className={"hover:bg-gray-300 hover:cursor-pointer"}
+                                <TableRow key={parent.id} className="hover:bg-gray-300 hover:cursor-pointer"
                                           onClick={() => router.push(`parents/${parent.id}`)}>
                                     <TableCell className="text-center">
                                         {parent.givenName} {parent.familyName}
@@ -106,30 +94,32 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
                                     <TableCell className="text-center">
                                         {parent.phoneNumbers.length > 1
                                             ? (
-                                                <HoverText trigger={
+                                                <HoverText
+                                                    content={
+                                                        parent.phoneNumbers.slice(1)
+                                                            .map((number, index) =>
+                                                                <p key={index}>{number}</p>)
+                                                    }>
                                                     <div>
                                                         {parent.phoneNumbers[0]} (+
                                                         {parent.phoneNumbers.length - 1})
                                                     </div>
-                                                } content={
-                                                    parent.phoneNumbers.slice(1)
-                                                        .map((number, index) =>
-                                                            <p key={index}>{number}</p>)
-                                                }/>
+                                                </HoverText>
                                             )
                                             : (<>{parent.phoneNumbers[0]}</>)}
                                     </TableCell>
-                                    <TableCell className={"text-right"}>
-                                        <HoverText trigger={
-                                            (!parent.childIds || parent.childIds?.length === 0) && (
-                                                <AlertTriangle className={"text-yellow-600 "}/>)
-                                        } content={"Child not associated yet"}/>
+                                    <TableCell className="text-right">
+                                        <HoverText content="Child not associated yet">
+                                            {
+                                                (!parent.childIds?.length) && (
+                                                    <AlertTriangle className="text-yellow-600 "/>)
+                                            }
+                                        </HoverText>
                                     </TableCell>
                                     <TableCell className="p-1 text-center">
                                         <SettingsDropdown
-                                            handleEditClick={handleEditClick}
-                                            handleDeleteClick={handleDeleteClick}
-                                            item={parent}
+                                            handleEditClick={() => handleEditClick(parent)}
+                                            handleDeleteClick={() => handleDeleteClick(parent)}
                                         />
                                     </TableCell>
                                 </TableRow>
@@ -152,7 +142,7 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
                         onOpenChange={setIsDeleteDialogOpen}
                         onSuccess={onParentDeleted}
                         deleteFunction={deleteParent}
-                        entityType={"Parent"}
+                        entityType="Parent"
             />
         </div>
     )

@@ -1,29 +1,28 @@
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
-import {AlertTriangle} from "lucide-react";
-import React, {ReactNode} from "react";
+import React, {PropsWithChildren, ReactNode} from "react";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface HoverTextProps {
-    trigger: ReactNode,
-    content?: ReactNode
+    content?: ReactNode;
 }
 
-export default function HoverText({trigger, content}: HoverTextProps) {
-
+export default function HoverText({children, content}: PropsWithChildren<HoverTextProps>) {
     return (
         <>
-            {
-                content ?
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                {trigger}
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                {content}
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                    : trigger
-            }
-        </>)
+            {content ? (
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>{children}</TooltipTrigger>
+                        <TooltipContent>{content}</TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            ) : (
+                children
+            )}
+        </>
+    );
 }

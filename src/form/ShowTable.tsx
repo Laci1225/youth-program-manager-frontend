@@ -6,6 +6,7 @@ import {Disease} from "@/model/disease";
 import {Medicine} from "@/model/medicine";
 import {isStrictDate} from "@/utils/date";
 import {toast} from "@/components/ui/use-toast";
+import {cn} from "@/lib/utils";
 
 interface ShowTableProps {
     tableFields: string[],
@@ -25,7 +26,7 @@ export default function ShowTable({tableFields, value, showDeleteButton, onChang
             });
         }
     };
-    return (<div className={`w-full ${className}`}>
+    return (<div className={cn(`w-full`, className)}>
         <Table className={"w-full border border-gray-200"}>
             <TableHeader>
                 <TableRow>
@@ -39,7 +40,7 @@ export default function ShowTable({tableFields, value, showDeleteButton, onChang
             </TableHeader>
             <TableBody>{
                 value && value?.length !== 0 ? (
-                    value.map((field: Disease | Medicine | Object, index: number) => (
+                    value.map((field: Disease | Medicine, index: number) => (
                         <TableRow key={index}>
                             {Object.values(field).map((value) => (
                                 <TableCell key={value} className={"text-center"}>

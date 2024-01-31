@@ -19,6 +19,7 @@ import fromParentWithChildrenToParent from "@/model/fromParentWithChildrenToPare
 import SaveChildrenDataToParent from "@/table/parent/SaveChildrenDataToParent";
 import HoverText from "@/components/hoverText";
 import ChildInEditMode from "@/table/parent/ChildInEditMode";
+import {cn} from "@/lib/utils";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {ChildData} from "@/model/child-data";
 
@@ -71,37 +72,39 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
     const [isEditChildrenModeEnabled, setIsEditChildrenModeEnabled] = useState(false)
 
     return (
-        <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
-            <div className={"flex justify-between px-6 pb-6 items-center"}>
-                <Link href={"/parents"}>
+        <div className="container w-3/6 py-10 h-[100vh] overflow-auto">
+            <div className="flex justify-between px-6 pb-6 items-center">
+                <Link href="/parents">
                     <span className="material-icons-outlined">arrow_back</span>
                 </Link>
                 <div>
                     Parent details
                 </div>
-                <HoverText trigger={
-                    (!parentWithChildren.childDtos || parentWithChildren.childDtos?.length === 0) && (
-                        <div className={"flex"}>
-                            <AlertTriangle className={"text-yellow-600 "}/>
-                            Child not associated yet
-                        </div>)
-                }/>
-                <div className={"flex"}>
-                    <div className={" flex flex-row items-center hover:cursor-pointer px-5"}
+                <HoverText>
+                    {
+                        (!parentWithChildren.childDtos?.length) && (
+                            <div className="flex">
+                                <AlertTriangle className="text-yellow-600 "/>
+                                Child not associated yet
+                            </div>)
+                    }
+                </HoverText>
+                <div className="flex">
+                    <div className=" flex flex-row items-center hover:cursor-pointer px-5"
                          onClick={(event) => {
                              event.preventDefault()
                              handleEditClick()
                          }}>
-                        <Pencil className={"mx-1"}/>
+                        <Pencil className="mx-1"/>
                         <span>Edit</span>
                     </div>
                     <div
-                        className={"flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"}
+                        className="flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"
                         onClick={(event) => {
                             event.preventDefault()
                             handleDeleteClick()
                         }}>
-                        <Trash className={"mx-1"}/>
+                        <Trash className="mx-1"/>
                         <span>Delete</span>
                     </div>
                 </div>
@@ -124,7 +127,7 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                     </>
                 </div>
                 <div
-                    className={`mb-6 ${isEditChildrenModeEnabled && "border border-dashed border-gray-400  p-2 rounded"}`}>
+                    className={cn(`mb-6`, isEditChildrenModeEnabled && "border border-dashed border-gray-400  p-2 rounded")}>
                     <SaveChildrenDataToParent onEdit={onEditClicked}
                                               isEditChildrenModeEnabled={isEditChildrenModeEnabled}/>
                     {isEditChildrenModeEnabled ? (
@@ -172,7 +175,7 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                 <div className="mb-6">
                     <Label>Address:</Label>
                     <div className={`${fieldAppearance} mt-2`}>
-                        {parent.address ?? <div className={"text-gray-400"}>Not added yet </div>}
+                        {parent.address ?? <div className="text-gray-400">Not added yet </div>}
                     </div>
                 </div>
             </div>
@@ -191,7 +194,7 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                         onOpenChange={setIsDeleteDialogOpen}
                         onSuccess={onParentDeleted}
                         deleteFunction={deleteParent}
-                        entityType={"Parent"}
+                        entityType="Parent"
             />
         </div>
     )

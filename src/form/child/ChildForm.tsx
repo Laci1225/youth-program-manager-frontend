@@ -17,7 +17,7 @@ import {ChildData} from "@/model/child-data";
 import LoadingButton from "@/components/loading-button";
 import updateChild from "@/api/graphql/child/updateChild";
 import {parseDateInDisease, parseDateInMedicine} from "@/utils/child";
-import {AutoComplete} from "@/table/AutoComplete";
+import {AutoComplete} from "@/form/AutoComplete";
 import ParentForm from "@/form/parent/ParentForm";
 import {Button} from "@/components/ui/button";
 import getPotentialParents from "@/api/graphql/child/getPotentialParents";
@@ -48,7 +48,7 @@ function ChildForm({
             birthDate: existingChild?.birthDate ? new Date(existingChild.birthDate) : undefined,
             birthPlace: existingChild?.birthPlace,
             address: existingChild?.address,
-            relativeParents: existingChild?.relativeParents,
+            relativeParent: undefined,
             diagnosedDiseases: parseDateInDisease(existingChild?.diagnosedDiseases),
             regularMedicines: parseDateInMedicine(existingChild?.regularMedicines)
         },
@@ -57,11 +57,7 @@ function ChildForm({
     function onSubmit(values: z.infer<typeof childSchema>) {
         setIsSubmitting(true)
         if (existingChild) {
-            const updateValues = {
-                ...values,
-                id: existingChild.id
-            };
-            updateChild(updateValues)
+            updateChild({id: existingChild.id, ...values, relativeParents: existingChild.relativeParents})
                 .then((result) => {
                     onChildModified(result)
                     toast({
@@ -80,7 +76,17 @@ function ChildForm({
                 setIsSubmitting(false)
             })
         } else {
-            addChild(values)
+            console.log(values)
+            const {relativeParent, ...values2} = values;
+            let updatedRelativeParent;
+            if (relativeParent) {
+                updatedRelativeParent = {id: relativeParent.id, isEmergencyContact: relativeParent.isEmergencyContact};
+            }
+            console.log(updatedRelativeParent)
+            addChild({
+                relativeParent: updatedRelativeParent,
+                ...values2
+            })
                 .then((result) => {
                     onChildModified(result)
                     toast({
@@ -108,16 +114,14 @@ function ChildForm({
             birthDate: existingChild?.birthDate ? new Date(existingChild.birthDate) : undefined,
             birthPlace: existingChild?.birthPlace ?? "",
             address: existingChild?.address ?? "",
-            relativeParents: existingChild?.relativeParents ?? [],
+            relativeParent: undefined,
             diagnosedDiseases: existingChild ? parseDateInDisease(existingChild?.diagnosedDiseases) : [],
             regularMedicines: existingChild ? parseDateInMedicine(existingChild?.regularMedicines) : []
         })
     }, [existingChild]);
     const [isParentEditDialogOpen, setParentIsEditDialogOpen] = useState(false)
-    const [autoCompleteValue, setAutoCompleteValue] = useState<ParentData>()
     const onParentUpdated = (parent: ParentData) => {
-        form.setValue("relativeParents", [{id: parent.id, isEmergencyContact: true}])
-        setAutoCompleteValue(parent)
+        form.setValue("relativeParent", {...parent, isEmergencyContact: true})
     }
 
     function handleParentEditClick() {
@@ -208,7 +212,7 @@ function ChildForm({
                                     {!existingChild && !onParentFormClicked &&
                                         <FormField
                                             control={form.control}
-                                            name="relativeParents"
+                                            name="relativeParent"
                                             render={({field}) => (
                                                 <FormItem className={"flex-1"}>
                                                     <FormLabel>Parent</FormLabel>
@@ -216,27 +220,24 @@ function ChildForm({
                                                         <div className={"flex justify-between"}>
                                                             <AutoComplete
                                                                 className={"w-2/3"}
-                                                                key={0}
-                                                                value={autoCompleteValue ?? autoCompleteValue}
+                                                                value={field.value}
                                                                 isLoading={false}
                                                                 disabled={false}
                                                                 getPotential={getPotentialParents}
                                                                 isAdded={false}
                                                                 onValueChange={(value) => {
-                                                                    if (value) {
-                                                                        const selectedParent = {
-                                                                            id: value.id,
-                                                                            isEmergencyContact: true
-                                                                        };
-                                                                        const updatedParents = [
-                                                                            selectedParent
-                                                                        ];
-                                                                        field.onChange(updatedParents);
-                                                                    } else field.onChange(undefined);
-
+                                                                    if (!value) {
+                                                                        field.onChange(undefined);
+                                                                        return;
+                                                                    }
+                                                                    field.onChange({
+                                                                            ...value,
+                                                                            isEmergencyContact: true,
+                                                                        }
+                                                                    )
                                                                 }}
-                                                                placeholder={"Select parents..."}
-                                                                emptyMessage={"No parent found"}
+                                                                placeholder="Select parents..."
+                                                                emptyMessage="No parent found"
                                                             />
                                                             <Button type={"button"}
                                                                     onClick={() => {

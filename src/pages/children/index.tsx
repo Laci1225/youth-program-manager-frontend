@@ -15,17 +15,10 @@ import getAllChildren from "@/api/graphql/child/getAllChildren";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
 import {serverSideClient} from "@/api/graphql/client";
 import deleteChild from "@/api/graphql/child/deleteChild";
-import {
-    DropdownMenu,
-    DropdownMenuContent, DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import {AlertTriangle, Pencil, PlusSquare, Trash} from "lucide-react"
+import {AlertTriangle, PlusSquare} from "lucide-react"
 import {useRouter} from "next/router";
 import {Button} from "@/components/ui/button";
 import DeleteData from "@/components/deleteData";
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import HoverText from "@/components/hoverText";
 import SettingsDropdown from "@/components/SettingsDropdown";
 
@@ -73,8 +66,8 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
     }
 
     return (
-        <div className={"container w-4/6 py-28"}>
-            <div className={"flex justify-between px-6 pb-6"}>
+        <div className="container w-4/6 py-28">
+            <div className="flex justify-between px-6 pb-6">
                 <span>Children</span>
                 <Button onClick={(event) => {
                     event.preventDefault()
@@ -84,7 +77,7 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                     <span>Create</span>
                 </Button>
             </div>
-            <Table className={"border border-gray-700 rounded"}>
+            <Table className="border border-gray-700 rounded">
                 <TableHeader>
                     <TableRow>
                         <TableHead className="text-center">Name</TableHead>
@@ -98,7 +91,7 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                     {
                         children && children.length !== 0 ? (
                             children.map((child) => (
-                                <TableRow key={child.id} className={"hover:bg-gray-300 hover:cursor-pointer"}
+                                <TableRow key={child.id} className="hover:bg-gray-300 hover:cursor-pointer"
                                           onClick={() => router.push(`children/${child.id}`)}>
                                     <TableCell className="text-center">
                                         {child.givenName} {child.familyName}
@@ -116,17 +109,18 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                                         <span className="material-icons-outlined">check_box</span> :
                                         <span className="material-icons-outlined">check_box_outline_blank</span>}
                                     </TableCell>
-                                    <TableCell className={"text-right"}>
-                                        <HoverText trigger={
-                                            (!child.relativeParents || child.relativeParents?.length === 0) && (
-                                                <AlertTriangle className={"text-yellow-600 "}/>)
-                                        } content={"Parent not associated yet"}/>
+                                    <TableCell className="text-right">
+                                        <HoverText content="Parent not associated yet">
+                                            {
+                                                (!child.relativeParents?.length) && (
+                                                    <AlertTriangle className="text-yellow-600 "/>)
+                                            }
+                                        </HoverText>
                                     </TableCell>
                                     <TableCell className="p-1 text-center">
                                         <SettingsDropdown
-                                            handleEditClick={handleEditClick}
-                                            handleDeleteClick={handleDeleteClick}
-                                            item={child}
+                                            handleEditClick={() => handleEditClick(child)}
+                                            handleDeleteClick={() => handleDeleteClick(child)}
                                         />
                                     </TableCell>
                                 </TableRow>
@@ -150,7 +144,7 @@ export default function Children({childrenData}: InferGetServerSidePropsType<typ
                         onOpenChange={setIsDeleteDialogOpen}
                         onSuccess={onChildDeleted}
                         deleteFunction={deleteChild}
-                        entityType={"Child"}
+                        entityType="Child"
             />
         </div>
     )
