@@ -19,6 +19,8 @@ import updateTicket from "@/api/graphql/ticket/updateTicket";
 import fromTicketDataToTicketInputData from "@/model/fromTicketDataToTicketInputData";
 import ConfirmDialog from "@/components/confirmDialog";
 import {toast} from "@/components/ui/use-toast";
+import {cn} from "@/lib/utils";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 
 export const getServerSideProps = (async () => {
     const tickets = await getAllTickets(serverSideClient)
@@ -200,20 +202,32 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                                             handleEditClick={() => handleEditClick(ticket)}
                                             handleDeleteClick={() => handleDeleteClick(ticket)}
                                             additionalItem={
-                                                //todo hover text why is it disabled
                                                 <DropdownMenuItem
-                                                    className={"justify-center hover:cursor-pointer p-2 mx-5 bg-green-600 text-white"}
+                                                    className={`justify-center my-1 p-2 mx-5 ${calculateDaysDifference(ticket.expirationDate) <= 0 || (ticket.historyLog && ticket.numberOfParticipation - ticket.historyLog.length <= 0) ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:cursor-pointer text-white'}`}
                                                     onClick={event => {
-                                                        event.preventDefault()
-                                                        event.stopPropagation()
-                                                        !(ticket.historyLog && ticket.numberOfParticipation - ticket.historyLog.length <= 0
-                                                            || calculateDaysDifference(ticket.expirationDate) <= 0)
-                                                            ?
-                                                            handleReportClicked(ticket)
-                                                            : alert("Cannot report attendance as participation limit reached or report attendance as ticket is expired")
-                                                    }}>
-                                                    <Check className={"mx-1"}/>
-                                                    <span>Report attendance</span>
+                                                        event.preventDefault();
+                                                        event.stopPropagation();
+                                                        if (!(ticket.historyLog && ticket.numberOfParticipation - ticket.historyLog.length <= 0 || calculateDaysDifference(ticket.expirationDate) <= 0)) {
+                                                            handleReportClicked(ticket);
+                                                        }
+                                                    }}
+                                                >
+                                                    {
+                                                        //todo not working
+                                                    }
+                                                    {!(ticket.historyLog && ticket.numberOfParticipation - ticket.historyLog.length <= 0 || calculateDaysDifference(ticket.expirationDate) <= 0) ?
+                                                        <>
+                                                            <Check className={"mx-1"}/>
+                                                            <span>Report attendance</span>
+                                                        </>
+                                                        :
+                                                        <HoverText content="No more tickets / ticket expired">
+                                                            <>
+                                                                <Check className={"mx-1"}/>
+                                                                <span>Report attendance</span>
+                                                            </>
+                                                        </HoverText>
+                                                    }
                                                 </DropdownMenuItem>
                                             }
                                         />

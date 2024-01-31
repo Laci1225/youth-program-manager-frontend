@@ -16,9 +16,9 @@ import {TicketTypeData} from "@/model/ticket-type-data";
 
 export const getServerSideProps = (async (context) => {
     let ticketData;
-    if (context.params?.ticketId) {
+    if (context.params?.ticketTypeId) {
         try {
-            ticketData = await getTicketTypeById(context.params.ticketId, serverSideClient);
+            ticketData = await getTicketTypeById(context.params.ticketTypeId, serverSideClient);
             return {
                 props: {
                     selectedTicket: ticketData
@@ -33,7 +33,7 @@ export const getServerSideProps = (async (context) => {
     return {
         notFound: true
     };
-}) satisfies GetServerSideProps<{ selectedTicket: TicketTypeData }, { ticketId: string }>;
+}) satisfies GetServerSideProps<{ selectedTicket: TicketTypeData }, { ticketTypeId: string }>;
 export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const [ticket, setTicket] = useState<TicketTypeData>(selectedTicket)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)

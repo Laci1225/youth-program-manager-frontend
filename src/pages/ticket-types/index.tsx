@@ -88,28 +88,28 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                 <TableBody>
                     {
                         ticketTypes && ticketTypes.length !== 0 ? (
-                            ticketTypes.map((ticket) => (
-                                <TableRow key={ticket.id} className="hover:bg-gray-300 hover:cursor-pointer"
-                                          onClick={() => router.push(`ticket-types/${ticket.id}`)}>
+                            ticketTypes.map((ticketType) => (
+                                <TableRow key={ticketType.id} className="hover:bg-gray-300 hover:cursor-pointer"
+                                          onClick={() => router.push(`ticket-types/${ticketType.id}`)}>
                                     <TableCell className="text-center">
-                                        {ticket.name}
+                                        {ticketType.name}
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        {ticket.description}
+                                        {ticketType.description}
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        {ticket.price} HUF
+                                        {ticketType.price} HUF
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        {ticket.numberOfParticipation} pc(s)
+                                        {ticketType.numberOfParticipation} pc(s)
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        {ticket.standardValidityPeriod} day(s)
+                                        {ticketType.standardValidityPeriod} day(s)
                                     </TableCell>
                                     <TableCell className="p-1 text-center">
                                         <SettingsDropdown
-                                            handleEditClick={() => handleEditClick(ticket)}
-                                            handleDeleteClick={() => handleDeleteClick(ticket)}
+                                            handleEditClick={() => handleEditClick(ticketType)}
+                                            handleDeleteClick={() => handleDeleteClick(ticketType)}
                                         />
                                     </TableCell>
                                 </TableRow>

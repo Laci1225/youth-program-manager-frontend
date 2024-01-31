@@ -124,13 +124,15 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
             <div className="border border-gray-200 rounded p-4">
                 <div className="mb-6">
                     <Label>Full Name:</Label>
-                    <div className={`${fieldAppearance} mt-2`}>
+                    <div className={`${fieldAppearance} mt-2 cursor-pointer`}
+                         onClick={() => router.push(`/children/${ticket.child.id}`, `/children/${ticket.child.id}`)}>
                         {ticket.child.givenName} {ticket.child.familyName}
                     </div>
                 </div>
                 <div className="mb-6">
                     <Label>Ticket name:</Label>
-                    <div className={`${fieldAppearance} mt-2 h-fit`}>
+                    <div className={`${fieldAppearance} mt-2 cursor-pointer`}
+                         onClick={() => router.push(`/ticket-types/${ticket.ticketType.id}`, `/ticket-types/${ticket.ticketType.id}`)}>
                         {ticket.ticketType.name}
                     </div>
                 </div>
@@ -186,7 +188,8 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                                 ?
                                 reportParticipation()
                                 : alert("Cannot report attendance as participation limit reached or report attendance as ticket is expired")
-                        }>
+                        }
+                        className="h-7 text-[10px] font-bold">
 
                         Report participation
                     </Button>

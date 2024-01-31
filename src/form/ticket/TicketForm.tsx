@@ -21,6 +21,8 @@ import {ChildData} from "@/model/child-data";
 import {TicketTypeData} from "@/model/ticket-type-data";
 import TicketTypeForm from "@/form/ticket-type/TicketTypeForm";
 import {AutoComplete} from "@/form/AutoComplete";
+import {Info, ToggleLeft, ToggleRight} from "lucide-react";
+import HoverText from "@/components/hoverText";
 
 
 interface TicketFormProps {
@@ -319,24 +321,46 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                 name="expirationDate"
                                                 render={({field}) => (
                                                     <FormItem className="w-full">
-                                                        <FormLabel>Valid until*</FormLabel>
-                                                        <div onClick={() => setDisable(!disable)}>Switch to other date
-                                                            format
+                                                        <div className="flex">
+                                                            <FormLabel>Valid until*</FormLabel>
+                                                            <HoverText
+                                                                content={`Edit ${disable ? " days " : " date "} instead `}>
+
+                                                                <div className={"flex ml-4 text-xs cursor-pointer"}
+                                                                     onClick={
+                                                                         () => setDisable(!disable)}>{disable ?
+                                                                    <ToggleLeft/> :
+                                                                    <ToggleRight/>}
+                                                                    <Info className={"h-4"}/>
+                                                                </div>
+                                                            </HoverText>
                                                         </div>
                                                         <FormControl>
                                                             <div className={"flex"}>
-                                                                <CalendarInput {...field}
-                                                                               shownYear={new Date().getFullYear()}
-                                                                               reCalc={calcDateByGivenDate}
-                                                                               disabled={!disable}
-                                                                               canBeFuture={true}/>
-                                                                <Input disabled={disable}
-                                                                       onClick={() => setDisable(false)}
-                                                                       onInput={(event) => {
-                                                                           calcDateByGivenDay(Number(event.currentTarget.value))
-                                                                       }}
-                                                                       value={days}
-                                                                />
+                                                                <div className="w-1/3 px-2">
+                                                                    <CalendarInput {...field}
+                                                                                   shownYear={new Date().getFullYear()}
+                                                                                   reCalc={calcDateByGivenDate}
+                                                                                   disabled={!disable}
+                                                                                   canBeFuture={true}
+                                                                                   minDate={form.getValues("issueDate")}
+                                                                    />
+                                                                </div>
+                                                                <div className="relative w-1/3 px-2">
+                                                                    <Input
+                                                                        disabled={disable}
+                                                                        onClick={() => setDisable(false)}
+                                                                        onInput={(event) => {
+                                                                            calcDateByGivenDay(Number(event.currentTarget.value));
+                                                                        }}
+                                                                        value={days}
+                                                                        className="pr-10"
+                                                                    />
+                                                                    <span
+                                                                        className="absolute mr-2 inset-y-0 right-0 flex items-center pr-2">
+                                                                        day(s)
+                                                                    </span>
+                                                                </div>
                                                             </div>
                                                         </FormControl>
                                                         <FormMessage/>

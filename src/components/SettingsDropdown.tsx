@@ -26,7 +26,7 @@ const SettingsDropdown = ({
             <DropdownMenuContent className={"min-w-8"}>
                 <DropdownMenuSeparator/>
                 <DropdownMenuItem
-                    className={"justify-center hover:cursor-pointer"}
+                    className={"justify-center hover:cursor-pointer p-2 mx-5 my-1"}
                     onClick={(event) => {
                         event.preventDefault()
                         event.stopPropagation()
@@ -36,7 +36,7 @@ const SettingsDropdown = ({
                     <span>Edit</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                    className={"justify-center hover:cursor-pointer p-2 mx-5 bg-red-600 text-white"}
+                    className={"justify-center hover:cursor-pointer p-2 mx-5 bg-red-600 text-white my-1"}
                     onClick={event => {
                         event.preventDefault()
                         event.stopPropagation()
