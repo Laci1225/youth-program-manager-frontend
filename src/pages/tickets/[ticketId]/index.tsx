@@ -95,7 +95,7 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
     return (
         <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
             <div className={"flex justify-between px-6 pb-6 items-center"}>
-                <Link href={"/ticket-types"}>
+                <Link href={"/tickets"}>
                     <span className="material-icons-outlined">arrow_back</span>
                 </Link>
                 <div>
@@ -156,8 +156,8 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                     ${differenceInDays(new Date(ticket.expirationDate), new Date()) <= 5 && "bg-red-700 text-white"} mt-2`}>
                         {differenceInDays(new Date(ticket.expirationDate), new Date()) > 0 ? (
                                 <>{
-                                    differenceInDays(new Date(ticket.expirationDate), new Date())}
-                                    <span> day(s)</span>
+                                    differenceInDays(new Date(ticket.expirationDate), new Date())
+                                } day(s)
                                 </>) :
                             <>Expired</>
                         }

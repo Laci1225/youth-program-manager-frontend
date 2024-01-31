@@ -9,7 +9,6 @@ import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "@/
 import LoadingButton from "@/components/loading-button";
 import {ticketSchema} from "@/form/ticket/ticketSchema";
 import CalendarInput from "@/form/CalendarInput";
-import {AutoComplete} from "@/table/AutoComplete";
 import {Button} from "@/components/ui/button";
 import getPotentialChildren from "@/api/graphql/parent/getPotentialChildren";
 import {TicketData} from "@/model/ticket-data";
@@ -21,6 +20,7 @@ import ChildForm from "@/form/child/ChildForm";
 import {ChildData} from "@/model/child-data";
 import {TicketTypeData} from "@/model/ticket-type-data";
 import TicketTypeForm from "@/form/ticket-type/TicketTypeForm";
+import {AutoComplete} from "@/form/AutoComplete";
 
 
 interface TicketFormProps {

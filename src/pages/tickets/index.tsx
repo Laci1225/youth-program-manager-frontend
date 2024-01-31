@@ -3,7 +3,7 @@ import React, {useState} from "react";
 import {Toaster} from "@/components/ui/toaster";
 import {serverSideClient} from "@/api/graphql/client";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
-import {Check, PlusSquare} from "lucide-react";
+import {AlertTriangle, Check, PlusSquare} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
 import DeleteData from "@/components/deleteData";
@@ -113,6 +113,10 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
         }
     }
 
+    function calculateDaysDifference(endDate: Date): number {
+        return differenceInDays(new Date(endDate), new Date());
+    }
+
     function handleReportClicked(ticket: TicketData) {
         setIsReportParticipationClicked(true)
         setReportedTicket(ticket)
@@ -134,7 +138,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                 <TableHeader>
                     <TableRow>
                         <TableHead className="text-center">Child</TableHead>
-                        <TableHead className="text-center">Ticket</TableHead>
+                        <TableHead className="text-center">Ticket type</TableHead>
                         <TableHead className="text-center">Valid until</TableHead>
                         <TableHead className="text-center">Participation</TableHead>
                         <TableHead className="px-5"></TableHead>
@@ -153,29 +157,48 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                                         {ticket.ticketType.name}
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        <HoverText trigger={
-                                            <div
-                                                className={`${differenceInDays(new Date(ticket.expirationDate), new Date()) <= 5 && "bg-red-700 text-white"} mt-2`}>
-                                                {differenceInDays(new Date(ticket.expirationDate), new Date()) > 0 ? (
-                                                        <>{
-                                                            differenceInDays(new Date(ticket.expirationDate), new Date())}
-                                                            <span> day(s)</span>
-                                                        </>) :
-                                                    <>Expired</>
-                                                }
-                                            </div>
-                                        }
-                                                   content={format(new Date(ticket.expirationDate), "P")}/>
+                                        <HoverText
+                                            content={format(new Date(ticket.expirationDate), "P")}>
+                                            {
+                                                <div className="mt-2">
+                                                    {calculateDaysDifference(ticket.expirationDate) > 5 ?
+                                                        <div>
+                                                            {
+                                                                calculateDaysDifference(ticket.expirationDate)
+                                                            } day(s)
+                                                        </div>
+                                                        :
+                                                        calculateDaysDifference(ticket.expirationDate) > 0 ?
+                                                            <div className="inline-flex text-yellow-600">
+                                                                {
+                                                                    calculateDaysDifference(ticket.expirationDate)
+                                                                } day(s)
+                                                                <AlertTriangle className="pl-1"/>
+                                                            </div> :
+                                                            <div
+                                                                className="bg-red-700 text-white rounded mx-4 py-1">Expired
+                                                            </div>
+                                                    }
+                                                </div>
+                                            }</HoverText>
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        {ticket.historyLog ? ticket.numberOfParticipation - ticket.historyLog.length
-                                            : ticket.numberOfParticipation} pc(s)
+                                        <span
+                                            className={`${
+                                                (ticket.numberOfParticipation - (ticket.historyLog?.length || 0)) <= 1
+                                                    ? (ticket.numberOfParticipation - (ticket.historyLog?.length || 0)) <= 0
+                                                        ? "text-red-500"
+                                                        : "text-yellow-500"
+                                                    : ""
+                                            }`}
+                                        > {ticket.numberOfParticipation - (ticket.historyLog?.length || 0)} pc(s)
+                                        </span>
                                     </TableCell>
+
                                     <TableCell className="p-1 text-center">
                                         <SettingsDropdown
-                                            handleEditClick={handleEditClick}
-                                            handleDeleteClick={handleDeleteClick}
-                                            item={ticket}
+                                            handleEditClick={() => handleEditClick(ticket)}
+                                            handleDeleteClick={() => handleDeleteClick(ticket)}
                                             additionalItem={
                                                 //todo hover text why is it disabled
                                                 <DropdownMenuItem
@@ -184,7 +207,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                                                         event.preventDefault()
                                                         event.stopPropagation()
                                                         !(ticket.historyLog && ticket.numberOfParticipation - ticket.historyLog.length <= 0
-                                                            || differenceInDays(new Date(ticket.expirationDate), new Date()) <= 0)
+                                                            || calculateDaysDifference(ticket.expirationDate) <= 0)
                                                             ?
                                                             handleReportClicked(ticket)
                                                             : alert("Cannot report attendance as participation limit reached or report attendance as ticket is expired")

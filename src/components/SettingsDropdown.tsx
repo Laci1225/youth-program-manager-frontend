@@ -5,17 +5,17 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import {Pencil, Trash} from "lucide-react";
+import {ReactNode} from "react";
 
 interface SettingsDropdownProps {
     handleEditClick: () => void
     handleDeleteClick: () => void
-    additionalItem?: React.ReactNode;
+    additionalItem?: ReactNode;
 }
 
 const SettingsDropdown = ({
                               handleEditClick,
                               handleDeleteClick,
-                              item,
                               additionalItem
                           }: SettingsDropdownProps) => {
     return (

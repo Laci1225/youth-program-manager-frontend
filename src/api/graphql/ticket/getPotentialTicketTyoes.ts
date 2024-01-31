@@ -2,7 +2,7 @@ import {clientSideClient} from "@/api/graphql/client";
 import {ApolloClient, gql, NormalizedCacheObject} from "@apollo/client";
 import {TicketTypeData} from "@/model/ticket-type-data";
 
-export default async function getPotentialTicketTypes(ticketTypeName: string, client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketTypeData[]> {
+export default async function getPotentialTicketTypes(ticketTypeName: string, limit: number, client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketTypeData[]> {
     return client
     .query({
         query: gql`
@@ -20,5 +20,5 @@ export default async function getPotentialTicketTypes(ticketTypeName: string, cl
         variables: {
             name: ticketTypeName,
         },
-    }).then(value => value.data.getPotentialTicketTypes);
+    }).then(value => value.data.getPotentialTicketTypes.slice(0, limit));
 }

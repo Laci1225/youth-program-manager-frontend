@@ -26,17 +26,17 @@ type AutoCompleteProps<T> = {
 }
 
 export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeData>({
-                                                                       alreadyAddedData,
-                                                                       className,
-                                                                       isAdded,
-                                                                       placeholder,
-                                                                       emptyMessage,
-                                                                       value,
-                                                                       onValueChange,
-                                                                       disabled,
-                                                                       isLoading = false,
-                                                                       getPotential,
-                                                                   }: AutoCompleteProps<T>) => {
+                                                                                        alreadyAddedData,
+                                                                                        className,
+                                                                                        isAdded,
+                                                                                        placeholder,
+                                                                                        emptyMessage,
+                                                                                        value,
+                                                                                        onValueChange,
+                                                                                        disabled,
+                                                                                        isLoading = false,
+                                                                                        getPotential,
+                                                                                    }: AutoCompleteProps<T>) => {
     const getDisplayName = (item: T): string => {
         if ('familyName' in item && 'givenName' in item) {
             return `${item.familyName} ${item.givenName}`;
@@ -49,7 +49,7 @@ export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeDa
     const inputRef = useRef<HTMLInputElement>(null)
 
     const [isOpen, setOpen] = useState(false)
-    const [inputValue, setInputValue] = useState<string | undefined>(value ? `${value.familyName} ${value.givenName}` : undefined)
+    const [inputValue, setInputValue] = useState<string | undefined>(value ? getDisplayName(value) : undefined)
     const [options, setOptions] = useState<T[]>()
 
     useEffect(() => {
@@ -120,8 +120,8 @@ export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeDa
 
     const handleBlur = useCallback(() => {
         setOpen(false)
-        setInputValue(selected ? getDisplayName(selected) : undefined)
-    }, [selected])
+        setInputValue(value ? getDisplayName(value) : undefined)
+    }, [value])
 
     const handleSelectOption = useCallback(
         (selectedOption: T) => {
@@ -184,7 +184,7 @@ export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeDa
                                                     {isSelected ? <Check className="w-4"/> : null}
                                                     {option && ('birthDate' in option ? (
                                                         <div>
-                                                            {option.familyName} {option.givenName} {format(new Date(option.birthDate), "P")}
+                                                            {getDisplayName(option)} {format(new Date(option.birthDate), "P")}
                                                         </div>
                                                     ) : (
                                                         <div>
