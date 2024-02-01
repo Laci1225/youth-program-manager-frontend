@@ -125,8 +125,8 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
     }
 
     return (
-        <div className={"container w-4/6 py-28"}>
-            <div className={"flex justify-between px-6 pb-6"}>
+        <div className="container w-4/6 py-28">
+            <div className="flex justify-between px-6 pb-6">
                 <span>Tickets</span>
                 <Button onClick={(event) => {
                     event.preventDefault()
@@ -136,7 +136,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                     <span>Create</span>
                 </Button>
             </div>
-            <Table className={"border border-gray-700 rounded"}>
+            <Table className="border border-gray-700 rounded">
                 <TableHeader>
                     <TableRow>
                         <TableHead className="text-center">Child</TableHead>
@@ -150,7 +150,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                     {
                         tickets && tickets.length !== 0 ? (
                             tickets.map((ticket) => (
-                                <TableRow key={ticket.id} className={"hover:bg-gray-300 hover:cursor-pointer"}
+                                <TableRow key={ticket.id} className="hover:bg-gray-300 hover:cursor-pointer"
                                           onClick={() => router.push(`tickets/${ticket.id}`)}>
                                     <TableCell className="text-center">
                                         {ticket.child.givenName} {ticket.child.familyName}
@@ -217,13 +217,13 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                                                     }
                                                     {!(ticket.historyLog && ticket.numberOfParticipation - ticket.historyLog.length <= 0 || calculateDaysDifference(ticket.expirationDate) <= 0) ?
                                                         <>
-                                                            <Check className={"mx-1"}/>
+                                                            <Check className="mx-1"/>
                                                             <span>Report attendance</span>
                                                         </>
                                                         :
                                                         <HoverText content="No more tickets / ticket expired">
                                                             <>
-                                                                <Check className={"mx-1"}/>
+                                                                <Check className="mx-1"/>
                                                                 <span>Report attendance</span>
                                                             </>
                                                         </HoverText>
@@ -252,14 +252,13 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                         onOpenChange={setIsDeleteDialogOpen}
                         onSuccess={onTicketDeleted}
                         deleteFunction={deletedTicket}
-                        entityType={"Ticket"}
+                        entityType="Ticket"
             />
             <ConfirmDialog
                 isOpen={isReportParticipationClicked}
                 onOpenChange={setIsReportParticipationClicked}
-                title={"Are you absolutely sure?"}
-                description={"This action cannot be undone. This will permanently delete your" +
-                    " account and remove your data from our servers."}
+                title="Are you absolutely sure?"
+                description="This action can be undone."
                 onContinue={handleReport}
             />
         </div>

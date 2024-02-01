@@ -55,30 +55,30 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
     }
 
     return (
-        <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
-            <div className={"flex justify-between px-6 pb-6 items-center"}>
-                <Link href={"/ticket-types"}>
+        <div className="container w-3/6 py-10 h-[100vh] overflow-auto">
+            <div className="flex justify-between px-6 pb-6 items-center">
+                <Link href="/ticket-types">
                     <span className="material-icons-outlined">arrow_back</span>
                 </Link>
                 <div>
                     Ticket details
                 </div>
-                <div className={"flex"}>
-                    <div className={" flex flex-row items-center hover:cursor-pointer px-5"}
+                <div className="flex">
+                    <div className=" flex flex-row items-center hover:cursor-pointer px-5"
                          onClick={(event) => {
                              event.preventDefault()
                              handleEditClick()
                          }}>
-                        <Pencil className={"mx-1"}/>
+                        <Pencil className="mx-1"/>
                         <span>Edit</span>
                     </div>
                     <div
-                        className={"flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"}
+                        className="flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"
                         onClick={(event) => {
                             event.preventDefault()
                             handleDeleteClick()
                         }}>
-                        <Trash className={"mx-1"}/>
+                        <Trash className="mx-1"/>
                         <span>Delete</span>
                     </div>
                 </div>
@@ -96,7 +96,7 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                         {ticket.description}
                     </div>
                 </div>
-                <div className={"flex flex-wrap items-center "}>
+                <div className="flex flex-wrap items-center ">
                     <div className="mb-6 flex-1">
                         <Label>Price:</Label>
                         <div className={`${fieldAppearance} mt-2`}>
@@ -129,7 +129,7 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                         onOpenChange={setIsDeleteDialogOpen}
                         onSuccess={onTicketDeleted}
                         deleteFunction={deletedTicketType}
-                        entityType={"Ticket"}
+                        entityType="Ticket"
             />
         </div>
     )

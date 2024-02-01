@@ -40,9 +40,9 @@ export function InputDiseaseHandler({value, onChange}: InputHandlerProps) {
     return (
         <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-                <Button className={"flex justify-end"}
-                        type={"button"}
-                        variant={"default"}
+                <Button className="flex justify-end"
+                        type="button"
+                        variant="default"
                         onClick={() => {
                             setDialogOpen(true)
                             diseaseForm.reset()
@@ -84,7 +84,7 @@ export function InputDiseaseHandler({value, onChange}: InputHandlerProps) {
                             )}
                         />
                         <DialogFooter>
-                            <Button type={"submit"}>Add</Button>
+                            <Button type="submit">Add</Button>
                         </DialogFooter>
                     </form>
                 </Form>

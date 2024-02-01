@@ -200,7 +200,7 @@ function ChildForm({
                                         control={form.control}
                                         name="address"
                                         render={({field}) => (
-                                            <FormItem className={"flex-1"}>
+                                            <FormItem className="flex-1">
                                                 <FormLabel>Address*</FormLabel>
                                                 <FormControl>
                                                     <Input placeholder="Address" {...field} />
@@ -214,12 +214,12 @@ function ChildForm({
                                             control={form.control}
                                             name="relativeParent"
                                             render={({field}) => (
-                                                <FormItem className={"flex-1"}>
+                                                <FormItem className="flex-1">
                                                     <FormLabel>Parent</FormLabel>
                                                     <FormControl>
-                                                        <div className={"flex justify-between"}>
+                                                        <div className="flex justify-between">
                                                             <AutoComplete
-                                                                className={"w-2/3"}
+                                                                className="w-2/3"
                                                                 value={field.value}
                                                                 isLoading={false}
                                                                 disabled={false}
@@ -239,7 +239,7 @@ function ChildForm({
                                                                 placeholder="Select parents..."
                                                                 emptyMessage="No parent found"
                                                             />
-                                                            <Button type={"button"}
+                                                            <Button type="button"
                                                                     onClick={() => {
                                                                         handleParentEditClick()
                                                                     }}>

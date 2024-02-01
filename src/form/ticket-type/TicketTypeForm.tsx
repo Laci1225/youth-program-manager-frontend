@@ -129,7 +129,7 @@ function TicketTypeForm({onTicketModified, existingTicket, isOpen, onOpenChange}
                                         </FormItem>
                                     )}
                                 />
-                                <div className={"flex w-full justify-between"}>
+                                <div className="flex w-full justify-between">
                                     <FormField
                                         control={form.control}
                                         name="price"

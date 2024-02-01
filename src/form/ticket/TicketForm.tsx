@@ -175,9 +175,9 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                         <FormItem className="flex-1">
                                             <FormLabel>Child Name*</FormLabel>
                                             <FormControl>
-                                                <div className={"flex justify-between"}>
+                                                <div className="flex justify-between">
                                                     <AutoComplete
-                                                        className={"w-2/3"}
+                                                        className="w-2/3"
                                                         key={0}
                                                         value={childAutocompleteValue ? childAutocompleteValue : existingTicket?.child}
                                                         isLoading={false}
@@ -190,11 +190,11 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                             } else field.onChange(undefined);
 
                                                         }}
-                                                        placeholder={"Select children..."}
-                                                        emptyMessage={"No child found"}
+                                                        placeholder="Select children..."
+                                                        emptyMessage="No child found"
                                                     />
                                                     {!existingTicket &&
-                                                        <Button type={"button"}
+                                                        <Button type="button"
                                                                 onClick={() => {
                                                                     handleChildEditClick()
                                                                 }}>
@@ -214,9 +214,9 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                         <FormItem className="flex-1">
                                             <FormLabel>Ticket type*</FormLabel>
                                             <FormControl>
-                                                <div className={"flex justify-between"}>
+                                                <div className="flex justify-between">
                                                     <AutoComplete
-                                                        className={"w-2/3"}
+                                                        className="w-2/3"
                                                         key={0}
                                                         value={ticketTypeAutocompleteValue ? ticketTypeAutocompleteValue : existingTicket?.ticketType}
                                                         isLoading={false}
@@ -234,10 +234,10 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                             } else field.onChange(undefined);
 
                                                         }}
-                                                        placeholder={"Select ticket type..."}
-                                                        emptyMessage={"No ticket type found"}
+                                                        placeholder="Select ticket type..."
+                                                        emptyMessage="No ticket type found"
                                                     />
-                                                    <Button type={"button"}
+                                                    <Button type="button"
                                                             onClick={() => {
                                                                 handleTicketTypeEditClick()
                                                             }}>
@@ -251,7 +251,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                 />
                                 {form.getValues("ticketTypeId") && (
                                     <>
-                                        <div className={"flex w-full"}>
+                                        <div className="flex w-full">
                                             <FormField
                                                 control={form.control}
                                                 name="price"
@@ -326,17 +326,17 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                             <HoverText
                                                                 content={`Edit ${disable ? " days " : " date "} instead `}>
 
-                                                                <div className={"flex ml-4 text-xs cursor-pointer"}
+                                                                <div className="flex ml-4 text-xs cursor-pointer"
                                                                      onClick={
                                                                          () => setDisable(!disable)}>{disable ?
                                                                     <ToggleLeft/> :
                                                                     <ToggleRight/>}
-                                                                    <Info className={"h-4"}/>
+                                                                    <Info className="h-4"/>
                                                                 </div>
                                                             </HoverText>
                                                         </div>
                                                         <FormControl>
-                                                            <div className={"flex"}>
+                                                            <div className="flex">
                                                                 <div className="w-1/3 px-2">
                                                                     <CalendarInput {...field}
                                                                                    shownYear={new Date().getFullYear()}

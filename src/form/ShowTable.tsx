@@ -27,12 +27,12 @@ export default function ShowTable({tableFields, value, showDeleteButton, onChang
         }
     };
     return (<div className={cn(`w-full`, className)}>
-        <Table className={"w-full border border-gray-200"}>
+        <Table className="w-full border border-gray-200">
             <TableHeader>
                 <TableRow>
                     {
                         tableFields.map(value => (
-                            <TableHead key={value} className={"text-center"}>{value}</TableHead>
+                            <TableHead key={value} className="text-center">{value}</TableHead>
                         ))
                     }
                     {showDeleteButton && <TableHead className="w-5"></TableHead>}
@@ -43,7 +43,7 @@ export default function ShowTable({tableFields, value, showDeleteButton, onChang
                     value.map((field: Disease | Medicine, index: number) => (
                         <TableRow key={index}>
                             {Object.values(field).map((value) => (
-                                <TableCell key={value} className={"text-center"}>
+                                <TableCell key={value} className="text-center">
                                     {isStrictDate(value) ? (
                                         <>{format(new Date(value), "P")}</>
                                     ) : (
@@ -53,8 +53,8 @@ export default function ShowTable({tableFields, value, showDeleteButton, onChang
                             ))}
                             {showDeleteButton &&
                                 <TableCell className="w-6">
-                                    <Button type={"button"} className="p-0"
-                                            variant={"ghost"}
+                                    <Button type="button" className="p-0"
+                                            variant="ghost"
                                             onClick={() => handleDelete(index)}>
                                         <span className="material-icons-outlined">delete</span>
                                     </Button>
@@ -63,7 +63,7 @@ export default function ShowTable({tableFields, value, showDeleteButton, onChang
                         </TableRow>
                     ))) : (
                     <TableRow>
-                        <TableCell className={"text-center text-gray-400"} colSpan={tableFields.length}>
+                        <TableCell className="text-center text-gray-400" colSpan={tableFields.length}>
                             Nothing added yet
                         </TableCell>
                     </TableRow>

@@ -211,7 +211,7 @@ export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeDa
             {!disabled &&
                 <Button
                     type="button"
-                    variant={"ghost"}
+                    variant="ghost"
                     className="absolute top-1 right-1 text-red-500 p-0 mt-1 mr-1 h-fit"
                     onClick={() => {
                         onValueChange?.(undefined)

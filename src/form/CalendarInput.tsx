@@ -31,7 +31,7 @@ export default function CalendarInput({
             <PopoverTrigger disabled={disabled} className={cn(
                 fieldAppearance,
                 !value && "text-muted-foreground"
-            )} type={"button"} onClick={() => setIsPopoverOpen(true)}>
+            )} type="button" onClick={() => setIsPopoverOpen(true)}>
                 <div className="flex">
                     <CalendarIcon className="mr-2 h-4 w-4"/>
                     {value ? format(value, "P") :
@@ -40,7 +40,7 @@ export default function CalendarInput({
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
                 <Calendar
-                    mode={"single"}
+                    mode="single"
                     initialFocus
                     selected={value}
                     onSelect={(newDate) => {

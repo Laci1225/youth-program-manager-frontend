@@ -137,22 +137,22 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                                              setIsEditChildrenModeEnabled={setIsEditChildrenModeEnabled}/>
                         ) :
                         <div className={`w-full`}>
-                            <Table className={"w-full border border-gray-200"}>
+                            <Table className="w-full border border-gray-200">
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className={"text-center"}>Name</TableHead>
-                                        <TableHead className={"text-center"}>IsEmergencyContact</TableHead>
+                                        <TableHead className="text-center">Name</TableHead>
+                                        <TableHead className="text-center">IsEmergencyContact</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>{
                                     parentWithChildren.childDtos && parentWithChildren.childDtos?.length !== 0 ? (
                                         parentWithChildren.childDtos.map((child: ChildData, index: number) => (
-                                            <TableRow key={index} className={"hover:bg-gray-300 hover:cursor-pointer"}
+                                            <TableRow key={index} className="hover:bg-gray-300 hover:cursor-pointer"
                                                       onClick={() => router.push(`/children/${child.id}`, `/children/${child.id}`)}>
-                                                <TableCell className={"text-center"}>
+                                                <TableCell className="text-center">
                                                     {child.givenName + " " + child.familyName}
                                                 </TableCell>
-                                                <TableCell className={"text-center"}>
+                                                <TableCell className="text-center">
                                                 <span className="material-icons-outlined">
                                                     {child.relativeParents?.find(relative => relative.id == parent.id)?.isEmergencyContact ? 'check_box' : 'check_box_outline_blank'}
                                                 </span>
@@ -161,7 +161,7 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                                             </TableRow>
                                         ))) : (
                                         <TableRow>
-                                            <TableCell className={"text-center text-gray-400"}
+                                            <TableCell className="text-center text-gray-400"
                                                        colSpan={2}>
                                                 Nothing added yet
                                             </TableCell>
