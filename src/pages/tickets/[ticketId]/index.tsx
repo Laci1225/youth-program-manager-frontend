@@ -4,7 +4,7 @@ import Link from "next/link";
 import {Toaster} from "@/components/ui/toaster";
 import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
-import {Pencil, Trash} from "lucide-react";
+import {Check, Pencil, Trash} from "lucide-react";
 import {useRouter} from "next/router";
 import {serverSideClient} from "@/api/graphql/client";
 import deletedTicketType from "@/api/graphql/ticketType/deletedTicketType";
@@ -19,6 +19,12 @@ import ConfirmDialog from "@/components/confirmDialog";
 import updateTicket from "@/api/graphql/ticket/updateTicket";
 import fromTicketDataToTicketInputData from "@/model/fromTicketDataToTicketInputData";
 import {toast} from "@/components/ui/use-toast";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
+import {Disease} from "@/model/disease";
+import {Medicine} from "@/model/medicine";
+import {isStrictDate} from "@/utils/date";
+import HoverText from "@/components/hoverText";
+import {calculateDaysDifference} from "@/pages/tickets";
 
 
 export const getServerSideProps = (async (context) => {
@@ -62,9 +68,39 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
     }
 
     const [isReportParticipationClicked, setIsReportParticipationClicked] = useState<boolean>(false)
+    const [isReportCancelParticipationClicked, setIsReportCancelParticipationClicked] = useState<boolean>(false)
+    const [reportCancelParticipationIndex, setReportCancelParticipationIndex] = useState<number>()
 
     function reportParticipation() {
         setIsReportParticipationClicked(true)
+    }
+
+    function reportCancelParticipation(index: number) {
+        setIsReportCancelParticipationClicked(true)
+        setReportCancelParticipationIndex(index)
+    }
+
+    function handleCancelReport() {
+        const {
+            ticketType,
+            child,
+            id,
+            ...remainingTicket
+        } = ticket
+        updateTicket(id, {
+            ...remainingTicket,
+            childId: child.id,
+            ticketTypeId: ticketType.id,
+            historyLog: (remainingTicket.historyLog?.filter((_, i) => i !== reportCancelParticipationIndex))
+        }).then(
+            value =>
+                setTicket(value)
+        )
+        setReportCancelParticipationIndex(undefined)
+        toast({
+            title: "Successfully deleted",
+            duration: 2000
+        });
     }
 
     function handleReport() {
@@ -181,29 +217,58 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                 </div>
                 <div className="mb-6 flex justify-between">
                     <Label className="items-center">Report Participation:</Label>
-                    <Button
-                        onClick={() =>
-                            !(ticket.historyLog && ticket.numberOfParticipation - ticket.historyLog.length <= 0
-                                || differenceInDays(new Date(ticket.expirationDate), new Date()) <= 0)
-                                ?
-                                reportParticipation()
-                                : alert("Cannot report attendance as participation limit reached or report attendance as ticket is expired")
-                        }
-                        className="h-7 text-[10px] font-bold">
-
-                        Report participation
-                    </Button>
+                    {!!(ticket.historyLog && ticket.numberOfParticipation - ticket.historyLog.length <= 0) ?
+                        <HoverText content="No more tickets avaiable">
+                            <Button
+                                className={`h-7 text-[10px] font-bold justify-center my-1 p-2 mx-5 bg-gray-400 cursor-not-allowed`}
+                            >Report participation
+                            </Button>
+                        </HoverText>
+                        : calculateDaysDifference(ticket.expirationDate) <= 0 ?
+                            <HoverText content="Ticket expired">
+                                <Button
+                                    className={`h-7 text-[10px] font-bold justify-center my-1 p-2 mx-5 bg-gray-400 cursor-not-allowed`}>
+                                    Report participation
+                                </Button>
+                            </HoverText> :
+                            <Button
+                                onClick={reportParticipation}
+                                className="h-7 text-[10px] font-bold">
+                                Report participation
+                            </Button>
+                    }
                 </div>
                 <div className="mb-6 flex-1">
-                    <ShowTable
-                        tableFields={["#", "Date"]}
-                        value={ticket.historyLog?.map((value, index) => ({
-                            id: index + 1,
-                            date: format(new Date(value.date), "P")
-                        }))}
-                        showDeleteButton={false}
-                    />
-
+                    <Table className="w-full border border-gray-200">
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="text-center">#</TableHead>
+                                <TableHead className="text-center">Date</TableHead>
+                                <TableHead className="w-5"></TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {
+                                ticket.historyLog?.map((field, index: number) => (
+                                    <TableRow key={index}>
+                                        <TableCell className="text-center">
+                                            {index + 1}
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            {format(new Date(field.date), "P")}
+                                        </TableCell>
+                                        <TableCell className="w-6">
+                                            <Button type="button" className="p-0"
+                                                    variant="ghost"
+                                                    onClick={() => reportCancelParticipation(index)}>
+                                                <span className="material-icons-outlined">delete</span>
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            }
+                        </TableBody>
+                    </Table>
                 </div>
             </div>
             <Toaster/>
@@ -226,6 +291,13 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                 title="Are you absolutely sure?"
                 description="This action can be undone."
                 onContinue={handleReport}
+            />
+            <ConfirmDialog
+                isOpen={isReportCancelParticipationClicked}
+                onOpenChange={setIsReportCancelParticipationClicked}
+                title="Are you absolutely sure?"
+                description="This action can be undone."
+                onContinue={handleCancelReport}
             />
         </div>
     )

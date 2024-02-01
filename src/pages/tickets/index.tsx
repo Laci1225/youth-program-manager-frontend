@@ -31,6 +31,10 @@ export const getServerSideProps = (async () => {
     };
 }) satisfies GetServerSideProps<{ ticketsData: TicketData[] }>;
 
+export function calculateDaysDifference(endDate: Date): number {
+    return differenceInDays(new Date(endDate), new Date());
+}
+
 export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
     const [tickets, setTickets] = useState<TicketData[]>(ticketsData)
@@ -115,9 +119,6 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
         }
     }
 
-    function calculateDaysDifference(endDate: Date): number {
-        return differenceInDays(new Date(endDate), new Date());
-    }
 
     function handleReportClicked(ticket: TicketData) {
         setIsReportParticipationClicked(true)
