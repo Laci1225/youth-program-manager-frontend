@@ -89,7 +89,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
             })
     }
 
-    const [days, setDays] = useState<number>(0)
+    const [days, setDays] = useState<number | undefined>(undefined)
 
     useEffect(() => {
         form.reset({
@@ -111,7 +111,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
             setDays(givenDay)
         } else {
             const issueDate = form.getValues("issueDate");
-            const result = addDays(issueDate, days)
+            const result = addDays(issueDate, days ?? 0)
             form.setValue("expirationDate", result);
         }
     }
@@ -351,7 +351,9 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                                         disabled={disable}
                                                                         onClick={() => setDisable(false)}
                                                                         onInput={(event) => {
-                                                                            calcDateByGivenDay(Number(event.currentTarget.value));
+                                                                            if (!!Number(event.currentTarget.value))
+                                                                                calcDateByGivenDay(Number(event.currentTarget.value));
+                                                                            else setDays(undefined)
                                                                         }}
                                                                         value={days}
                                                                         className="pr-10"
