@@ -21,17 +21,44 @@ import {Button} from "@/components/ui/button";
 import DeleteData from "@/components/deleteData";
 import HoverText from "@/components/hoverText";
 import SettingsDropdown from "@/components/SettingsDropdown";
+import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 
-
-export const getServerSideProps = (async () => {
-    const children = await getAllChildren(serverSideClient)
-    return {
-        props: {
-            childrenData: children
+export const getServerSideProps = withPageAuthRequired({
+    async getServerSideProps(ctx) {
+        const session = await getSession(ctx.req, ctx.res);
+        console.log(session?.accessToken)
+        const children = await getAllChildren(serverSideClient, session?.accessToken);
+        return {
+            props: {
+                childrenData: children,
+            },
         }
-    };
-}) satisfies GetServerSideProps<{ childrenData: ChildData[] }>;
+    }
+})/*
+export const getServerSideProps = (async (context) => {
+    //const {user} = useUser(context.req);
+    const user = await getUserProfileData();
+    console.log(context.req)
+    // Redirect to login page if user is not authenticated
+    /*if (!user) {
+        return {
+            redirect: {
+                destination: '/login',
+                permanent: false,
+            },
+        };
+    }*/
 
+/*
+  const children = await getAllChildren(serverSideClient, "012");
+
+  return {
+      props: {
+          childrenData: children,
+      },
+  };
+}) satisfies GetServerSideProps<{ childrenData: ChildData[] }>;
+*/
 export default function Children({childrenData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
     const [children, setChildren] = useState<ChildData[]>(childrenData)
