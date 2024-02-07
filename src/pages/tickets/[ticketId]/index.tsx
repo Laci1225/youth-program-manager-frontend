@@ -4,7 +4,7 @@ import Link from "next/link";
 import {Toaster} from "@/components/ui/toaster";
 import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
-import {Check, Pencil, Trash} from "lucide-react";
+import {Pencil, Trash} from "lucide-react";
 import {useRouter} from "next/router";
 import {serverSideClient} from "@/api/graphql/client";
 import deletedTicketType from "@/api/graphql/ticketType/deletedTicketType";
@@ -13,18 +13,14 @@ import getTicketById from "@/api/graphql/ticket/getTicketById";
 import {TicketData} from "@/model/ticket-data";
 import {differenceInDays, format} from "date-fns";
 import TicketForm from "@/form/ticket/TicketForm";
-import ShowTable from "@/form/ShowTable";
 import {Button} from "@/components/ui/button";
 import ConfirmDialog from "@/components/confirmDialog";
 import updateTicket from "@/api/graphql/ticket/updateTicket";
-import fromTicketDataToTicketInputData from "@/model/fromTicketDataToTicketInputData";
 import {toast} from "@/components/ui/use-toast";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Disease} from "@/model/disease";
-import {Medicine} from "@/model/medicine";
-import {isStrictDate} from "@/utils/date";
 import HoverText from "@/components/hoverText";
 import {calculateDaysDifference} from "@/pages/tickets";
+import reportParticipation from "@/api/graphql/ticket/reportParticipation";
 
 
 export const getServerSideProps = (async (context) => {
@@ -68,19 +64,19 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
     }
 
     const [isReportParticipationClicked, setIsReportParticipationClicked] = useState<boolean>(false)
-    const [isReportCancelParticipationClicked, setIsReportCancelParticipationClicked] = useState<boolean>(false)
-    const [reportCancelParticipationIndex, setReportCancelParticipationIndex] = useState<number>()
+    const [isRemoveParticipationClicked, setIsRemoveParticipationClicked] = useState<boolean>(false)
+    const [removeParticipationIndex, setRemoveParticipationIndex] = useState<number>()
 
-    function reportParticipation() {
+    function handleReportParticipation() {
         setIsReportParticipationClicked(true)
     }
 
-    function reportCancelParticipation(index: number) {
-        setIsReportCancelParticipationClicked(true)
-        setReportCancelParticipationIndex(index)
+    function handleRemoveParticipation(index: number) {
+        setIsRemoveParticipationClicked(true)
+        setRemoveParticipationIndex(index)
     }
 
-    function handleCancelReport() {
+    function handleRemoveReport() {
         const {
             ticketType,
             child,
@@ -91,12 +87,11 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
             ...remainingTicket,
             childId: child.id,
             ticketTypeId: ticketType.id,
-            historyLog: (remainingTicket.historyLog?.filter((_, i) => i !== reportCancelParticipationIndex))
         }).then(
             value =>
                 setTicket(value)
         )
-        setReportCancelParticipationIndex(undefined)
+        setRemoveParticipationIndex(undefined)
         toast({
             title: "Successfully deleted",
             duration: 2000
@@ -104,16 +99,7 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
     }
 
     function handleReport() {
-        const updatedHistoryLog = [
-            ...(ticket.historyLog || []),
-            {date: new Date(), reporter: ""}
-        ];
-        setTicket(prevState => ({
-            ...prevState,
-            historyLog: updatedHistoryLog
-        }));
-
-        updateTicket(ticket.id, fromTicketDataToTicketInputData({...ticket, historyLog: updatedHistoryLog}))
+        reportParticipation(ticket.id, {date: new Date(), reporter: ""})
             .then(value => {
                 setTicket(value)
             }).then(() =>
@@ -232,7 +218,7 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                                 </Button>
                             </HoverText> :
                             <Button
-                                onClick={reportParticipation}
+                                onClick={handleReportParticipation}
                                 className="h-7 text-[10px] font-bold">
                                 Report participation
                             </Button>
@@ -260,7 +246,7 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                                         <TableCell className="w-6">
                                             <Button type="button" className="p-0"
                                                     variant="ghost"
-                                                    onClick={() => reportCancelParticipation(index)}>
+                                                    onClick={() => handleRemoveParticipation(index)}>
                                                 <span className="material-icons-outlined">delete</span>
                                             </Button>
                                         </TableCell>
@@ -293,11 +279,11 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                 onContinue={handleReport}
             />
             <ConfirmDialog
-                isOpen={isReportCancelParticipationClicked}
-                onOpenChange={setIsReportCancelParticipationClicked}
+                isOpen={isRemoveParticipationClicked}
+                onOpenChange={setIsRemoveParticipationClicked}
                 title="Are you absolutely sure?"
                 description="This action can be undone."
-                onContinue={handleCancelReport}
+                onContinue={handleRemoveReport}
             />
         </div>
     )

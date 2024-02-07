@@ -8,6 +8,5 @@ export default function fromTicketDataToTicketInputData(ticket: TicketData): Tic
         price: ticket.price,
         issueDate: ticket.issueDate,
         numberOfParticipation: ticket.numberOfParticipation,
-        historyLog: ticket.historyLog
     }
 }

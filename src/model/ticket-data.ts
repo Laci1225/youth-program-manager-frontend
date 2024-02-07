@@ -10,9 +10,10 @@ export interface TicketData {
     price: number,
     numberOfParticipation: number
     historyLog?: HistoryData[]
+    //todo historyLog: HistoryData[]
 }
 
-interface HistoryData {
+export interface HistoryData {
     date: Date,
     reporter: string
 }
@@ -24,5 +25,4 @@ export interface TicketDataInput {
     expirationDate: Date
     price: number,
     numberOfParticipation: number
-    historyLog?: HistoryData[]
 }

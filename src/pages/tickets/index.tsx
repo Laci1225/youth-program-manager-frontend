@@ -15,10 +15,9 @@ import TicketForm from "@/form/ticket/TicketForm";
 import HoverText from "@/components/hoverText";
 import deletedTicket from "@/api/graphql/ticket/deletedTicket";
 import {DropdownMenuItem} from "@/components/ui/dropdown-menu";
-import updateTicket from "@/api/graphql/ticket/updateTicket";
-import fromTicketDataToTicketInputData from "@/model/fromTicketDataToTicketInputData";
 import ConfirmDialog from "@/components/confirmDialog";
 import {toast} from "@/components/ui/use-toast";
+import reportParticipation from "@/api/graphql/ticket/reportParticipation";
 
 export const getServerSideProps = (async () => {
     const tickets = await getAllTickets(serverSideClient)
@@ -72,40 +71,18 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
 
     function handleReport() {
         if (reportedTicket) {
-            const updatedHistoryLog = [
-                ...(reportedTicket.historyLog || []),
-                {date: new Date(), reporter: ""}
-            ];
-            setTickets(prevTickets => {
-                return prevTickets.map(tic => {
-                    if (reportedTicket.id === tic.id) {
-                        return {
-                            ...tic,
-                            historyLog: updatedHistoryLog
-                        };
-                    } else {
-                        return tic;
-                    }
-                });
-            });
-            updateTicket(reportedTicket.id, fromTicketDataToTicketInputData({
-                ...reportedTicket,
-                historyLog: updatedHistoryLog
-            }))
-                .then(value => {
+            reportParticipation(reportedTicket.id,
+                {date: new Date(), reporter: ""})
+                .then(value =>
                     setTickets(prevTickets => {
                         return prevTickets.map(tic => {
                             if (value.id === tic.id) {
-                                return {
-                                    ...tic,
-                                    historyLog: updatedHistoryLog
-                                };
+                                return value
                             } else {
                                 return tic;
                             }
-                        });
-                    });
-                })
+                        })
+                    }))
                 .then(() =>
                     toast({
                         variant: "default",
