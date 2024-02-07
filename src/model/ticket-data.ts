@@ -9,8 +9,7 @@ export interface TicketData {
     expirationDate: Date
     price: number,
     numberOfParticipation: number
-    historyLog?: HistoryData[]
-    //todo historyLog: HistoryData[]
+    historyLog: HistoryData[]
 }
 
 export interface HistoryData {

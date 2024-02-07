@@ -15,12 +15,12 @@ import {differenceInDays, format} from "date-fns";
 import TicketForm from "@/form/ticket/TicketForm";
 import {Button} from "@/components/ui/button";
 import ConfirmDialog from "@/components/confirmDialog";
-import updateTicket from "@/api/graphql/ticket/updateTicket";
 import {toast} from "@/components/ui/use-toast";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import HoverText from "@/components/hoverText";
 import {calculateDaysDifference} from "@/pages/tickets";
 import reportParticipation from "@/api/graphql/ticket/reportParticipation";
+import removeParticipation from "@/api/graphql/ticket/removeParticipation";
 
 
 export const getServerSideProps = (async (context) => {
@@ -83,19 +83,18 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
             id,
             ...remainingTicket
         } = ticket
-        updateTicket(id, {
-            ...remainingTicket,
-            childId: child.id,
-            ticketTypeId: ticketType.id,
-        }).then(
-            value =>
-                setTicket(value)
-        )
+        const participationToRemove = remainingTicket.historyLog.find((_, i) => i === removeParticipationIndex);
+        if (participationToRemove) {
+            removeParticipation(id, participationToRemove)
+                .then(value => {
+                    setTicket(value)
+                    toast({
+                        title: "Successfully deleted",
+                        duration: 2000
+                    });
+                });
+        }
         setRemoveParticipationIndex(undefined)
-        toast({
-            title: "Successfully deleted",
-            duration: 2000
-        });
     }
 
     function handleReport() {
@@ -167,10 +166,9 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                     </div>
                     <div className="mb-6 flex-1">
                         <Label>Number of participation:</Label>
-                        <div className={`${fieldAppearance} mt-2 ${ticket.historyLog &&
-                        (ticket.numberOfParticipation - ticket.historyLog.length) <= 0 && "bg-red-700 text-white"}`}>
-                            {ticket.historyLog ? ticket.numberOfParticipation - ticket.historyLog.length
-                                : ticket.numberOfParticipation} pc(s)
+                        <div className={`${fieldAppearance} mt-2 ${
+                            (ticket.numberOfParticipation - ticket.historyLog.length) <= 0 && "bg-red-700 text-white"}`}>
+                            {ticket.numberOfParticipation - ticket.historyLog.length} pc(s)
                         </div>
                     </div>
                 </div>
@@ -203,7 +201,7 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                 </div>
                 <div className="mb-6 flex justify-between">
                     <Label className="items-center">Report Participation:</Label>
-                    {!!(ticket.historyLog && ticket.numberOfParticipation - ticket.historyLog.length <= 0) ?
+                    {(ticket.numberOfParticipation - ticket.historyLog.length <= 0) ?
                         <HoverText content="No more tickets avaiable">
                             <Button
                                 className={`h-7 text-[10px] font-bold justify-center my-1 p-2 mx-5 bg-gray-400 cursor-not-allowed`}
@@ -235,7 +233,7 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                         </TableHeader>
                         <TableBody>
                             {
-                                ticket.historyLog?.map((field, index: number) => (
+                                ticket.historyLog.map((field, index: number) => (
                                     <TableRow key={index}>
                                         <TableCell className="text-center">
                                             {index + 1}

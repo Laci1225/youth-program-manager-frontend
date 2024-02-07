@@ -163,13 +163,13 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                                     <TableCell className="text-center">
                                         <span
                                             className={`${
-                                                (ticket.numberOfParticipation - (ticket.historyLog?.length || 0)) <= 1
-                                                    ? (ticket.numberOfParticipation - (ticket.historyLog?.length || 0)) <= 0
+                                                (ticket.numberOfParticipation - (ticket.historyLog.length)) <= 1
+                                                    ? (ticket.numberOfParticipation - (ticket.historyLog.length)) <= 0
                                                         ? "text-red-500"
                                                         : "text-yellow-500"
                                                     : ""
                                             }`}
-                                        > {ticket.numberOfParticipation - (ticket.historyLog?.length || 0)} pc(s)
+                                        > {ticket.numberOfParticipation - (ticket.historyLog.length)} pc(s)
                                         </span>
                                     </TableCell>
 
@@ -178,7 +178,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                                             handleEditClick={() => handleEditClick(ticket)}
                                             handleDeleteClick={() => handleDeleteClick(ticket)}
                                             additionalItem={
-                                                !!(ticket.historyLog && ticket.numberOfParticipation - ticket.historyLog.length <= 0) ?
+                                                (ticket.numberOfParticipation - ticket.historyLog.length <= 0) ?
                                                     <HoverText content="No more tickets avaiable">
                                                         <DropdownMenuItem
                                                             onClick={
