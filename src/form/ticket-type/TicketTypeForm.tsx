@@ -16,32 +16,32 @@ import updateTicketType from "@/api/graphql/ticketType/updateTicketType";
 
 
 interface TicketFormProps {
-    onTicketModified: (ticket: TicketTypeData) => void;
-    existingTicket?: TicketTypeData
+    onTicketTypeModified: (ticket: TicketTypeData) => void;
+    existingTicketType?: TicketTypeData
     isOpen: boolean
     onOpenChange: (open: boolean) => void;
 }
 
-function TicketTypeForm({onTicketModified, existingTicket, isOpen, onOpenChange}: TicketFormProps) {
+function TicketTypeForm({onTicketTypeModified, existingTicketType, isOpen, onOpenChange}: TicketFormProps) {
 
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof ticketTypeSchema>>({
         resolver: zodResolver(ticketTypeSchema),
         defaultValues: {
-            name: existingTicket?.name,
-            description: existingTicket?.description,
-            price: existingTicket?.price,
-            numberOfParticipation: existingTicket?.numberOfParticipation,
-            standardValidityPeriod: existingTicket?.standardValidityPeriod,
+            name: existingTicketType?.name,
+            description: existingTicketType?.description,
+            price: existingTicketType?.price,
+            numberOfParticipation: existingTicketType?.numberOfParticipation,
+            standardValidityPeriod: existingTicketType?.standardValidityPeriod,
         },
     })
 
     function onSubmit(values: z.infer<typeof ticketTypeSchema>) {
         setIsSubmitting(true)
-        if (existingTicket) {
-            updateTicketType(existingTicket.id, values)
+        if (existingTicketType) {
+            updateTicketType(existingTicketType.id, values)
                 .then((result) => {
-                    onTicketModified(result)
+                    onTicketTypeModified(result)
                     toast({
                         title: "The ticket is successfully updated",
                         description: `A ticket with name: ${form.getValues("name")} updated`,
@@ -60,7 +60,7 @@ function TicketTypeForm({onTicketModified, existingTicket, isOpen, onOpenChange}
         } else
             addTicketType(values)
                 .then((result) => {
-                    onTicketModified(result)
+                    onTicketTypeModified(result)
                     toast({
                         title: "The ticket is successfully added",
                         description: `A ticket with name: ${form.getValues("name")} created`,
@@ -81,19 +81,19 @@ function TicketTypeForm({onTicketModified, existingTicket, isOpen, onOpenChange}
 
     useEffect(() => {
         form.reset({
-            name: existingTicket?.name,
-            description: existingTicket?.description,
-            price: existingTicket?.price,
-            numberOfParticipation: existingTicket?.numberOfParticipation,
-            standardValidityPeriod: existingTicket?.standardValidityPeriod,
+            name: existingTicketType?.name,
+            description: existingTicketType?.description,
+            price: existingTicketType?.price,
+            numberOfParticipation: existingTicketType?.numberOfParticipation,
+            standardValidityPeriod: existingTicketType?.standardValidityPeriod,
         })
-    }, [existingTicket])
+    }, [existingTicketType])
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[800px] h-[90vh] shadow-muted-foreground">
                 <DialogHeader>
-                    <DialogTitle>{existingTicket ? "Update" : "Create"} a ticket</DialogTitle>
+                    <DialogTitle>{existingTicketType ? "Update" : "Create"} a ticket</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.log(errors))}
@@ -139,7 +139,7 @@ function TicketTypeForm({onTicketModified, existingTicket, isOpen, onOpenChange}
                                                 <FormControl>
                                                     <div className="relative w-36">
                                                         <Input
-                                                            placeholder="125000"
+                                                            placeholder="12500"
                                                             {...field}
                                                             className="pr-5"
                                                         />
@@ -204,7 +204,7 @@ function TicketTypeForm({onTicketModified, existingTicket, isOpen, onOpenChange}
                         </ScrollArea>
                         <DialogFooter>
                             <LoadingButton isLoading={isSubmitting}>
-                                {existingTicket ? "Update" : "Create"}
+                                {existingTicketType ? "Update" : "Create"}
                             </LoadingButton>
                         </DialogFooter>
                     </form>

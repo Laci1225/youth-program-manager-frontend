@@ -1,8 +1,22 @@
 import * as z from "zod";
+import {childSchema} from "@/form/child/childSchema";
+import {ticketTypeSchema} from "@/form/ticket-type/ticketTypeSchema";
 
 export const ticketSchema = z.object({
-    childId: z.string(),
-    ticketTypeId: z.string(),
+    child: z.object({
+        id: z.string(),
+        familyName: z.string(),
+        givenName: z.string(),
+        birthDate: z.date()
+    }),
+    ticketType: z.object({
+        id: z.string(),
+        name: z.string(),
+        description: z.string(),
+        price: z.number(),
+        numberOfParticipation: z.number(),
+        standardValidityPeriod: z.number()
+    }),
     issueDate: z.date(),
     expirationDate: z.date(),
     price: z

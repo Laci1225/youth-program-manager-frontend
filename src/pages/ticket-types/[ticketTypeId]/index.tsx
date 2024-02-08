@@ -118,9 +118,9 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                 </div>
             </div>
             <Toaster/>
-            <TicketTypeForm existingTicket={ticket ?? undefined}
+            <TicketTypeForm existingTicketType={ticket ?? undefined}
                             isOpen={isEditDialogOpen}
-                            onTicketModified={onTicketUpdated}
+                            onTicketTypeModified={onTicketUpdated}
                             onOpenChange={setIsEditDialogOpen}
             />
             <DeleteData entityId={ticket.id}

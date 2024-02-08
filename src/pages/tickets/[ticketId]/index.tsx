@@ -104,7 +104,7 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
             }).then(() =>
             toast({
                 variant: "default",
-                title: `${ticket.child.givenName} ${ticket.child.familyName}'s ticket data reported successfully`,
+                title: `${ticket.child.givenName} ${ticket.child.familyName}'s participation reported successfully`,
                 description: `${ticket.ticketType.name} reported`,
                 duration: 2000
             })
@@ -112,6 +112,20 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
 
     }
 
+    function handleValidFor() {
+        const dayDifference = differenceInDays(new Date(ticket.expirationDate), new Date())
+        return (
+            <div className={`${fieldAppearance}  
+                    ${dayDifference <= 5 && "bg-red-700 text-white"} mt-2`}>
+                {dayDifference > 0 ? (
+                        <>{
+                            dayDifference
+                        } day(s)
+                        </>) :
+                    <>Expired</>
+                }
+            </div>)
+    }
 
     return (
         <div className="container w-3/6 py-10 h-[100vh] overflow-auto">
@@ -173,22 +187,14 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                     </div>
                 </div>
                 <div className="mb-6 flex-1">
-                    <Label>Valid for :</Label> {/*todo warning logic*/}
-                    <div className={`${fieldAppearance}  
-                    ${differenceInDays(new Date(ticket.expirationDate), new Date()) <= 5 && "bg-red-700 text-white"} mt-2`}>
-                        {differenceInDays(new Date(ticket.expirationDate), new Date()) > 0 ? (
-                                <>{
-                                    differenceInDays(new Date(ticket.expirationDate), new Date())
-                                } day(s)
-                                </>) :
-                            <>Expired</>
-                        }
-                    </div>
+                    <Label>Valid for :</Label>
+                    {handleValidFor()}
                 </div>
                 <div className="flex">
                     <div className="mb-6 flex-1">
                         <Label>Issue date :</Label>
-                        <div className={`${fieldAppearance} mt-2`}>
+                        <div
+                            className={`${fieldAppearance} ${calculateDaysDifference(new Date(), ticket.issueDate) <= 0 && "bg-orange-300"} mt-2`}>
                             {format(new Date(ticket.issueDate), "P")}
                         </div>
                     </div>
@@ -214,12 +220,19 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                                     className={`h-7 text-[10px] font-bold justify-center my-1 p-2 mx-5 bg-gray-400 cursor-not-allowed`}>
                                     Report participation
                                 </Button>
-                            </HoverText> :
-                            <Button
-                                onClick={handleReportParticipation}
-                                className="h-7 text-[10px] font-bold">
-                                Report participation
-                            </Button>
+                            </HoverText>
+                            : calculateDaysDifference(new Date(), ticket.issueDate) <= 0 ?
+                                <HoverText content="Ticket in not yet valid">
+                                    <Button
+                                        className={`h-7 text-[10px] font-bold justify-center my-1 p-2 mx-5 bg-gray-400 cursor-not-allowed`}>
+                                        Report participation
+                                    </Button>
+                                </HoverText> :
+                                <Button
+                                    onClick={handleReportParticipation}
+                                    className="h-7 text-[10px] font-bold">
+                                    Report participation
+                                </Button>
                     }
                 </div>
                 <div className="mb-6 flex-1">

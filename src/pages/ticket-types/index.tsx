@@ -121,9 +121,9 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                 </TableBody>
             </Table>
             <Toaster/>
-            <TicketTypeForm existingTicket={editedTicketType ?? undefined}
+            <TicketTypeForm existingTicketType={editedTicketType ?? undefined}
                             isOpen={isEditDialogOpen}
-                            onTicketModified={onTicketTypeSaved}
+                            onTicketTypeModified={onTicketTypeSaved}
                             onOpenChange={setIsEditDialogOpen}
             />
             <DeleteData entityId={deletedTicket?.id}

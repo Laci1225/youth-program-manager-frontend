@@ -13,7 +13,7 @@ import {TicketData} from "@/model/ticket-data";
 import {differenceInDays, format} from "date-fns";
 import TicketForm from "@/form/ticket/TicketForm";
 import HoverText from "@/components/hoverText";
-import deletedTicket from "@/api/graphql/ticket/deletedTicket";
+import deleteTicket from "@/api/graphql/ticket/deleteTicket";
 import {DropdownMenuItem} from "@/components/ui/dropdown-menu";
 import ConfirmDialog from "@/components/confirmDialog";
 import {toast} from "@/components/ui/use-toast";
@@ -28,8 +28,8 @@ export const getServerSideProps = (async () => {
     };
 }) satisfies GetServerSideProps<{ ticketsData: TicketData[] }>;
 
-export function calculateDaysDifference(endDate: Date): number {
-    return differenceInDays(new Date(endDate), new Date());
+export function calculateDaysDifference(endDate: Date, startDay: Date = new Date()): number {
+    return differenceInDays(new Date(endDate), new Date(startDay));
 }
 
 export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
@@ -124,7 +124,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                 </TableHeader>
                 <TableBody>
                     {
-                        tickets && tickets.length !== 0 ? (
+                        !!tickets.length ? (
                             tickets.map((ticket) => (
                                 <TableRow key={ticket.id} className="hover:bg-gray-300 hover:cursor-pointer"
                                           onClick={() => router.push(`tickets/${ticket.id}`)}>
@@ -145,8 +145,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                                                                 calculateDaysDifference(ticket.expirationDate)
                                                             } day(s)
                                                         </div>
-                                                        :
-                                                        calculateDaysDifference(ticket.expirationDate) > 0 ?
+                                                        : calculateDaysDifference(ticket.expirationDate) > 0 ?
                                                             <div className="inline-flex text-yellow-600">
                                                                 {
                                                                     calculateDaysDifference(ticket.expirationDate)
@@ -204,16 +203,29 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                                                                 Report participation
                                                             </DropdownMenuItem>
                                                         </HoverText> :
-                                                        <DropdownMenuItem
-                                                            className="justify-center p-2 mx-5 my-1 bg-green-400"
-                                                            onClick={
-                                                                (event) => {
-                                                                    event.preventDefault()
-                                                                    event.stopPropagation()
-                                                                    handleReportClicked(ticket)
-                                                                }}>
-                                                            <Check/> Report participation
-                                                        </DropdownMenuItem>
+                                                        calculateDaysDifference(new Date(), ticket.issueDate) <= 0 ?
+                                                            <HoverText content="Ticket in not yet valid">
+                                                                <DropdownMenuItem
+                                                                    onClick={
+                                                                        (event) => {
+                                                                            event.preventDefault()
+                                                                            event.stopPropagation()
+                                                                        }}
+                                                                    className="justify-center p-2 mx-5 my-1
+                                                                    bg-gray-400 cursor-not-allowed">
+                                                                    Report participation
+                                                                </DropdownMenuItem>
+                                                            </HoverText> :
+                                                            <DropdownMenuItem
+                                                                className="justify-center p-2 mx-5 my-1 bg-green-400"
+                                                                onClick={
+                                                                    (event) => {
+                                                                        event.preventDefault()
+                                                                        event.stopPropagation()
+                                                                        handleReportClicked(ticket)
+                                                                    }}>
+                                                                <Check/> Report participation
+                                                            </DropdownMenuItem>
 
                                             }
                                         />
@@ -237,7 +249,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                         isOpen={isDeleteDialogOpen}
                         onOpenChange={setIsDeleteDialogOpen}
                         onSuccess={onTicketDeleted}
-                        deleteFunction={deletedTicket}
+                        deleteFunction={deleteTicket}
                         entityType="Ticket"
             />
             <ConfirmDialog

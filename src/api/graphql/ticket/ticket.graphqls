@@ -33,7 +33,7 @@ extend type Query {
 extend type Mutation{
     addTicket(ticket: TicketInput!): Ticket!
     updateTicket(id: String!, ticket: TicketInput!): Ticket!
-    deletedTicket(id: String!): Ticket!
+    deleteTicket(id: String!): Ticket!
     reportParticipation(id:String!,historyData: HistoryDataInput!): Ticket!
     removeParticipation(id:String!,historyData: HistoryDataInput!): Ticket!
 }
