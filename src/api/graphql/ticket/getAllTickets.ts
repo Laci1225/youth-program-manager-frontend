@@ -13,6 +13,7 @@ export default async function getAllTickets(client: ApolloClient<NormalizedCache
                         id
                         givenName
                         familyName
+                        birthDate
                     }
                     ticketType{
                         id
@@ -20,6 +21,7 @@ export default async function getAllTickets(client: ApolloClient<NormalizedCache
                         price
                         numberOfParticipation
                         standardValidityPeriod
+                        description
                     }
                     issueDate
                     expirationDate

@@ -18,6 +18,8 @@ import {DropdownMenuItem} from "@/components/ui/dropdown-menu";
 import ConfirmDialog from "@/components/confirmDialog";
 import {toast} from "@/components/ui/use-toast";
 import reportParticipation from "@/api/graphql/ticket/reportParticipation";
+import {calculateDaysDifference} from "@/utils/calculateDaysDifference";
+import {fieldAppearance} from "@/components/fieldAppearance";
 
 export const getServerSideProps = (async () => {
     const tickets = await getAllTickets(serverSideClient)
@@ -28,13 +30,50 @@ export const getServerSideProps = (async () => {
     };
 }) satisfies GetServerSideProps<{ ticketsData: TicketData[] }>;
 
-export function calculateDaysDifference(endDate: Date, startDay: Date = new Date()): number {
-    return differenceInDays(new Date(endDate), new Date(startDay));
-}
-
 export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    const router = useRouter()
-    const [tickets, setTickets] = useState<TicketData[]>(ticketsData)
+    const router = useRouter();
+    const [tickets, setTickets] = useState<TicketData[]>(ticketsData);
+    const [editedTicket, setEditedTicket] = useState<TicketData | null>(null);
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [deletedTicketState, setDeletedTicketState] = useState<TicketData>();
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [isReportParticipationClicked, setIsReportParticipationClicked] = useState(false);
+    const [reportedTicket, setReportedTicket] = useState<TicketData>();
+
+    const handleEditClick = (ticket: TicketData | null) => {
+        setIsEditDialogOpen(true);
+        if (ticket) {
+            setEditedTicket({...ticket, child: {...ticket.child, birthDate: new Date(ticket.child.birthDate)}});
+        } else {
+            setEditedTicket(null);
+        }
+    }
+
+    const handleDeleteClick = (ticket: TicketData) => {
+        setIsDeleteDialogOpen(true);
+        setDeletedTicketState(ticket);
+    };
+
+    const handleReportClicked = (ticket: TicketData) => {
+        setIsReportParticipationClicked(true);
+        setReportedTicket(ticket);
+    };
+
+    const handleReport = () => {
+        if (reportedTicket) {
+            reportParticipation(reportedTicket.id, {date: new Date(), reporter: ""}).then((value) => {
+                setTickets((prevTickets) =>
+                    prevTickets.map((tic) => (value.id === tic.id ? value : tic))
+                );
+                toast({
+                    variant: "default",
+                    title: `${reportedTicket.child.givenName} ${reportedTicket.child.familyName}'s ticket data reported successfully`,
+                    description: `${reportedTicket.ticketType.name} reported`,
+                    duration: 2000,
+                });
+            });
+        }
+    };
     const onTicketSaved = (savedTicket: TicketData) => {
         if (editedTicket) {
             const modifiedTickets = tickets.map((ticket) =>
@@ -50,64 +89,80 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
         const updatedTickets = tickets.filter(p => p.id !== ticket.id);
         setTickets(updatedTickets);
     }
-    const [editedTicket, setEditedTicket] = useState<TicketData | null>(null)
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-    const [deletedTicketState, setDeletedTicketState] = useState<TicketData>()
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-    function handleEditClick(ticket: TicketData | null) {
-        setIsEditDialogOpen(true)
-        setEditedTicket(ticket)
-    }
+    const renderReportParticipationButton = (ticket: TicketData) => {
+        const hoverButton = <DropdownMenuItem
+            onClick={
+                (event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }}
+            className="justify-center p-2 mx-5 my-1 bg-gray-400 cursor-not-allowed">
+            Report participation
+        </DropdownMenuItem>
 
-    function handleDeleteClick(ticket: TicketData) {
-        setIsDeleteDialogOpen(true)
-        setDeletedTicketState(ticket)
-    }
-
-    const [isReportParticipationClicked, setIsReportParticipationClicked] = useState<boolean>(false)
-
-    const [reportedTicket, setReportedTicket] = useState<TicketData>()
-
-    function handleReport() {
-        if (reportedTicket) {
-            reportParticipation(reportedTicket.id,
-                {date: new Date(), reporter: ""})
-                .then(value =>
-                    setTickets(prevTickets => {
-                        return prevTickets.map(tic => {
-                            if (value.id === tic.id) {
-                                return value
-                            } else {
-                                return tic;
-                            }
-                        })
-                    }))
-                .then(() =>
-                    toast({
-                        variant: "default",
-                        title: `${reportedTicket.child.givenName} ${reportedTicket.child.familyName}'s ticket data reported successfully`,
-                        description: `${reportedTicket.ticketType.name} reported`,
-                        duration: 2000
-                    })
-                )
+        if (ticket.numberOfParticipation - ticket.historyLog.length <= 0) {
+            return (
+                <HoverText content="No more tickets avaiable">
+                    {hoverButton}
+                </HoverText>
+            )
+        } else if (calculateDaysDifference(ticket.expirationDate) <= 0) {
+            return (
+                <HoverText content="Ticket expired">
+                    {hoverButton}
+                </HoverText>
+            )
+        } else if (calculateDaysDifference(new Date(), ticket.issueDate) <= 0) {
+            return (
+                <HoverText content="Ticket in not yet valid">
+                    {hoverButton}
+                </HoverText>
+            )
+        } else {
+            return (
+                <DropdownMenuItem
+                    className="justify-center p-2 mx-5 my-1 bg-green-400"
+                    onClick={
+                        (event) => {
+                            event.preventDefault()
+                            event.stopPropagation()
+                            handleReportClicked(ticket)
+                        }}>
+                    <Check/> Report participation
+                </DropdownMenuItem>
+            );
         }
-    }
+    };
 
-
-    function handleReportClicked(ticket: TicketData) {
-        setIsReportParticipationClicked(true)
-        setReportedTicket(ticket)
+    function handleValidFor(ticket: TicketData) {
+        const dayDifference = calculateDaysDifference(ticket.expirationDate)
+        return <HoverText
+            content={format(new Date(ticket.expirationDate), "P")}>
+            {
+                <div className="mt-2">
+                    {
+                        dayDifference > 5 ?
+                            <div>{dayDifference} day(s)</div> :
+                            dayDifference > 0 ?
+                                <div className="inline-flex text-yellow-600">
+                                    {dayDifference} day(s)
+                                    <AlertTriangle className="pl-1"/>
+                                </div> :
+                                <div className="bg-red-700 text-white rounded mx-4 py-1">
+                                    Expired
+                                </div>
+                    }
+                </div>
+            }
+        </HoverText>
     }
 
     return (
         <div className="container w-4/6 py-28">
             <div className="flex justify-between px-6 pb-6">
                 <span>Tickets</span>
-                <Button onClick={(event) => {
-                    event.preventDefault()
-                    handleEditClick(null)
-                }}>
+                <Button onClick={(event) => handleEditClick(null)}>
                     <PlusSquare/>
                     <span>Create</span>
                 </Button>
@@ -135,29 +190,8 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                                         {ticket.ticketType.name}
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        <HoverText
-                                            content={format(new Date(ticket.expirationDate), "P")}>
-                                            {
-                                                <div className="mt-2">
-                                                    {calculateDaysDifference(ticket.expirationDate) > 5 ?
-                                                        <div>
-                                                            {
-                                                                calculateDaysDifference(ticket.expirationDate)
-                                                            } day(s)
-                                                        </div>
-                                                        : calculateDaysDifference(ticket.expirationDate) > 0 ?
-                                                            <div className="inline-flex text-yellow-600">
-                                                                {
-                                                                    calculateDaysDifference(ticket.expirationDate)
-                                                                } day(s)
-                                                                <AlertTriangle className="pl-1"/>
-                                                            </div> :
-                                                            <div
-                                                                className="bg-red-700 text-white rounded mx-4 py-1">Expired
-                                                            </div>
-                                                    }
-                                                </div>
-                                            }</HoverText>
+                                        {handleValidFor(ticket)}
+
                                     </TableCell>
                                     <TableCell className="text-center">
                                         <span
@@ -171,62 +205,12 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                                         > {ticket.numberOfParticipation - (ticket.historyLog.length)} pc(s)
                                         </span>
                                     </TableCell>
-
                                     <TableCell className="p-1 text-center">
                                         <SettingsDropdown
                                             handleEditClick={() => handleEditClick(ticket)}
                                             handleDeleteClick={() => handleDeleteClick(ticket)}
                                             additionalItem={
-                                                (ticket.numberOfParticipation - ticket.historyLog.length <= 0) ?
-                                                    <HoverText content="No more tickets avaiable">
-                                                        <DropdownMenuItem
-                                                            onClick={
-                                                                (event) => {
-                                                                    event.preventDefault()
-                                                                    event.stopPropagation()
-                                                                }}
-                                                            className="justify-center hover:cursor-pointer p-2 mx-5 my-1
-                                                            bg-gray-400 cursor-not-allowed">
-                                                            Report participation
-                                                        </DropdownMenuItem>
-                                                    </HoverText>
-                                                    : calculateDaysDifference(ticket.expirationDate) <= 0 ?
-                                                        <HoverText content="Ticket expired">
-                                                            <DropdownMenuItem
-                                                                onClick={
-                                                                    (event) => {
-                                                                        event.preventDefault()
-                                                                        event.stopPropagation()
-                                                                    }}
-                                                                className="justify-center p-2 mx-5 my-1
-                                                                bg-gray-400 cursor-not-allowed">
-                                                                Report participation
-                                                            </DropdownMenuItem>
-                                                        </HoverText> :
-                                                        calculateDaysDifference(new Date(), ticket.issueDate) <= 0 ?
-                                                            <HoverText content="Ticket in not yet valid">
-                                                                <DropdownMenuItem
-                                                                    onClick={
-                                                                        (event) => {
-                                                                            event.preventDefault()
-                                                                            event.stopPropagation()
-                                                                        }}
-                                                                    className="justify-center p-2 mx-5 my-1
-                                                                    bg-gray-400 cursor-not-allowed">
-                                                                    Report participation
-                                                                </DropdownMenuItem>
-                                                            </HoverText> :
-                                                            <DropdownMenuItem
-                                                                className="justify-center p-2 mx-5 my-1 bg-green-400"
-                                                                onClick={
-                                                                    (event) => {
-                                                                        event.preventDefault()
-                                                                        event.stopPropagation()
-                                                                        handleReportClicked(ticket)
-                                                                    }}>
-                                                                <Check/> Report participation
-                                                            </DropdownMenuItem>
-
+                                                renderReportParticipationButton(ticket)
                                             }
                                         />
                                     </TableCell>

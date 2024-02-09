@@ -24,6 +24,7 @@ import {AutoComplete} from "@/form/AutoComplete";
 import {Info} from "lucide-react";
 import HoverText from "@/components/hoverText";
 import {Switch} from "@/components/ui/switch"
+import InputCalendarSwitch from "@/form/ticket/InputCalendarSwitch";
 
 
 interface TicketFormProps {
@@ -50,10 +51,10 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
 
     function onSubmit(values: z.infer<typeof ticketSchema>) {
         setIsSubmitting(true)
-        const {ticketType, child} = values
+        const {ticketType, child, ...remainingValues} = values
         if (existingTicket) {
             updateTicket(existingTicket.id, {
-                ...values, ticketTypeId: ticketType.id,
+                ...remainingValues, ticketTypeId: ticketType.id,
                 childId: child.id
             })
                 .then((result) => {
@@ -335,54 +336,14 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                 control={form.control}
                                                 name="expirationDate"
                                                 render={({field}) => (
-                                                    <FormItem className="w-full">
-                                                        <div className="flex">
-                                                            <FormLabel>Valid until*</FormLabel>
-                                                            <HoverText
-                                                                content={`Edit ${disable ? " days " : " date "} instead `}>
-
-                                                                <div className="flex ml-4 text-xs cursor-pointer"
-                                                                     onClick={
-                                                                         () => setDisable(!disable)}>
-                                                                    <div className="flex items-center space-x-2">
-                                                                        <Switch/>
-                                                                    </div>
-                                                                    <Info className="h-4"/>
-                                                                </div>
-                                                            </HoverText>
-                                                        </div>
-                                                        <FormControl>
-                                                            <div className="flex">
-                                                                <div className="w-1/3 px-2">
-                                                                    <CalendarInput {...field}
-                                                                                   shownYear={new Date().getFullYear()}
-                                                                                   disabled={!disable}
-                                                                                   canBeFuture={true}
-                                                                                   onSelectCallback={calcDateByGivenDate}
-                                                                                   minDate={form.getValues("issueDate")}
-                                                                    />
-                                                                </div>
-                                                                <div className="relative w-1/3 px-2">
-                                                                    <Input
-                                                                        disabled={disable}
-                                                                        onClick={() => setDisable(false)}
-                                                                        onInput={(event) => {
-                                                                            if (!!Number(event.currentTarget.value))
-                                                                                calcDateByGivenDay(Number(event.currentTarget.value));
-                                                                            else setDays(undefined)
-                                                                        }}
-                                                                        value={days}
-                                                                        className="pr-10"
-                                                                    />
-                                                                    <span
-                                                                        className="absolute mr-2 inset-y-0 right-0 flex items-center pr-2">
-                                                                        day(s)
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        </FormControl>
-                                                        <FormMessage/>
-                                                    </FormItem>
+                                                    <InputCalendarSwitch
+                                                        {...field}
+                                                        form={form}
+                                                        days={days}
+                                                        setDays={setDays}
+                                                        calcDateByGivenDate={calcDateByGivenDate}
+                                                        calcDateByGivenDay={calcDateByGivenDay}
+                                                    />
                                                 )}
                                             />
                                         </div>
