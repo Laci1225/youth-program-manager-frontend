@@ -25,10 +25,18 @@ interface ParentFormProps {
     isOpen: boolean
     onOpenChange: (open: boolean) => void;
     onChildFormClicked?: boolean
+    idToken?: string
 
 }
 
-function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onChildFormClicked}: ParentFormProps) {
+function ParentForm({
+                        onParentModified,
+                        existingParent,
+                        isOpen,
+                        onOpenChange,
+                        onChildFormClicked,
+                        idToken
+                    }: ParentFormProps) {
 
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof parentSchema>>({
@@ -78,7 +86,7 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
                 child,
                 ...parentFields
             } = values;
-            addParent({...parentFields, childId: child?.id})
+            addParent({...parentFields, childId: child?.id}, idToken)
                 .then((result) => {
                     onParentModified(result)
                     toast({

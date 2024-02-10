@@ -20,17 +20,21 @@ import DeleteData from "@/components/deleteData";
 import {ParentData, ParentDataWithChildrenIds} from "@/model/parent-data";
 import HoverText from "@/components/hoverText";
 import SettingsDropdown from "@/components/SettingsDropdown";
+import {getSession} from "@auth0/nextjs-auth0";
 
-export const getServerSideProps = (async () => {
-    const parents = await getAllParents(serverSideClient)
+export const getServerSideProps = (async (context) => {
+    const session = await getSession(context.req, context.res);
+    console.log(session?.accessToken)
+    const parents = await getAllParents(session?.idToken, serverSideClient)
     return {
         props: {
-            parentsData: parents
+            parentsData: parents,
+            idToken: session?.idToken
         }
     };
-}) satisfies GetServerSideProps<{ parentsData: ParentDataWithChildrenIds[] }>;
+}) satisfies GetServerSideProps<{ parentsData: ParentDataWithChildrenIds[], idToken: string | undefined }>;
 
-export default function Parents({parentsData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Parents({parentsData, idToken}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
     const [parents, setParents] = useState<ParentDataWithChildrenIds[]>(parentsData)
     const onParentSaved = (savedParent: ParentData) => {
@@ -135,6 +139,7 @@ export default function Parents({parentsData}: InferGetServerSidePropsType<typeo
                         isOpen={isEditDialogOpen}
                         onParentModified={onParentSaved}
                         onOpenChange={setIsEditDialogOpen}
+                        idToken={idToken}
             />
             <DeleteData entityId={deletedParent?.id}
                         entityLabel={`${deletedParent?.givenName} ${deletedParent?.familyName}`}
