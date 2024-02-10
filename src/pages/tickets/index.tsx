@@ -7,19 +7,17 @@ import {AlertTriangle, Check, PlusSquare} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
 import DeleteData from "@/components/deleteData";
-import SettingsDropdown from "@/components/SettingsDropdown";
+import SettingsDropdown, {DropdownItem} from "@/components/SettingsDropdown";
 import getAllTickets from "@/api/graphql/ticket/getAllTickets";
 import {TicketData} from "@/model/ticket-data";
-import {differenceInDays, format} from "date-fns";
+import {format} from "date-fns";
 import TicketForm from "@/form/ticket/TicketForm";
 import HoverText from "@/components/hoverText";
 import deleteTicket from "@/api/graphql/ticket/deleteTicket";
-import {DropdownMenuItem} from "@/components/ui/dropdown-menu";
 import ConfirmDialog from "@/components/confirmDialog";
 import {toast} from "@/components/ui/use-toast";
 import reportParticipation from "@/api/graphql/ticket/reportParticipation";
 import {calculateDaysDifference} from "@/utils/calculateDaysDifference";
-import {fieldAppearance} from "@/components/fieldAppearance";
 
 export const getServerSideProps = (async () => {
     const tickets = await getAllTickets(serverSideClient)
@@ -91,48 +89,46 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
     }
 
     const renderReportParticipationButton = (ticket: TicketData) => {
-        const hoverButton = <DropdownMenuItem
-            onClick={
-                (event) => {
-                    event.preventDefault()
-                    event.stopPropagation()
-                }}
-            className="justify-center p-2 mx-5 my-1 bg-gray-400 cursor-not-allowed">
-            Report participation
-        </DropdownMenuItem>
+        const items: DropdownItem[] = [];
 
         if (ticket.numberOfParticipation - ticket.historyLog.length <= 0) {
-            return (
-                <HoverText content="No more tickets avaiable">
-                    {hoverButton}
-                </HoverText>
-            )
+            items.push({
+                icon: <Check/>,
+                label: "Report participation",
+                hoverTextContent: "No more tickets available",
+                className: "cursor-not-allowed",
+                onClick: () => {
+                }
+            });
         } else if (calculateDaysDifference(ticket.expirationDate) <= 0) {
-            return (
-                <HoverText content="Ticket expired">
-                    {hoverButton}
-                </HoverText>
-            )
-        } else if (calculateDaysDifference(new Date(), ticket.issueDate) <= 0) {
-            return (
-                <HoverText content="Ticket in not yet valid">
-                    {hoverButton}
-                </HoverText>
-            )
+            items.push({
+                icon: <Check/>,
+                label: "Report participation",
+                hoverTextContent: "Ticket expired",
+                className: "cursor-not-allowed",
+                onClick: () => {
+                }
+            });
+        } else if (calculateDaysDifference(new Date(), ticket.issueDate) < 0) {
+            items.push({
+                icon: <Check/>,
+                label: "Report participation",
+                hoverTextContent: "Ticket in not yet valid",
+                className: "cursor-not-allowed",
+                onClick: () => {
+                }
+            });
         } else {
-            return (
-                <DropdownMenuItem
-                    className="justify-center p-2 mx-5 my-1 bg-green-400"
-                    onClick={
-                        (event) => {
-                            event.preventDefault()
-                            event.stopPropagation()
-                            handleReportClicked(ticket)
-                        }}>
-                    <Check/> Report participation
-                </DropdownMenuItem>
-            );
+            items.push({
+                icon: <Check/>,
+                label: "Report participation",
+                className: "hover:cursor-pointer bg-green-600 text-white",
+                onClick: () => {
+                    handleReportClicked(ticket)
+                }
+            });
         }
+        return items;
     };
 
     function handleValidFor(ticket: TicketData) {
@@ -162,7 +158,7 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
         <div className="container w-4/6 py-28">
             <div className="flex justify-between px-6 pb-6">
                 <span>Tickets</span>
-                <Button onClick={(event) => handleEditClick(null)}>
+                <Button onClick={() => handleEditClick(null)}>
                     <PlusSquare/>
                     <span>Create</span>
                 </Button>
@@ -209,9 +205,8 @@ export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeo
                                         <SettingsDropdown
                                             handleEditClick={() => handleEditClick(ticket)}
                                             handleDeleteClick={() => handleDeleteClick(ticket)}
-                                            additionalItem={
-                                                renderReportParticipationButton(ticket)
-                                            }
+                                            additionalItems={
+                                                renderReportParticipationButton(ticket)}
                                         />
                                     </TableCell>
                                 </TableRow>
