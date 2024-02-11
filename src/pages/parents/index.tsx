@@ -25,16 +25,16 @@ import {getSession} from "@auth0/nextjs-auth0";
 export const getServerSideProps = (async (context) => {
     const session = await getSession(context.req, context.res);
     console.log(session?.accessToken)
-    const parents = await getAllParents(session?.idToken, serverSideClient)
+    const parents = await getAllParents(session?.accessToken, serverSideClient)
     return {
         props: {
             parentsData: parents,
-            idToken: session?.idToken
+            accessToken: session?.accessToken
         }
     };
-}) satisfies GetServerSideProps<{ parentsData: ParentDataWithChildrenIds[], idToken: string | undefined }>;
+}) satisfies GetServerSideProps<{ parentsData: ParentDataWithChildrenIds[], accessToken: string | undefined }>;
 
-export default function Parents({parentsData, idToken}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Parents({parentsData, accessToken}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
     const [parents, setParents] = useState<ParentDataWithChildrenIds[]>(parentsData)
     const onParentSaved = (savedParent: ParentData) => {
@@ -139,7 +139,7 @@ export default function Parents({parentsData, idToken}: InferGetServerSidePropsT
                         isOpen={isEditDialogOpen}
                         onParentModified={onParentSaved}
                         onOpenChange={setIsEditDialogOpen}
-                        idToken={idToken}
+                        accessToken={accessToken}
             />
             <DeleteData entityId={deletedParent?.id}
                         entityLabel={`${deletedParent?.givenName} ${deletedParent?.familyName}`}
@@ -148,6 +148,7 @@ export default function Parents({parentsData, idToken}: InferGetServerSidePropsT
                         onSuccess={onParentDeleted}
                         deleteFunction={deleteParent}
                         entityType="Parent"
+                        accessToken={accessToken}
             />
         </div>
     )

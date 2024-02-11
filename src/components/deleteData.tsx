@@ -8,7 +8,8 @@ interface DeleteDataProps<T> {
     onSuccess: (deletedData: T) => void,
     isOpen: boolean,
     onOpenChange: (open: boolean) => void,
-    deleteFunction: (id: string) => Promise<T>,
+    accessToken: string | undefined,
+    deleteFunction: (id: string, auth0: string | undefined) => Promise<T>,
     entityType: string
 }
 
@@ -19,12 +20,13 @@ export default function DeleteData<T>({
                                           onOpenChange,
                                           onSuccess,
                                           deleteFunction,
-                                          entityType
+                                          entityType,
+                                          accessToken
                                       }: DeleteDataProps<T>) {
     const handleDelete = async () => {
         if (entityId) {
             try {
-                const deletedData = await deleteFunction(entityId);
+                const deletedData = await deleteFunction(entityId, accessToken);
                 toast({
                     variant: "default",
                     title: `${entityType} data deleted successfully`,

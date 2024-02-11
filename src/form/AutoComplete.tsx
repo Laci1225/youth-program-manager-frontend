@@ -22,7 +22,8 @@ type AutoCompleteProps<T> = {
     className?: string
     alreadyAddedData?: ChildNameData[] | RelativeParent[]
     isAdded: boolean
-    getPotential: (name: string, limit: number) => Promise<T[]>
+    accessToken: string | undefined
+    getPotential: (name: string, limit: number, auth: string | undefined) => Promise<T[]>
 }
 
 export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeData>({
@@ -34,6 +35,7 @@ export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeDa
                                                                                         value,
                                                                                         onValueChange,
                                                                                         disabled,
+                                                                                        accessToken,
                                                                                         isLoading = false,
                                                                                         getPotential,
                                                                                     }: AutoCompleteProps<T>) => {
@@ -60,9 +62,8 @@ export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeDa
             setOptions(undefined)
         }
     }, [isAdded, value]);
-
     const fetchPotential = useCallback((name: string) => {
-        getPotential(name, 5)
+        getPotential(name, 5, accessToken)
             .then(items => {
                 const filteredItems = items.filter((item) =>
                     !alreadyAddedData?.some(

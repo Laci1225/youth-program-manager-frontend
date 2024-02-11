@@ -22,16 +22,19 @@ import ChildInEditMode from "@/table/parent/ChildInEditMode";
 import {cn} from "@/lib/utils";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {ChildData} from "@/model/child-data";
+import {getSession} from "@auth0/nextjs-auth0";
 
 
 export const getServerSideProps = (async (context) => {
     let parentData;
     if (context.params?.parentId) {
         try {
-            parentData = await getParentById(context.params.parentId, serverSideClient);
+            const session = await getSession(context.req, context.res);
+            parentData = await getParentById(context.params.parentId, session?.accessToken, serverSideClient);
             return {
                 props: {
-                    selectedParent: parentData
+                    selectedParent: parentData,
+                    accessToken: session?.accessToken
                 }
             }
         } catch (error) {
@@ -43,8 +46,10 @@ export const getServerSideProps = (async (context) => {
     return {
         notFound: true
     };
-}) satisfies GetServerSideProps<{ selectedParent: ParentDataWithChildren }, { parentId: string }>;
-export default function Parent({selectedParent}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+}) satisfies GetServerSideProps<{ selectedParent: ParentDataWithChildren, accessToken: string | undefined }, {
+    parentId: string
+}>;
+export default function Parent({selectedParent, accessToken}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const [parentWithChildren, setParentWithChildren] = useState<ParentDataWithChildren>(selectedParent)
     const parent: ParentData = fromParentWithChildrenToParent(parentWithChildren)
     const [isParentEditDialogOpen, setIsParentEditDialogOpen] = useState(false)
@@ -187,6 +192,7 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                         isOpen={isParentEditDialogOpen}
                         onParentModified={onParentUpdated}
                         onOpenChange={setIsParentEditDialogOpen}
+                        accessToken={accessToken}
             />
             <DeleteData entityId={parent.id}
                         entityLabel={`${parent.givenName} ${parent.familyName}`}
@@ -195,6 +201,7 @@ export default function Parent({selectedParent}: InferGetServerSidePropsType<typ
                         onSuccess={onParentDeleted}
                         deleteFunction={deleteParent}
                         entityType="Parent"
+                        accessToken={accessToken}
             />
         </div>
     )

@@ -25,7 +25,7 @@ interface ParentFormProps {
     isOpen: boolean
     onOpenChange: (open: boolean) => void;
     onChildFormClicked?: boolean
-    idToken?: string
+    accessToken: string | undefined
 
 }
 
@@ -35,7 +35,7 @@ function ParentForm({
                         isOpen,
                         onOpenChange,
                         onChildFormClicked,
-                        idToken
+                        accessToken
                     }: ParentFormProps) {
 
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -63,7 +63,7 @@ function ParentForm({
                 id: existingParent.id,
                 childIds: existingParent.childIds
             };
-            updateParent(updateValues)
+            updateParent(updateValues, accessToken)
                 .then((result) => {
                     onParentModified(result)
                     toast({
@@ -86,7 +86,7 @@ function ParentForm({
                 child,
                 ...parentFields
             } = values;
-            addParent({...parentFields, childId: child?.id}, idToken)
+            addParent({...parentFields, childId: child?.id}, accessToken)
                 .then((result) => {
                     onParentModified(result)
                     toast({
@@ -173,6 +173,7 @@ function ParentForm({
                                                                 className="w-2/3"
                                                                 isLoading={false}
                                                                 disabled={false}
+                                                                accessToken={accessToken}
                                                                 value={field.value}
                                                                 getPotential={getPotentialChildren}
                                                                 isAdded={false}
