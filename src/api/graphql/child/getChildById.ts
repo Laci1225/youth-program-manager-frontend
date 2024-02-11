@@ -2,7 +2,9 @@ import {clientSideClient} from "@/api/graphql/client";
 import {ApolloClient, gql, NormalizedCacheObject} from "@apollo/client";
 import {ChildDataWithParents} from "@/model/child-data";
 
-export default async function getChildById(childId: string, client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<ChildDataWithParents> {
+export default async function getChildById(childId: string,
+                                           authToken: string | undefined,
+                                           client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<ChildDataWithParents> {
     return client
     .query({
         query: gql`
@@ -42,6 +44,11 @@ export default async function getChildById(childId: string, client: ApolloClient
         `, fetchPolicy: "no-cache",
         variables: {
             id: childId,
+        },
+        context: {
+            headers: {
+                Authorization: `Bearer ${authToken}`,
+            },
         },
     }).then(value => value.data.getChildById);
 }

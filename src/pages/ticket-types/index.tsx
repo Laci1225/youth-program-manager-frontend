@@ -19,9 +19,11 @@ import {TicketTypeData} from "@/model/ticket-type-data";
 import TicketTypeForm from "@/form/ticket-type/TicketTypeForm";
 import deletedTicketType from "@/api/graphql/ticketType/deletedTicketType";
 import SettingsDropdown from "@/components/SettingsDropdown";
+import {getSession} from "@auth0/nextjs-auth0";
 
-export const getServerSideProps = (async () => {
-    const tickets = await getAllTicketTypes(serverSideClient)
+export const getServerSideProps = (async (context) => {
+    const session = await getSession(context.req, context.res);
+    const tickets = await getAllTicketTypes(session?.accessToken, serverSideClient)
     return {
         props: {
             ticketsData: tickets

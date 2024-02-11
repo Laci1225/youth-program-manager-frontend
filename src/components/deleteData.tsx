@@ -1,6 +1,7 @@
 import {toast} from "@/components/ui/use-toast";
 import React from "react";
 import ConfirmDialog from "@/components/confirmDialog";
+import {useAuth} from "@/utils/auth";
 
 interface DeleteDataProps<T> {
     entityId?: string,
@@ -8,7 +9,6 @@ interface DeleteDataProps<T> {
     onSuccess: (deletedData: T) => void,
     isOpen: boolean,
     onOpenChange: (open: boolean) => void,
-    accessToken: string | undefined,
     deleteFunction: (id: string, auth0: string | undefined) => Promise<T>,
     entityType: string
 }
@@ -21,8 +21,8 @@ export default function DeleteData<T>({
                                           onSuccess,
                                           deleteFunction,
                                           entityType,
-                                          accessToken
                                       }: DeleteDataProps<T>) {
+    const {accessToken} = useAuth();
     const handleDelete = async () => {
         if (entityId) {
             try {

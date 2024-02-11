@@ -18,6 +18,7 @@ import getPotentialChildren from "@/api/graphql/parent/getPotentialChildren";
 import {Button} from "@/components/ui/button";
 import {ChildData} from "@/model/child-data";
 import ChildForm from "@/form/child/ChildForm";
+import {useAuth} from "@/utils/auth";
 
 interface ParentFormProps {
     onParentModified: (parent: ParentData) => void;
@@ -25,7 +26,6 @@ interface ParentFormProps {
     isOpen: boolean
     onOpenChange: (open: boolean) => void;
     onChildFormClicked?: boolean
-    accessToken: string | undefined
 
 }
 
@@ -35,9 +35,8 @@ function ParentForm({
                         isOpen,
                         onOpenChange,
                         onChildFormClicked,
-                        accessToken
                     }: ParentFormProps) {
-
+    const {accessToken} = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof parentSchema>>({
         resolver: zodResolver(parentSchema),
@@ -173,7 +172,6 @@ function ParentForm({
                                                                 className="w-2/3"
                                                                 isLoading={false}
                                                                 disabled={false}
-                                                                accessToken={accessToken}
                                                                 value={field.value}
                                                                 getPotential={getPotentialChildren}
                                                                 isAdded={false}

@@ -21,13 +21,15 @@ import fromChildWithParentsToChildData from "@/model/fromChildWithParentsToChild
 import ParentInEditMode from "@/table/child/ParentInEditMode";
 import {cn} from "@/lib/utils";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
+import {getSession} from "@auth0/nextjs-auth0";
 
 
 export const getServerSideProps = (async (context) => {
     let childData;
     if (context.params?.childId) {
         try {
-            childData = await getChildById(context.params.childId, serverSideClient);
+            const session = await getSession(context.req, context.res);
+            childData = await getChildById(context.params.childId, session?.accessToken, serverSideClient);
             return {
                 props: {selectedChildData: childData}
             }

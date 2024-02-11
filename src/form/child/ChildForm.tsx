@@ -22,6 +22,7 @@ import ParentForm from "@/form/parent/ParentForm";
 import {Button} from "@/components/ui/button";
 import getPotentialParents from "@/api/graphql/child/getPotentialParents";
 import {ParentData} from "@/model/parent-data";
+import {useAuth} from "@/utils/auth";
 
 interface ChildFormProps {
     onChildModified: (child: ChildData) => void;
@@ -39,6 +40,7 @@ function ChildForm({
                        onOpenChange,
                        onParentFormClicked
                    }: ChildFormProps) {
+    const {accessToken} = useAuth()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof childSchema>>({
         resolver: zodResolver(childSchema),
@@ -57,7 +59,7 @@ function ChildForm({
     function onSubmit(values: z.infer<typeof childSchema>) {
         setIsSubmitting(true)
         if (existingChild) {
-            updateChild({id: existingChild.id, ...values, relativeParents: existingChild.relativeParents})
+            updateChild({id: existingChild.id, ...values, relativeParents: existingChild.relativeParents}, accessToken)
                 .then((result) => {
                     onChildModified(result)
                     toast({
@@ -86,7 +88,7 @@ function ChildForm({
             addChild({
                 relativeParent: updatedRelativeParent,
                 ...values2
-            })
+            }, accessToken)
                 .then((result) => {
                     onChildModified(result)
                     toast({

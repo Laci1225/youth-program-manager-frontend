@@ -5,7 +5,7 @@ import {ParentData} from "@/model/parent-data";
 export default async function getPotentialParents(
     parentName: string,
     limit: number,
-    authToken: string,
+    authToken: string | undefined,
     client: ApolloClient<NormalizedCacheObject> = clientSideClient
 ): Promise<ParentData[]> {
     return client

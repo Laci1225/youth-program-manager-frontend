@@ -10,6 +10,7 @@ import updateParent from "@/api/graphql/parent/updateParent";
 import {toast} from "@/components/ui/use-toast";
 import ChildForm from "@/form/child/ChildForm";
 import updateChild from "@/api/graphql/child/updateChild";
+import {useAuth} from "@/utils/auth";
 
 interface ChildInEditModeProps {
     parent: ParentData
@@ -25,6 +26,8 @@ export default function ChildInEditMode({
                                             setParentWithChildren,
                                             setIsEditChildrenModeEnabled
                                         }: ChildInEditModeProps) {
+    const {accessToken} = useAuth()
+
     const [tempParentsWithChildren, setTempParentsWithChildren] = useState<ParentDataWithChildren>(parentWithChildren)
     const [selectedChildDataToAdd, setSelectedChildDataToAdd] = useState<ChildData>()
 
@@ -48,7 +51,7 @@ export default function ChildInEditMode({
         updateParent({
             ...others,
             childIds: childDtos?.map(child => child.id)
-        })
+        }, accessToken)
             .then(value => {
                 setParentWithChildren(prevState => ({...prevState, ...value}))
                 toast({
@@ -69,7 +72,7 @@ export default function ChildInEditMode({
             })
         if (childDtos) {
             childDtos.map(
-                childDto => updateChild(childDto)
+                childDto => updateChild(childDto, accessToken)
             );
         }
     }

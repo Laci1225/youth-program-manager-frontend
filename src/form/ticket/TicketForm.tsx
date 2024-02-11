@@ -23,6 +23,7 @@ import TicketTypeForm from "@/form/ticket-type/TicketTypeForm";
 import {AutoComplete} from "@/form/AutoComplete";
 import {Info, ToggleLeft, ToggleRight} from "lucide-react";
 import HoverText from "@/components/hoverText";
+import {useAuth} from "@/utils/auth";
 
 
 interface TicketFormProps {
@@ -33,7 +34,7 @@ interface TicketFormProps {
 }
 
 function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: TicketFormProps) {
-
+    const {accessToken} = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof ticketSchema>>({
         resolver: zodResolver(ticketSchema),
@@ -50,7 +51,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
     function onSubmit(values: z.infer<typeof ticketSchema>) {
         setIsSubmitting(true)
         if (existingTicket) {
-            updateTicket(existingTicket.id, values)
+            updateTicket(existingTicket.id, values, accessToken)
                 .then((result) => {
                     onTicketModified(result)
                     toast({
@@ -69,7 +70,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                 setIsSubmitting(false)
             })
         } else
-            addTicket(values)
+            addTicket(values, accessToken)
                 .then((result) => {
                     onTicketModified(result)
                     toast({

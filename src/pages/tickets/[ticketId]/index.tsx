@@ -25,13 +25,16 @@ import {Medicine} from "@/model/medicine";
 import {isStrictDate} from "@/utils/date";
 import HoverText from "@/components/hoverText";
 import {calculateDaysDifference} from "@/pages/tickets";
+import {getSession} from "@auth0/nextjs-auth0";
+import {useAuth} from "@/utils/auth";
 
 
 export const getServerSideProps = (async (context) => {
     let ticketData;
     if (context.params?.ticketId) {
         try {
-            ticketData = await getTicketById(context.params.ticketId, serverSideClient);
+            const session = await getSession(context.req, context.res);
+            ticketData = await getTicketById(context.params.ticketId, session?.accessToken, serverSideClient);
             return {
                 props: {
                     selectedTicket: ticketData
@@ -48,6 +51,7 @@ export const getServerSideProps = (async (context) => {
     };
 }) satisfies GetServerSideProps<{ selectedTicket: TicketData }, { ticketId: string }>;
 export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const {accessToken} = useAuth()
     const [ticket, setTicket] = useState<TicketData>(selectedTicket)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -92,7 +96,7 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
             childId: child.id,
             ticketTypeId: ticketType.id,
             historyLog: (remainingTicket.historyLog?.filter((_, i) => i !== reportCancelParticipationIndex))
-        }).then(
+        }, accessToken).then(
             value =>
                 setTicket(value)
         )
@@ -113,7 +117,10 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
             historyLog: updatedHistoryLog
         }));
 
-        updateTicket(ticket.id, fromTicketDataToTicketInputData({...ticket, historyLog: updatedHistoryLog}))
+        updateTicket(ticket.id, fromTicketDataToTicketInputData({
+            ...ticket,
+            historyLog: updatedHistoryLog
+        }), accessToken)
             .then(value => {
                 setTicket(value)
             }).then(() =>

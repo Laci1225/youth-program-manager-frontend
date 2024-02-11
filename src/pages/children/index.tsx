@@ -27,7 +27,7 @@ export const getServerSideProps = withPageAuthRequired({
     async getServerSideProps(ctx) {
         const session = await getSession(ctx.req, ctx.res);
         console.log(session?.accessToken)
-        const children = await getAllChildren(serverSideClient, session?.accessToken);
+        const children = await getAllChildren(session?.accessToken, serverSideClient);
         return {
             props: {
                 childrenData: children,

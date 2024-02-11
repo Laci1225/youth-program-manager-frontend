@@ -12,13 +12,15 @@ import getTicketTypeById from "@/api/graphql/ticketType/getTicketTypeById";
 import deletedTicketType from "@/api/graphql/ticketType/deletedTicketType";
 import DeleteData from "@/components/deleteData";
 import {TicketTypeData} from "@/model/ticket-type-data";
+import {getSession} from "@auth0/nextjs-auth0";
 
 
 export const getServerSideProps = (async (context) => {
     let ticketData;
     if (context.params?.ticketTypeId) {
         try {
-            ticketData = await getTicketTypeById(context.params.ticketTypeId, serverSideClient);
+            const session = await getSession(context.req, context.res);
+            ticketData = await getTicketTypeById(context.params.ticketTypeId, session?.accessToken, serverSideClient);
             return {
                 props: {
                     selectedTicket: ticketData

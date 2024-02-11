@@ -13,6 +13,7 @@ import {TicketTypeData} from "@/model/ticket-type-data";
 import {ticketTypeSchema} from "@/form/ticket-type/ticketTypeSchema";
 import {Textarea} from "@/components/ui/textarea"
 import updateTicketType from "@/api/graphql/ticketType/updateTicketType";
+import {useAuth} from "@/utils/auth";
 
 
 interface TicketFormProps {
@@ -23,7 +24,7 @@ interface TicketFormProps {
 }
 
 function TicketTypeForm({onTicketModified, existingTicket, isOpen, onOpenChange}: TicketFormProps) {
-
+    const {accessToken} = useAuth()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof ticketTypeSchema>>({
         resolver: zodResolver(ticketTypeSchema),
@@ -39,7 +40,7 @@ function TicketTypeForm({onTicketModified, existingTicket, isOpen, onOpenChange}
     function onSubmit(values: z.infer<typeof ticketTypeSchema>) {
         setIsSubmitting(true)
         if (existingTicket) {
-            updateTicketType(existingTicket.id, values)
+            updateTicketType(existingTicket.id, values, accessToken)
                 .then((result) => {
                     onTicketModified(result)
                     toast({
@@ -58,7 +59,7 @@ function TicketTypeForm({onTicketModified, existingTicket, isOpen, onOpenChange}
                 setIsSubmitting(false)
             })
         } else
-            addTicketType(values)
+            addTicketType(values, accessToken)
                 .then((result) => {
                     onTicketModified(result)
                     toast({

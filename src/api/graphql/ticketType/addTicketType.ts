@@ -2,7 +2,8 @@ import {clientSideClient} from "@/api/graphql/client";
 import {gql} from "@apollo/client";
 import {TicketTypeDataInput} from "@/model/ticket-type-data";
 
-export default function addTicketType(values: TicketTypeDataInput) {
+export default function addTicketType(values: TicketTypeDataInput,
+                                      authToken: string | undefined) {
     return clientSideClient
     .mutate({
         mutation: gql`
@@ -25,6 +26,11 @@ export default function addTicketType(values: TicketTypeDataInput) {
                 numberOfParticipation: values.numberOfParticipation,
                 standardValidityPeriod: values.standardValidityPeriod
             }, fetchPolicy: "no-cache"
+        },
+        context: {
+            headers: {
+                Authorization: `Bearer ${authToken}`,
+            },
         },
     }).then(value => value.data.addTicketType)
 }

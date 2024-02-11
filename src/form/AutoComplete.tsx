@@ -11,6 +11,7 @@ import {ChildNameData, RelativeParent} from "@/model/child-data";
 import debounce from "@/utils/debounce";
 import {format} from "date-fns";
 import {TicketTypeData} from "@/model/ticket-type-data";
+import {useAuth} from "@/utils/auth";
 
 type AutoCompleteProps<T> = {
     emptyMessage: string
@@ -22,7 +23,6 @@ type AutoCompleteProps<T> = {
     className?: string
     alreadyAddedData?: ChildNameData[] | RelativeParent[]
     isAdded: boolean
-    accessToken: string | undefined
     getPotential: (name: string, limit: number, auth: string | undefined) => Promise<T[]>
 }
 
@@ -35,10 +35,10 @@ export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeDa
                                                                                         value,
                                                                                         onValueChange,
                                                                                         disabled,
-                                                                                        accessToken,
                                                                                         isLoading = false,
                                                                                         getPotential,
                                                                                     }: AutoCompleteProps<T>) => {
+    const {accessToken} = useAuth()
     const getDisplayName = (item: T): string => {
         if ('familyName' in item && 'givenName' in item) {
             return `${item.familyName} ${item.givenName}`;

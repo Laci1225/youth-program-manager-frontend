@@ -29,12 +29,11 @@ export const getServerSideProps = (async (context) => {
     return {
         props: {
             parentsData: parents,
-            accessToken: session?.accessToken
         }
     };
-}) satisfies GetServerSideProps<{ parentsData: ParentDataWithChildrenIds[], accessToken: string | undefined }>;
+}) satisfies GetServerSideProps<{ parentsData: ParentDataWithChildrenIds[] }>;
 
-export default function Parents({parentsData, accessToken}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Parents({parentsData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
     const [parents, setParents] = useState<ParentDataWithChildrenIds[]>(parentsData)
     const onParentSaved = (savedParent: ParentData) => {
@@ -139,7 +138,6 @@ export default function Parents({parentsData, accessToken}: InferGetServerSidePr
                         isOpen={isEditDialogOpen}
                         onParentModified={onParentSaved}
                         onOpenChange={setIsEditDialogOpen}
-                        accessToken={accessToken}
             />
             <DeleteData entityId={deletedParent?.id}
                         entityLabel={`${deletedParent?.givenName} ${deletedParent?.familyName}`}
@@ -148,7 +146,6 @@ export default function Parents({parentsData, accessToken}: InferGetServerSidePr
                         onSuccess={onParentDeleted}
                         deleteFunction={deleteParent}
                         entityType="Parent"
-                        accessToken={accessToken}
             />
         </div>
     )
