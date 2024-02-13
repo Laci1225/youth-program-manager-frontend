@@ -24,9 +24,8 @@ import SettingsDropdown from "@/components/SettingsDropdown";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 
 export const getServerSideProps = withPageAuthRequired({
-    async getServerSideProps(ctx) {
-        const session = await getSession(ctx.req, ctx.res);
-        console.log(session?.accessToken)
+    async getServerSideProps(context) {
+        const session = await getSession(context.req, context.res);
         const children = await getAllChildren(session?.accessToken, serverSideClient);
         return {
             props: {
@@ -34,31 +33,7 @@ export const getServerSideProps = withPageAuthRequired({
             },
         }
     }
-})/*
-export const getServerSideProps = (async (context) => {
-    //const {user} = useUser(context.req);
-    const user = await getUserProfileData();
-    console.log(context.req)
-    // Redirect to login page if user is not authenticated
-    /*if (!user) {
-        return {
-            redirect: {
-                destination: '/login',
-                permanent: false,
-            },
-        };
-    }*/
-
-/*
-  const children = await getAllChildren(serverSideClient, "012");
-
-  return {
-      props: {
-          childrenData: children,
-      },
-  };
 }) satisfies GetServerSideProps<{ childrenData: ChildData[] }>;
-*/
 export default function Children({childrenData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
     const [children, setChildren] = useState<ChildData[]>(childrenData)

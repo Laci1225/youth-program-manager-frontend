@@ -1,10 +1,10 @@
-import {GetServerSideProps, InferGetServerSidePropsType} from "next";
+import {InferGetServerSidePropsType} from "next";
 import React, {useState} from "react";
 import Link from "next/link";
 import {Toaster} from "@/components/ui/toaster";
 import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
-import {Check, Pencil, Trash} from "lucide-react";
+import {Pencil, Trash} from "lucide-react";
 import {useRouter} from "next/router";
 import {serverSideClient} from "@/api/graphql/client";
 import deletedTicketType from "@/api/graphql/ticketType/deletedTicketType";
@@ -13,43 +13,43 @@ import getTicketById from "@/api/graphql/ticket/getTicketById";
 import {TicketData} from "@/model/ticket-data";
 import {differenceInDays, format} from "date-fns";
 import TicketForm from "@/form/ticket/TicketForm";
-import ShowTable from "@/form/ShowTable";
 import {Button} from "@/components/ui/button";
 import ConfirmDialog from "@/components/confirmDialog";
 import updateTicket from "@/api/graphql/ticket/updateTicket";
 import fromTicketDataToTicketInputData from "@/model/fromTicketDataToTicketInputData";
 import {toast} from "@/components/ui/use-toast";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Disease} from "@/model/disease";
-import {Medicine} from "@/model/medicine";
-import {isStrictDate} from "@/utils/date";
 import HoverText from "@/components/hoverText";
 import {calculateDaysDifference} from "@/pages/tickets";
-import {getSession} from "@auth0/nextjs-auth0";
+import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 import {useAuth} from "@/utils/auth";
 
 
-export const getServerSideProps = (async (context) => {
-    let ticketData;
-    if (context.params?.ticketId) {
-        try {
-            const session = await getSession(context.req, context.res);
-            ticketData = await getTicketById(context.params.ticketId, session?.accessToken, serverSideClient);
-            return {
-                props: {
-                    selectedTicket: ticketData
+export const getServerSideProps = withPageAuthRequired<{ selectedTicket: TicketData }, {
+    ticketId: string
+}>({
+    async getServerSideProps(context) {
+        let ticketData;
+        if (context.params?.ticketId) {
+            try {
+                const session = await getSession(context.req, context.res);
+                ticketData = await getTicketById(context.params.ticketId, session?.accessToken, serverSideClient);
+                return {
+                    props: {
+                        selectedTicket: ticketData
+                    }
                 }
+            } catch (error) {
+                return {
+                    notFound: true
+                };
             }
-        } catch (error) {
-            return {
-                notFound: true
-            };
         }
+        return {
+            notFound: true
+        };
     }
-    return {
-        notFound: true
-    };
-}) satisfies GetServerSideProps<{ selectedTicket: TicketData }, { ticketId: string }>;
+})
 export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const {accessToken} = useAuth()
     const [ticket, setTicket] = useState<TicketData>(selectedTicket)

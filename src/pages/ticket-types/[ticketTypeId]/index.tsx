@@ -1,4 +1,4 @@
-import {GetServerSideProps, InferGetServerSidePropsType} from "next";
+import {InferGetServerSidePropsType} from "next";
 import React, {useState} from "react";
 import Link from "next/link";
 import {Toaster} from "@/components/ui/toaster";
@@ -12,30 +12,34 @@ import getTicketTypeById from "@/api/graphql/ticketType/getTicketTypeById";
 import deletedTicketType from "@/api/graphql/ticketType/deletedTicketType";
 import DeleteData from "@/components/deleteData";
 import {TicketTypeData} from "@/model/ticket-type-data";
-import {getSession} from "@auth0/nextjs-auth0";
+import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 
 
-export const getServerSideProps = (async (context) => {
-    let ticketData;
-    if (context.params?.ticketTypeId) {
-        try {
-            const session = await getSession(context.req, context.res);
-            ticketData = await getTicketTypeById(context.params.ticketTypeId, session?.accessToken, serverSideClient);
-            return {
-                props: {
-                    selectedTicket: ticketData
+export const getServerSideProps = withPageAuthRequired<{ selectedTicket: TicketTypeData }, {
+    ticketTypeId: string
+}>({
+    async getServerSideProps(context) {
+        let ticketData;
+        if (context.params?.ticketTypeId) {
+            try {
+                const session = await getSession(context.req, context.res);
+                ticketData = await getTicketTypeById(context.params.ticketTypeId, session?.accessToken, serverSideClient);
+                return {
+                    props: {
+                        selectedTicket: ticketData
+                    }
                 }
+            } catch (error) {
+                return {
+                    notFound: true
+                };
             }
-        } catch (error) {
-            return {
-                notFound: true
-            };
         }
+        return {
+            notFound: true
+        };
     }
-    return {
-        notFound: true
-    };
-}) satisfies GetServerSideProps<{ selectedTicket: TicketTypeData }, { ticketTypeId: string }>;
+})
 export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const [ticket, setTicket] = useState<TicketTypeData>(selectedTicket)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)

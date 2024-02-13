@@ -1,4 +1,4 @@
-import {GetServerSideProps, InferGetServerSidePropsType} from "next";
+import {InferGetServerSidePropsType} from "next";
 import {ChildData, ChildDataWithParents} from "@/model/child-data";
 import getChildById from "@/api/graphql/child/getChildById";
 import React, {useState} from "react";
@@ -21,24 +21,27 @@ import fromChildWithParentsToChildData from "@/model/fromChildWithParentsToChild
 import ParentInEditMode from "@/table/child/ParentInEditMode";
 import {cn} from "@/lib/utils";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {getSession} from "@auth0/nextjs-auth0";
+import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 
-
-export const getServerSideProps = (async (context) => {
-    let childData;
-    if (context.params?.childId) {
-        try {
+export const getServerSideProps = withPageAuthRequired<{ selectedChildData: ChildDataWithParents }, {
+    childId: string
+}>({
+    async getServerSideProps(context) {
+        let childData;
+        if (context.params?.childId) {
             const session = await getSession(context.req, context.res);
             childData = await getChildById(context.params.childId, session?.accessToken, serverSideClient);
             return {
-                props: {selectedChildData: childData}
+                props: {
+                    selectedChildData: childData
+                }
             }
-        } catch (error) {
-            return {notFound: true};
         }
+        return {
+            notFound: true
+        };
     }
-    return {notFound: true};
-}) satisfies GetServerSideProps<{ selectedChildData: ChildDataWithParents }, { childId: string }>;
+})
 export default function Child({selectedChildData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
     const [childWithParents, setChildWithParents] = useState<ChildDataWithParents>(selectedChildData)

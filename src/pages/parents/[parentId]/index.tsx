@@ -1,4 +1,4 @@
-import {GetServerSideProps, InferGetServerSidePropsType} from "next";
+import {InferGetServerSidePropsType} from "next";
 import React, {useState} from "react";
 import Link from "next/link";
 import {Toaster} from "@/components/ui/toaster";
@@ -22,32 +22,37 @@ import ChildInEditMode from "@/table/parent/ChildInEditMode";
 import {cn} from "@/lib/utils";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {ChildData} from "@/model/child-data";
-import {getSession} from "@auth0/nextjs-auth0";
+import {
+    getSession, withPageAuthRequired
+} from "@auth0/nextjs-auth0";
 
-
-export const getServerSideProps = (async (context) => {
-    let parentData;
-    if (context.params?.parentId) {
-        try {
-            const session = await getSession(context.req, context.res);
-            parentData = await getParentById(context.params.parentId, session?.accessToken, serverSideClient);
-            return {
-                props: {
-                    selectedParent: parentData,
-                }
-            }
-        } catch (error) {
-            return {
-                notFound: true
-            };
-        }
-    }
-    return {
-        notFound: true
-    };
-}) satisfies GetServerSideProps<{ selectedParent: ParentDataWithChildren }, {
+export const getServerSideProps = withPageAuthRequired<{ selectedParent: ParentDataWithChildren }, {
     parentId: string
-}>;
+}>({
+    async getServerSideProps(context) {
+        console.log(context)
+        let parentData;
+        if (context.params?.parentId) {
+            try {
+                const session = await getSession(context.req, context.res);
+                parentData = await getParentById(context.params.parentId, session?.accessToken, serverSideClient);
+                return {
+                    props: {
+                        selectedParent: parentData,
+                    }
+                }
+            } catch (error) {
+                return {
+                    notFound: true
+                };
+            }
+        }
+        return {
+            notFound: true
+        };
+    }
+})
+
 export default function Parent({selectedParent}: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const [parentWithChildren, setParentWithChildren] = useState<ParentDataWithChildren>(selectedParent)
     const parent: ParentData = fromParentWithChildrenToParent(parentWithChildren)

@@ -19,16 +19,18 @@ import {TicketTypeData} from "@/model/ticket-type-data";
 import TicketTypeForm from "@/form/ticket-type/TicketTypeForm";
 import deletedTicketType from "@/api/graphql/ticketType/deletedTicketType";
 import SettingsDropdown from "@/components/SettingsDropdown";
-import {getSession} from "@auth0/nextjs-auth0";
+import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 
-export const getServerSideProps = (async (context) => {
-    const session = await getSession(context.req, context.res);
-    const tickets = await getAllTicketTypes(session?.accessToken, serverSideClient)
-    return {
-        props: {
-            ticketsData: tickets
-        }
-    };
+export const getServerSideProps = withPageAuthRequired({
+    async getServerSideProps(context) {
+        const session = await getSession(context.req, context.res);
+        const tickets = await getAllTicketTypes(session?.accessToken, serverSideClient)
+        return {
+            props: {
+                ticketsData: tickets
+            }
+        };
+    }
 }) satisfies GetServerSideProps<{ ticketsData: TicketTypeData[] }>;
 
 export default function Tickets({ticketsData}: InferGetServerSidePropsType<typeof getServerSideProps>) {

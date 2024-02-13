@@ -19,17 +19,19 @@ import updateTicket from "@/api/graphql/ticket/updateTicket";
 import fromTicketDataToTicketInputData from "@/model/fromTicketDataToTicketInputData";
 import ConfirmDialog from "@/components/confirmDialog";
 import {toast} from "@/components/ui/use-toast";
-import {getSession} from "@auth0/nextjs-auth0";
+import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 import {useAuth} from "@/utils/auth";
 
-export const getServerSideProps = (async (context) => {
-    const session = await getSession(context.req, context.res);
-    const tickets = await getAllTickets(session?.accessToken, serverSideClient)
-    return {
-        props: {
-            ticketsData: tickets
-        }
-    };
+export const getServerSideProps = withPageAuthRequired({
+    async getServerSideProps(context) {
+        const session = await getSession(context.req, context.res);
+        const tickets = await getAllTickets(session?.accessToken, serverSideClient)
+        return {
+            props: {
+                ticketsData: tickets
+            }
+        };
+    }
 }) satisfies GetServerSideProps<{ ticketsData: TicketData[] }>;
 
 export function calculateDaysDifference(endDate: Date): number {

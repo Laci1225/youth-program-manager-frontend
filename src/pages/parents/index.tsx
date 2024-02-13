@@ -20,17 +20,20 @@ import DeleteData from "@/components/deleteData";
 import {ParentData, ParentDataWithChildrenIds} from "@/model/parent-data";
 import HoverText from "@/components/hoverText";
 import SettingsDropdown from "@/components/SettingsDropdown";
-import {getSession} from "@auth0/nextjs-auth0";
+import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 
-export const getServerSideProps = (async (context) => {
-    const session = await getSession(context.req, context.res);
-    console.log(session?.accessToken)
-    const parents = await getAllParents(session?.accessToken, serverSideClient)
-    return {
-        props: {
-            parentsData: parents,
-        }
-    };
+export const getServerSideProps = withPageAuthRequired({
+    async getServerSideProps(context) {
+        const session = await getSession(context.req, context.res);
+        console.log(session?.accessToken)
+
+        const parents = await getAllParents(session?.accessToken, serverSideClient)
+        return {
+            props: {
+                parentsData: parents,
+            }
+        };
+    }
 }) satisfies GetServerSideProps<{ parentsData: ParentDataWithChildrenIds[] }>;
 
 export default function Parents({parentsData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
