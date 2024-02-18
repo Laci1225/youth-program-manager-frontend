@@ -22,7 +22,6 @@ import ParentForm from "@/form/parent/ParentForm";
 import {Button} from "@/components/ui/button";
 import getPotentialParents from "@/api/graphql/child/getPotentialParents";
 import {ParentData} from "@/model/parent-data";
-import {useAuth} from "@/utils/auth";
 import AccessTokenContext from "@/context/AccessTokenContext";
 
 interface ChildFormProps {

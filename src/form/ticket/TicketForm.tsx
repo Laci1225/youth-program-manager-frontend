@@ -1,6 +1,6 @@
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 import {Input} from "@/components/ui/input";
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {useForm} from "react-hook-form"
 import * as z from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -23,7 +23,7 @@ import TicketTypeForm from "@/form/ticket-type/TicketTypeForm";
 import {AutoComplete} from "@/form/AutoComplete";
 import {Info, ToggleLeft, ToggleRight} from "lucide-react";
 import HoverText from "@/components/hoverText";
-import {useAuth} from "@/utils/auth";
+import AccessTokenContext from "@/context/AccessTokenContext";
 
 
 interface TicketFormProps {
@@ -34,7 +34,7 @@ interface TicketFormProps {
 }
 
 function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: TicketFormProps) {
-    const {accessToken} = useAuth();
+    const accessToken = useContext(AccessTokenContext)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof ticketSchema>>({
         resolver: zodResolver(ticketSchema),
