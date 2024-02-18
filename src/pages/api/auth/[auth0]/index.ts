@@ -6,7 +6,9 @@ export default handleAuth({
         try {
             console.log('Handle login');
             await handleLogin(req, res, {
-                authorizationParams: {audience: 'https://ypm/api'},
+                authorizationParams: {
+                    audience: 'https://ypm/api',
+                },
             });
             console.log('Handle login done');
         } catch (error: any) {

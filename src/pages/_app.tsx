@@ -8,12 +8,10 @@ import {AuthProvider} from "@/utils/auth";
 
 export default function App({Component, pageProps}: AppProps) {
     return (
-        <AuthProvider accessToken={pageProps.accessToken}>
-            <UserProvider>
-                <Layout>
-                    <Component {...pageProps} />
-                </Layout>
-            </UserProvider>
-        </AuthProvider>
+        <UserProvider>
+            <Layout>
+                <Component {...pageProps} />
+            </Layout>
+        </UserProvider>
     )
 }
