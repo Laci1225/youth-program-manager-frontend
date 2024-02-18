@@ -21,8 +21,10 @@ import {ChildData} from "@/model/child-data";
 import {TicketTypeData} from "@/model/ticket-type-data";
 import TicketTypeForm from "@/form/ticket-type/TicketTypeForm";
 import {AutoComplete} from "@/form/AutoComplete";
-import {Info, ToggleLeft, ToggleRight} from "lucide-react";
+import {Info} from "lucide-react";
 import HoverText from "@/components/hoverText";
+import {Switch} from "@/components/ui/switch"
+import InputCalendarSwitch from "@/form/ticket/InputCalendarSwitch";
 
 
 interface TicketFormProps {
@@ -32,14 +34,14 @@ interface TicketFormProps {
     onOpenChange: (open: boolean) => void;
 }
 
-function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: TicketFormProps) {
 
+function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: TicketFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof ticketSchema>>({
         resolver: zodResolver(ticketSchema),
         defaultValues: {
-            childId: existingTicket?.child.id,
-            ticketTypeId: existingTicket?.ticketType.id,
+            child: existingTicket?.child,
+            ticketType: existingTicket?.ticketType,
             price: existingTicket?.price,
             numberOfParticipation: existingTicket?.numberOfParticipation,
             issueDate: existingTicket?.issueDate ? new Date(existingTicket.issueDate) : undefined,
@@ -49,13 +51,17 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
 
     function onSubmit(values: z.infer<typeof ticketSchema>) {
         setIsSubmitting(true)
+        const {ticketType, child, ...remainingValues} = values
         if (existingTicket) {
-            updateTicket(existingTicket.id, values)
+            updateTicket(existingTicket.id, {
+                ...remainingValues, ticketTypeId: ticketType.id,
+                childId: child.id
+            })
                 .then((result) => {
                     onTicketModified(result)
                     toast({
                         title: "The ticket is successfully updated",
-                        description: `A ticket with name: ${form.getValues("childId")} updated`,
+                        description: `A ticket with child: ${result.child.familyName} ${result.child.givenName} created`,
                         duration: 2000
                     })
                     onOpenChange(false)
@@ -69,12 +75,15 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                 setIsSubmitting(false)
             })
         } else
-            addTicket(values)
+            addTicket({
+                ...values, ticketTypeId: ticketType.id,
+                childId: child.id
+            })
                 .then((result) => {
                     onTicketModified(result)
                     toast({
                         title: "The ticket is successfully added",
-                        description: `A ticket with name: ${form.getValues("childId")} created`,
+                        description: `A ticket with child: ${result.child.familyName} ${result.child.givenName} created`,
                         duration: 2000
                     })
                     onOpenChange(false)
@@ -93,8 +102,8 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
 
     useEffect(() => {
         form.reset({
-            childId: existingTicket?.child.id,
-            ticketTypeId: existingTicket?.ticketType.id,
+            child: existingTicket?.child,
+            ticketType: existingTicket?.ticketType,
             price: existingTicket?.price,
             numberOfParticipation: existingTicket?.numberOfParticipation,
             issueDate: existingTicket?.issueDate ? new Date(existingTicket.issueDate) : undefined,
@@ -132,11 +141,9 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
         setIsChildEditDialogOpen(true)
     }
 
-    const [childAutocompleteValue, setChildAutocompleteValue] = useState<ChildData>()
 
     function onChildUpdated(child: ChildData) {
-        form.setValue("childId", child.id)
-        setChildAutocompleteValue(child)
+        form.setValue("child", {...child, birthDate: new Date(child.birthDate)})
     }
 
     const [isTicketTypeEditDialogOpen, setIsTicketTypeEditDialogOpen] = useState(false)
@@ -145,14 +152,19 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
         setIsTicketTypeEditDialogOpen(true)
     }
 
-    const [ticketTypeAutocompleteValue, setTicketTypeAutocompleteValue] = useState<TicketTypeData>()
-
     function onTicketTypeUpdated(ticketType: TicketTypeData) {
-        form.setValue("ticketTypeId", ticketType.id)
+        form.setValue("ticketType", ticketType)
         form.setValue("price", ticketType.price)
         form.setValue("numberOfParticipation", ticketType.numberOfParticipation)
         setDays(ticketType.standardValidityPeriod)
-        setTicketTypeAutocompleteValue(ticketType)
+    }
+
+    function setPredefinedValues(value: TicketTypeData) {
+        form.setValue("price", value.price)
+        form.setValue("numberOfParticipation", value.numberOfParticipation)
+        form.setValue("issueDate", new Date())
+        setDays(value.standardValidityPeriod)
+        calcDateByGivenDay(value.standardValidityPeriod)
     }
 
     return (
@@ -160,7 +172,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
 
             <Dialog open={isOpen} onOpenChange={onOpenChange}>
                 <DialogContent
-                    className={`sm:max-w-[700px] ${form.getValues("ticketTypeId") ? "h-[90vh]" : "h-[50vh]"} shadow-muted-foreground`}>
+                    className={`sm:max-w-[700px] ${form.getValues("ticketType") ? "h-[90vh]" : "h-[50vh]"} shadow-muted-foreground`}>
                     <DialogHeader>
                         <DialogTitle>{existingTicket ? "Update" : "Create"} a ticket</DialogTitle>
                     </DialogHeader>
@@ -170,7 +182,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                             <div className="mx-4">
                                 <FormField
                                     control={form.control}
-                                    name="childId"
+                                    name="child"
                                     render={({field}) => (
                                         <FormItem className="flex-1">
                                             <FormLabel>Child Name*</FormLabel>
@@ -179,16 +191,22 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                     <AutoComplete
                                                         className="w-2/3"
                                                         key={0}
-                                                        value={childAutocompleteValue ? childAutocompleteValue : existingTicket?.child}
+                                                        getLabelForItem={(item) => `${item.familyName} ${item.givenName}`}
+                                                        getDescriptionForItem={(item) => `${item.birthDate}`}
+                                                        value={field.value}
                                                         isLoading={false}
                                                         disabled={!!existingTicket}
                                                         getPotential={getPotentialChildren}
                                                         isAdded={false}
                                                         onValueChange={(value) => {
-                                                            if (value) {
-                                                                field.onChange(value.id);
-                                                            } else field.onChange(undefined);
-
+                                                            if (!value) {
+                                                                field.onChange(undefined);
+                                                                return;
+                                                            }
+                                                            field.onChange({
+                                                                ...value,
+                                                                birthDate: new Date(value.birthDate)
+                                                            })
                                                         }}
                                                         placeholder="Select children..."
                                                         emptyMessage="No child found"
@@ -209,7 +227,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                 />
                                 <FormField
                                     control={form.control}
-                                    name="ticketTypeId"
+                                    name="ticketType"
                                     render={({field}) => (
                                         <FormItem className="flex-1">
                                             <FormLabel>Ticket type*</FormLabel>
@@ -218,21 +236,19 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                     <AutoComplete
                                                         className="w-2/3"
                                                         key={0}
-                                                        value={ticketTypeAutocompleteValue ? ticketTypeAutocompleteValue : existingTicket?.ticketType}
+                                                        getLabelForItem={(item) => item.name}
+                                                        value={field.value}
                                                         isLoading={false}
                                                         disabled={!!existingTicket}
                                                         getPotential={getPotentialTicketTypes}
                                                         isAdded={false}
                                                         onValueChange={(value) => {
-                                                            if (value) {
-                                                                field.onChange(value.id);
-                                                                form.setValue("price", value.price)
-                                                                form.setValue("numberOfParticipation", value.numberOfParticipation)
-                                                                form.setValue("issueDate", new Date())
-                                                                setDays(value.standardValidityPeriod)
-                                                                calcDateByGivenDay(value.standardValidityPeriod)
-                                                            } else field.onChange(undefined);
-
+                                                            if (!value) {
+                                                                field.onChange(undefined);
+                                                                return;
+                                                            }
+                                                            field.onChange(value);
+                                                            setPredefinedValues(value)
                                                         }}
                                                         placeholder="Select ticket type..."
                                                         emptyMessage="No ticket type found"
@@ -249,7 +265,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                         </FormItem>
                                     )}
                                 />
-                                {form.getValues("ticketTypeId") && (
+                                {form.getValues("ticketType") && (
                                     <>
                                         <div className="flex w-full">
                                             <FormField
@@ -307,7 +323,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                         <FormControl>
                                                             <CalendarInput {...field}
                                                                            shownYear={new Date().getFullYear()}
-                                                                           reCalc={calcDateByGivenDay}
+                                                                           onSelectCallback={calcDateByGivenDay}
                                                                            canBeFuture={true}/>
                                                         </FormControl>
                                                         <FormMessage/>
@@ -320,53 +336,14 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                                                 control={form.control}
                                                 name="expirationDate"
                                                 render={({field}) => (
-                                                    <FormItem className="w-full">
-                                                        <div className="flex">
-                                                            <FormLabel>Valid until*</FormLabel>
-                                                            <HoverText
-                                                                content={`Edit ${disable ? " days " : " date "} instead `}>
-
-                                                                <div className="flex ml-4 text-xs cursor-pointer"
-                                                                     onClick={
-                                                                         () => setDisable(!disable)}>{disable ?
-                                                                    <ToggleLeft/> :
-                                                                    <ToggleRight/>}
-                                                                    <Info className="h-4"/>
-                                                                </div>
-                                                            </HoverText>
-                                                        </div>
-                                                        <FormControl>
-                                                            <div className="flex">
-                                                                <div className="w-1/3 px-2">
-                                                                    <CalendarInput {...field}
-                                                                                   shownYear={new Date().getFullYear()}
-                                                                                   reCalc={calcDateByGivenDate}
-                                                                                   disabled={!disable}
-                                                                                   canBeFuture={true}
-                                                                                   minDate={form.getValues("issueDate")}
-                                                                    />
-                                                                </div>
-                                                                <div className="relative w-1/3 px-2">
-                                                                    <Input
-                                                                        disabled={disable}
-                                                                        onClick={() => setDisable(false)}
-                                                                        onInput={(event) => {
-                                                                            if (!!Number(event.currentTarget.value))
-                                                                                calcDateByGivenDay(Number(event.currentTarget.value));
-                                                                            else setDays(undefined)
-                                                                        }}
-                                                                        value={days}
-                                                                        className="pr-10"
-                                                                    />
-                                                                    <span
-                                                                        className="absolute mr-2 inset-y-0 right-0 flex items-center pr-2">
-                                                                        day(s)
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        </FormControl>
-                                                        <FormMessage/>
-                                                    </FormItem>
+                                                    <InputCalendarSwitch
+                                                        {...field}
+                                                        form={form}
+                                                        days={days}
+                                                        setDays={setDays}
+                                                        calcDateByGivenDate={calcDateByGivenDate}
+                                                        calcDateByGivenDay={calcDateByGivenDay}
+                                                    />
                                                 )}
                                             />
                                         </div>
@@ -389,7 +366,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
                 onParentFormClicked={true}
             />
             <TicketTypeForm
-                onTicketModified={onTicketTypeUpdated}
+                onTicketTypeModified={onTicketTypeUpdated}
                 isOpen={isTicketTypeEditDialogOpen}
                 onOpenChange={setIsTicketTypeEditDialogOpen}
             />

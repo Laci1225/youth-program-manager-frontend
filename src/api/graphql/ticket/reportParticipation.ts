@@ -1,13 +1,13 @@
 import {clientSideClient} from "@/api/graphql/client";
 import {ApolloClient, gql, NormalizedCacheObject} from "@apollo/client";
-import {TicketData} from "@/model/ticket-data";
+import {HistoryData, TicketData} from "@/model/ticket-data";
 
-export default async function deletedTicket(ticketId: string, client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketData> {
-    let value = await client
+export default async function reportParticipation(ticketId: string, historyData: HistoryData, client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketData> {
+    return client
     .mutate({
         mutation: gql`
-            mutation DeletedTicket($id: String!) {
-                deletedTicket(id : $id){
+            mutation ReportParticipation($id: String!, $historyData: HistoryDataInput!){
+                reportParticipation(id : $id, historyData: $historyData){
                     id
                     child {
                         id
@@ -31,10 +31,10 @@ export default async function deletedTicket(ticketId: string, client: ApolloClie
                     }
                 }
             }
-        `,
+        `, fetchPolicy: "no-cache",
         variables: {
             id: ticketId,
+            historyData: historyData
         },
-    });
-    return value.data.deletedTicket;
+    }).then(value => value.data.reportParticipation);
 }
