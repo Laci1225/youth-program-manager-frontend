@@ -6,8 +6,15 @@ import {
     navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import Link from "next/link";
+import {useUser} from "@auth0/nextjs-auth0/client";
 
 export default function Navbar() {
+    const {user, isLoading, error} = useUser()
+    if (isLoading) {
+        return (
+            <div>Loading...</div>
+        );
+    }
     return (
         <NavigationMenu
             className={`p-2 w-[100%] bg-blue-200 fixed`}>
@@ -43,20 +50,23 @@ export default function Navbar() {
                     </NavigationMenuItem>
                 </div>
                 <div className={"flex"}>
-                    <NavigationMenuItem className={"mx-2"} aria-disabled>
-                        <Link href="http://localhost:8080/oauth2/authentication/auth0" legacyBehavior passHref>
-                            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                                Login
-                            </NavigationMenuLink>
-                        </Link>
-                    </NavigationMenuItem>
-                    <NavigationMenuItem className={"mx-2"} aria-disabled>
-                        <Link href="http://localhost:8080/register" legacyBehavior passHref>
-                            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                                Register
-                            </NavigationMenuLink>
-                        </Link>
-                    </NavigationMenuItem>
+                    {user ? (
+                        <NavigationMenuItem className={"mx-2"} aria-disabled>
+                            <Link href="/api/auth/logout" legacyBehavior passHref>
+                                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                                    Logout
+                                </NavigationMenuLink>
+                            </Link>
+                        </NavigationMenuItem>
+                    ) : (
+                        <NavigationMenuItem className={"mx-2"} aria-disabled>
+                            <Link href="/api/auth/login" legacyBehavior passHref>
+                                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                                    Login
+                                </NavigationMenuLink>
+                            </Link>
+                        </NavigationMenuItem>
+                    )}
                 </div>
             </NavigationMenuList>
         </NavigationMenu>
