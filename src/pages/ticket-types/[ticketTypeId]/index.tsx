@@ -6,19 +6,19 @@ import {Label} from "@/components/ui/label";
 import {fieldAppearance} from "@/components/fieldAppearance";
 import {Pencil, Trash} from "lucide-react";
 import {useRouter} from "next/router";
-import TicketTypeForm from "@/form/ticket/TicketTypeForm";
+import TicketTypeForm from "@/form/ticket-type/TicketTypeForm";
 import {serverSideClient} from "@/api/graphql/client";
-import getTicketTypeById from "@/api/graphql/ticket/getTicketTypeById";
-import deletedTicketType from "@/api/graphql/ticket/deletedTicketType";
+import getTicketTypeById from "@/api/graphql/ticketType/getTicketTypeById";
+import deletedTicketType from "@/api/graphql/ticketType/deletedTicketType";
 import DeleteData from "@/components/deleteData";
-import {TicketData} from "@/model/ticket-data";
+import {TicketTypeData} from "@/model/ticket-type-data";
 
 
 export const getServerSideProps = (async (context) => {
     let ticketData;
-    if (context.params?.ticketId) {
+    if (context.params?.ticketTypeId) {
         try {
-            ticketData = await getTicketTypeById(context.params.ticketId, serverSideClient);
+            ticketData = await getTicketTypeById(context.params.ticketTypeId, serverSideClient);
             return {
                 props: {
                     selectedTicket: ticketData
@@ -33,13 +33,13 @@ export const getServerSideProps = (async (context) => {
     return {
         notFound: true
     };
-}) satisfies GetServerSideProps<{ selectedTicket: TicketData }, { ticketId: string }>;
+}) satisfies GetServerSideProps<{ selectedTicket: TicketTypeData }, { ticketTypeId: string }>;
 export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    const [ticket, setTicket] = useState<TicketData>(selectedTicket)
+    const [ticket, setTicket] = useState<TicketTypeData>(selectedTicket)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const router = useRouter()
-    const onTicketUpdated = (newTicket: TicketData) => {
+    const onTicketUpdated = (newTicket: TicketTypeData) => {
         setTicket(newTicket)
     }
     const onTicketDeleted = () => {
@@ -55,30 +55,30 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
     }
 
     return (
-        <div className={"container w-3/6 py-10 h-[100vh] overflow-auto"}>
-            <div className={"flex justify-between px-6 pb-6 items-center"}>
-                <Link href={"/ticket-types"}>
+        <div className="container w-3/6 py-10 h-[100vh] overflow-auto">
+            <div className="flex justify-between px-6 pb-6 items-center">
+                <Link href="/ticket-types">
                     <span className="material-icons-outlined">arrow_back</span>
                 </Link>
                 <div>
                     Ticket details
                 </div>
-                <div className={"flex"}>
-                    <div className={" flex flex-row items-center hover:cursor-pointer px-5"}
+                <div className="flex">
+                    <div className=" flex flex-row items-center hover:cursor-pointer px-5"
                          onClick={(event) => {
                              event.preventDefault()
                              handleEditClick()
                          }}>
-                        <Pencil className={"mx-1"}/>
+                        <Pencil className="mx-1"/>
                         <span>Edit</span>
                     </div>
                     <div
-                        className={"flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"}
+                        className="flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"
                         onClick={(event) => {
                             event.preventDefault()
                             handleDeleteClick()
                         }}>
-                        <Trash className={"mx-1"}/>
+                        <Trash className="mx-1"/>
                         <span>Delete</span>
                     </div>
                 </div>
@@ -96,11 +96,11 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                         {ticket.description}
                     </div>
                 </div>
-                <div className={"flex flex-wrap items-center "}>
+                <div className="flex flex-wrap items-center ">
                     <div className="mb-6 flex-1">
                         <Label>Price:</Label>
                         <div className={`${fieldAppearance} mt-2`}>
-                            {ticket.price} €
+                            {ticket.price} HUF
                         </div>
                     </div>
                     <div className="mb-6 flex-1">
@@ -118,9 +118,9 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                 </div>
             </div>
             <Toaster/>
-            <TicketTypeForm existingTicket={ticket ?? undefined}
+            <TicketTypeForm existingTicketType={ticket ?? undefined}
                             isOpen={isEditDialogOpen}
-                            onTicketModified={onTicketUpdated}
+                            onTicketTypeModified={onTicketUpdated}
                             onOpenChange={setIsEditDialogOpen}
             />
             <DeleteData entityId={ticket.id}
@@ -129,7 +129,7 @@ export default function Ticket({selectedTicket}: InferGetServerSidePropsType<typ
                         onOpenChange={setIsDeleteDialogOpen}
                         onSuccess={onTicketDeleted}
                         deleteFunction={deletedTicketType}
-                        entityType={"Ticket"}
+                        entityType="Ticket"
             />
         </div>
     )

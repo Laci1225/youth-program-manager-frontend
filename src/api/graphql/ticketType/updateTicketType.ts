@@ -1,8 +1,8 @@
 import {clientSideClient} from "@/api/graphql/client";
 import {ApolloClient, gql, NormalizedCacheObject} from "@apollo/client";
-import {TicketData, TicketDataInput} from "@/model/ticket-data";
+import {TicketTypeData, TicketTypeDataInput} from "@/model/ticket-type-data";
 
-export default async function updateTicketType(ticketId: string, ticketData: TicketDataInput, client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketData> {
+export default async function updateTicketType(ticketId: string, ticketData: TicketTypeDataInput, client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketTypeData> {
     let value = await client
     .mutate({
         mutation: gql`

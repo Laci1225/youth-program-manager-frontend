@@ -1,8 +1,8 @@
 import {clientSideClient} from "@/api/graphql/client";
 import {gql} from "@apollo/client";
-import {TicketDataInput} from "@/model/ticket-data";
+import {TicketTypeDataInput} from "@/model/ticket-type-data";
 
-export default function addTicketType(values: TicketDataInput) {
+export default function addTicketType(values: TicketTypeDataInput) {
     return clientSideClient
     .mutate({
         mutation: gql`

@@ -10,16 +10,28 @@ export interface CalendarInputProps {
     value: any;
     onChange: (newValue: any) => void;
     shownYear: number
+    disabled?: boolean
+    canBeFuture?: boolean
+    minDate?: Date
+    onSelectCallback?: () => void;
 }
 
-export default function CalendarInput({value, onChange, shownYear}: CalendarInputProps) {
+export default function CalendarInput({
+                                          value,
+                                          onChange,
+                                          shownYear,
+                                          disabled = false,
+                                          canBeFuture = false,
+                                          minDate,
+                                          onSelectCallback
+                                      }: CalendarInputProps) {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     return (
         <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-            <PopoverTrigger className={cn(
+            <PopoverTrigger disabled={disabled} className={cn(
                 fieldAppearance,
                 !value && "text-muted-foreground"
-            )} type={"button"} onClick={() => setIsPopoverOpen(true)}>
+            )} type="button" onClick={() => setIsPopoverOpen(true)}>
                 <div className="flex">
                     <CalendarIcon className="mr-2 h-4 w-4"/>
                     {value ? format(value, "P") :
@@ -28,15 +40,17 @@ export default function CalendarInput({value, onChange, shownYear}: CalendarInpu
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
                 <Calendar
-                    mode={"single"}
+                    mode="single"
                     initialFocus
                     selected={value}
                     onSelect={(newDate) => {
                         onChange(newDate ? newDate : undefined);
                         setIsPopoverOpen(false);
+                        onSelectCallback?.();
                     }}
                     defaultMonth={new Date(shownYear, 1)}
-                    toDate={new Date()}
+                    fromDate={minDate}
+                    toDate={!canBeFuture ? new Date() : undefined}
                 />
             </PopoverContent>
         </Popover>

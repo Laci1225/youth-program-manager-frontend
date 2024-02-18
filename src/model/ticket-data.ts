@@ -1,16 +1,27 @@
+import {ChildData} from "@/model/child-data";
+import {TicketTypeData} from "@/model/ticket-type-data";
+
 export interface TicketData {
     id: string
-    name: string,
-    description: string,
+    child: ChildData
+    ticketType: TicketTypeData,
+    issueDate: Date,
+    expirationDate: Date
     price: number,
     numberOfParticipation: number
-    standardValidityPeriod: number
+    historyLog: HistoryData[]
+}
+
+export interface HistoryData {
+    date: Date,
+    reporter: string
 }
 
 export interface TicketDataInput {
-    name: string,
-    description: string,
+    childId: string
+    ticketTypeId: string,
+    issueDate: Date,
+    expirationDate: Date
     price: number,
     numberOfParticipation: number
-    standardValidityPeriod: number
 }

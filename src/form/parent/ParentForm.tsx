@@ -81,7 +81,6 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
             addParent({...parentFields, childId: child?.id})
                 .then((result) => {
                     onParentModified(result)
-                    console.log(result)
                     toast({
                         title: "The parent is successfully added",
                         description: `A parent with name: ${form.getValues("givenName")} ${form.getValues("familyName")} created`,
@@ -165,6 +164,8 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
                                                             <AutoComplete
                                                                 className="w-2/3"
                                                                 isLoading={false}
+                                                                getLabelForItem={(item) => `${item.givenName} ${item.familyName}`}
+                                                                getDescriptionForItem={(item) => `${item.birthDate}`}
                                                                 disabled={false}
                                                                 value={field.value}
                                                                 getPotential={getPotentialChildren}

@@ -41,8 +41,8 @@ export function InputMedicinesHandler({value, onChange}: InputHandlerProps) {
     return (
         <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-                <Button type={"button"}
-                        variant={"default"}
+                <Button type="button"
+                        variant="default"
                         onClick={() => {
                             setDialogOpen(true)
                             medicineForm.reset()
@@ -98,7 +98,7 @@ export function InputMedicinesHandler({value, onChange}: InputHandlerProps) {
                                     )
                                 }}
                             />
-                            <Button type={"submit"}>Add</Button>
+                            <Button type="submit">Add</Button>
                         </div>
                     </form>
                 </Form>

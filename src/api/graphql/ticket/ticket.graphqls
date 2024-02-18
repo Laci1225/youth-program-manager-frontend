@@ -1,26 +1,39 @@
-type TicketType {
+type Ticket {
     id: ID!
-    name: String!
-    description: String!
+    child: Child!
+    ticketType: TicketType!
+    issueDate: LocalDateTime
+    expirationDate: LocalDateTime
     price: Float!
     numberOfParticipation: Int!
-    standardValidityPeriod: Int!
+    historyLog: [HistoryData]
+}
+type HistoryData{
+    date: LocalDateTime!
+    reporter: String!
 }
 
-input TicketTypeInput {
-    name: String!
-    description: String!
+input TicketInput {
+    childId: ID!
+    ticketTypeId: ID!
+    issueDate: LocalDateTime
+    expirationDate: LocalDateTime
     price: Float!
     numberOfParticipation: Int!
-    standardValidityPeriod: Int!
+}
+input HistoryDataInput{
+    date: LocalDateTime!
+    reporter: String!
 }
 extend type Query {
-    getAllTicketTypes: [TicketType!]!
-    getTicketTypeById(id: String!): TicketType!
-
+    getAllTickets: [Ticket!]!
+    getTicketById(id: String!): Ticket!
+    getPotentialTicketTypes(name: String!): [TicketType]
 }
 extend type Mutation{
-    addTicketType(ticket: TicketTypeInput!): TicketType!
-    updateTicketType(id: String!, ticket: TicketTypeInput!): TicketType!
-    deletedTicketType(id: String!): TicketType!
+    addTicket(ticket: TicketInput!): Ticket!
+    updateTicket(id: String!, ticket: TicketInput!): Ticket!
+    deleteTicket(id: String!): Ticket!
+    reportParticipation(id:String!,historyData: HistoryDataInput!): Ticket!
+    removeParticipation(id:String!,historyData: HistoryDataInput!): Ticket!
 }

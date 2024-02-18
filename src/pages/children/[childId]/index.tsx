@@ -15,10 +15,12 @@ import {AlertTriangle, Pencil, Trash} from "lucide-react";
 import DeleteData from "@/components/deleteData";
 import deleteChild from "@/api/graphql/child/deleteChild";
 import HoverText from "@/components/hoverText";
+import {ParentDataWithEmergencyContact} from "@/model/parent-data";
 import SaveParentsDataToChild from "@/table/child/SaveParentsDataToChild";
 import fromChildWithParentsToChildData from "@/model/fromChildWithParentsToChildData";
 import ParentInEditMode from "@/table/child/ParentInEditMode";
 import {cn} from "@/lib/utils";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 
 
 export const getServerSideProps = (async (context) => {
@@ -127,20 +129,49 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
                     className={cn(`mb-6`, isEditModeBorderVisible && "border border-dashed border-gray-400  p-2 rounded")}>
                     <SaveParentsDataToChild onEdit={onEditClicked}
                                             isEditParentsModeEnabled={isEditParentsModeEnabled}/>
-                    {isEditParentsModeEnabled ?
-                        <>
-                            <ParentInEditMode child={currentChild}
-                                              childWithParents={childWithParents}
-                                              setChildWithParents={setChildWithParents}
-                                              setIsEditParentsModeEnabled={setIsEditParentsModeEnabled}/>
-                        </> :
-                        <ShowTable tableFields={["Name", "isEmergencyContact"]}
-                                   value={childWithParents.parents?.map((parent) => ({
-                                       name: parent.parentDto.givenName + " " + parent.parentDto.familyName,
-                                       isEmergencyContact: <span
-                                           className="material-icons-outlined">{parent.isEmergencyContact ? 'check_box' : 'check_box_outline_blank'}</span>
-                                   }))}
-                                   showDeleteButton={false}/>
+                    {isEditParentsModeEnabled ? (
+                            <>
+                                <ParentInEditMode child={currentChild}
+                                                  childWithParents={childWithParents}
+                                                  setChildWithParents={setChildWithParents}
+                                                  setIsEditParentsModeEnabled={setIsEditParentsModeEnabled}/>
+                            </>) :
+                        <div className={`w-full`}>
+                            <Table className="w-full border border-gray-200">
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="text-center">Name</TableHead>
+                                        <TableHead className="text-center">IsEmergencyContact</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>{
+                                    childWithParents.parents && childWithParents.parents?.length !== 0 ? (
+                                        childWithParents.parents.map((parent: ParentDataWithEmergencyContact, index: number) => (
+                                            <TableRow key={index} className="hover:bg-gray-300 hover:cursor-pointer"
+                                                      onClick={() => router.push(`/parents/${parent.parentDto.id}`, `/parents/${parent.parentDto.id}`)}>
+                                                <TableCell className="text-center">
+                                                    {parent.parentDto.givenName + " " + parent.parentDto.familyName}
+                                                </TableCell>
+                                                <TableCell className="text-center">
+                                                <span className="material-icons-outlined">
+                                                    <span className="material-icons-outlined">
+                                                        {parent.isEmergencyContact ? 'check_box' : 'check_box_outline_blank'}
+                                                    </span>
+                                                </span>
+                                                </TableCell>
+
+                                            </TableRow>
+                                        ))) : (
+                                        <TableRow>
+                                            <TableCell className="text-center text-gray-400"
+                                                       colSpan={2}>
+                                                Nothing added yet
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
                     }
                 </div>
                 <ShowTable className="mb-6" tableFields={["Name", "Diagnosed at"]}

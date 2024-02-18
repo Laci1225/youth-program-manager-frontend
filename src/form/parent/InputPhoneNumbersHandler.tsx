@@ -35,7 +35,7 @@ export function InputPhoneNumbersHandler({value, onChange, errors}: InputHandler
         <>
             {phoneNumbers.map((phoneNumber, index) => (
                 <div key={index}>
-                    <div className={"flex items-center"}>
+                    <div className="flex items-center">
                         <Input
                             placeholder={index === 0 ? "Scheme: +36200000000" : "Optional Phone number"}
                             required={index === 0}
@@ -53,15 +53,15 @@ export function InputPhoneNumbersHandler({value, onChange, errors}: InputHandler
                             </Button>
                         )}
                     </div>
-                    <div className={"text-sm font-medium text-destructive mt-2"}>
+                    <div className="text-sm font-medium text-destructive mt-2">
                         {errors[index]?.message}
                     </div>
                 </div>
             ))}
             <Button
                 className={fieldAppearance}
-                type={"button"}
-                variant={"ghost"}
+                type="button"
+                variant="ghost"
                 onClick={addPhoneNumberField}
             >
                 <PlusSquare/>

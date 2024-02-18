@@ -10,7 +10,8 @@ import {Button} from "@/components/ui/button";
 import {ChildNameData, RelativeParent} from "@/model/child-data";
 import debounce from "@/utils/debounce";
 import {format} from "date-fns";
-
+import {TicketTypeData} from "@/model/ticket-type-data";
+import {isStrictDate} from "@/utils/date";
 
 type AutoCompleteProps<T> = {
     emptyMessage: string
@@ -23,28 +24,32 @@ type AutoCompleteProps<T> = {
     alreadyAddedData?: ChildNameData[] | RelativeParent[]
     isAdded: boolean
     getPotential: (name: string, limit: number) => Promise<T[]>
+    getLabelForItem: (item: T) => string
+    getDescriptionForItem?: (item: T) => string
 }
 
-export const AutoComplete = <T extends ParentData | ChildNameData>({
-                                                                       alreadyAddedData,
-                                                                       className,
-                                                                       isAdded,
-                                                                       placeholder,
-                                                                       emptyMessage,
-                                                                       value,
-                                                                       onValueChange,
-                                                                       disabled,
-                                                                       isLoading = false,
-                                                                       getPotential,
-                                                                   }: AutoCompleteProps<T>) => {
+export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeData>({
+                                                                                        alreadyAddedData,
+                                                                                        className,
+                                                                                        isAdded,
+                                                                                        placeholder,
+                                                                                        emptyMessage,
+                                                                                        value,
+                                                                                        onValueChange,
+                                                                                        disabled,
+                                                                                        isLoading = false,
+                                                                                        getPotential,
+                                                                                        getLabelForItem,
+                                                                                        getDescriptionForItem,
+                                                                                    }: AutoCompleteProps<T>) => {
     const inputRef = useRef<HTMLInputElement>(null)
 
     const [isOpen, setOpen] = useState(false)
-    const [inputValue, setInputValue] = useState<string | undefined>(value ? `${value.familyName} ${value.givenName}` : undefined)
+    const [inputValue, setInputValue] = useState<string | undefined>(value ? getLabelForItem(value) : undefined)
     const [options, setOptions] = useState<T[]>()
 
     useEffect(() => {
-        setInputValue(value ? `${value.familyName} ${value.givenName}` : undefined)
+        setInputValue(value ? getLabelForItem(value) : undefined)
         if (isAdded) {
             setInputValue("")
             onValueChange?.(undefined)
@@ -63,9 +68,15 @@ export const AutoComplete = <T extends ParentData | ChildNameData>({
                 setOptions(filteredItems)
             })
             .catch(reason => {
-                console.error("Failed to get potential parents:", reason);
+                console.error("Failed to get potential items:", reason);
             });
     }, [alreadyAddedData]);
+
+    function handleClear() {
+        onValueChange?.(undefined)
+        setInputValue("")
+        setOptions(undefined)
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const debouncedFetchPotential = useCallback(debounce(fetchPotential), [fetchPotential]);
@@ -111,12 +122,12 @@ export const AutoComplete = <T extends ParentData | ChildNameData>({
 
     const handleBlur = useCallback(() => {
         setOpen(false)
-        setInputValue(value ? `${value.familyName} ${value.givenName}` : undefined)
+        setInputValue(value ? getLabelForItem(value) : undefined)
     }, [value])
 
     const handleSelectOption = useCallback(
         (selectedOption: T) => {
-            setInputValue(selectedOption ? `${selectedOption.familyName} ${selectedOption.givenName}` : undefined)
+            setInputValue(selectedOption ? getLabelForItem(selectedOption) : undefined)
 
             onValueChange?.(selectedOption)
 
@@ -164,7 +175,7 @@ export const AutoComplete = <T extends ParentData | ChildNameData>({
                                             return (
                                                 <CommandItem
                                                     key={option.id}
-                                                    value={option ? `${option.familyName} ${option.givenName}` : undefined}
+                                                    value={getLabelForItem(option)}
                                                     onMouseDown={(event) => {
                                                         event.preventDefault()
                                                         event.stopPropagation()
@@ -173,15 +184,20 @@ export const AutoComplete = <T extends ParentData | ChildNameData>({
                                                     className={cn("flex items-center gap-2 w-full", !isSelected && "pl-8")}
                                                 >
                                                     {isSelected ? <Check className="w-4"/> : null}
-                                                    {option && ('birthDate' in option ? (
-                                                        <div>
-                                                            {option.familyName} {option.givenName} {format(new Date(option.birthDate), "P")}
+                                                    <div className={"flex"}>
+                                                        <div className={"pr-2"}>
+                                                            {getLabelForItem(option)}
                                                         </div>
-                                                    ) : (
-                                                        <div>
-                                                            {option.familyName} {option.givenName} {option.phoneNumbers[0]}
-                                                        </div>
-                                                    ))}
+                                                        {getDescriptionForItem && (
+                                                            <div>
+                                                                {
+                                                                    !isStrictDate(getDescriptionForItem(option))
+                                                                        ? getDescriptionForItem(option) :
+                                                                        format(new Date(getDescriptionForItem(option)), "P")
+                                                                }
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </CommandItem>
                                             )
                                         })}
@@ -199,18 +215,16 @@ export const AutoComplete = <T extends ParentData | ChildNameData>({
                     ) : null}
                 </div>
             </CommandPrimitive>
-            <Button
-                type="button"
-                variant={"ghost"}
-                className="absolute top-1 right-1 text-red-500 p-0 mt-1 mr-1 h-fit"
-                onClick={() => {
-                    onValueChange?.(undefined)
-                    setInputValue("")
-                    setOptions(undefined)
-                }}
-            >
-                <XIcon/>
-            </Button>
+            {!disabled &&
+                <Button
+                    type="button"
+                    variant="ghost"
+                    className="absolute top-1 right-1 text-red-500 p-0 mt-1 mr-1 h-fit"
+                    onClick={handleClear}
+                >
+                    <XIcon/>
+                </Button>
+            }
         </div>
     )
 }
