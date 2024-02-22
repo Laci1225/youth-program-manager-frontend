@@ -24,7 +24,7 @@ type AutoCompleteProps<T> = {
     className?: string
     alreadyAddedData?: ChildNameData[] | RelativeParent[]
     isAdded: boolean
-    getPotential: (name: string, limit: number) => Promise<T[]>
+    getPotential: (name: string, limit: number, accessToken: string) => Promise<T[]>
     getLabelForItem: (item: T) => string
     getDescriptionForItem?: (item: T) => string
 }
