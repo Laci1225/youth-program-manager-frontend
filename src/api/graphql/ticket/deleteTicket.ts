@@ -1,20 +1,20 @@
-import {ApolloClient, NormalizedCacheObject} from '@apollo/client';
-import {clientSideClient} from '@/api/graphql/client';
-import {gql} from '@apollo/client';
+import {clientSideClient} from "@/api/graphql/client";
+import {ApolloClient, gql, NormalizedCacheObject} from "@apollo/client";
 import {TicketData} from "@/model/ticket-data";
 
-export default async function getAllTickets(authToken: string | undefined,
-                                            client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketData[]> {
-    let value = await client.query({
-        query: gql`
-            query {
-                getAllTickets {
+export default async function deletedTicket(ticketId: string,
+                                            authToken: string | undefined,
+                                            client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketData> {
+    let value = await client
+    .mutate({
+        mutation: gql`
+            mutation DeleteTicket($id: String!) {
+                deleteTicket(id : $id){
                     id
                     child {
                         id
                         givenName
                         familyName
-                        birthDate
                     }
                     ticketType{
                         id
@@ -22,7 +22,6 @@ export default async function getAllTickets(authToken: string | undefined,
                         price
                         numberOfParticipation
                         standardValidityPeriod
-                        description
                     }
                     issueDate
                     expirationDate
@@ -34,12 +33,15 @@ export default async function getAllTickets(authToken: string | undefined,
                     }
                 }
             }
-        `, fetchPolicy: "no-cache",
+        `,
+        variables: {
+            id: ticketId,
+        },
         context: {
             headers: {
                 Authorization: `Bearer ${authToken}`,
             },
         },
     });
-    return await value.data.getAllTickets;
+    return value.data.deleteTicket;
 }

@@ -223,6 +223,7 @@ function ChildForm({
                                                             <AutoComplete
                                                                 className="w-2/3"
                                                                 value={field.value}
+                                                                getLabelForItem={(item) => `${item.givenName} ${item.familyName}`}
                                                                 isLoading={false}
                                                                 disabled={false}
                                                                 getPotential={getPotentialParents}

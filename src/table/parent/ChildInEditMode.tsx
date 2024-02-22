@@ -116,6 +116,7 @@ export default function ChildInEditMode({
                         className={"w-2/3 mr-3"}
                         getPotential={getPotentialChildren}
                         key={0}
+                        getLabelForItem={(item) => `${item.givenName} ${item.familyName}`}
                         isAdded={false}
                         isLoading={false}
                         disabled={false}
