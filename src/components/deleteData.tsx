@@ -1,7 +1,7 @@
 import {toast} from "@/components/ui/use-toast";
-import React from "react";
+import React, {useContext} from "react";
 import ConfirmDialog from "@/components/confirmDialog";
-import {useAuth} from "@/utils/auth";
+import AccessTokenContext from "@/context/AccessTokenContext";
 
 interface DeleteDataProps<T> {
     entityId?: string,
@@ -22,7 +22,8 @@ export default function DeleteData<T>({
                                           deleteFunction,
                                           entityType,
                                       }: DeleteDataProps<T>) {
-    const {accessToken} = useAuth();
+
+    const accessToken = useContext(AccessTokenContext);
     const handleDelete = async () => {
         if (entityId) {
             try {

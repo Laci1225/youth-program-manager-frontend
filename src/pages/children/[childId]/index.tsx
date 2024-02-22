@@ -22,8 +22,11 @@ import ParentInEditMode from "@/table/child/ParentInEditMode";
 import {cn} from "@/lib/utils";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
+import AccessTokenContext from "@/context/AccessTokenContext";
 
-export const getServerSideProps = withPageAuthRequired<{ selectedChildData: ChildDataWithParents }, {
+export const getServerSideProps = withPageAuthRequired<{
+    selectedChildData: ChildDataWithParents, accessToken: string
+}, {
     childId: string
 }>({
     async getServerSideProps(context) {
@@ -33,7 +36,8 @@ export const getServerSideProps = withPageAuthRequired<{ selectedChildData: Chil
             childData = await getChildById(context.params.childId, session?.accessToken, serverSideClient);
             return {
                 props: {
-                    selectedChildData: childData
+                    selectedChildData: childData,
+                    accessToken: session!.accessToken!
                 }
             }
         }
@@ -42,7 +46,10 @@ export const getServerSideProps = withPageAuthRequired<{ selectedChildData: Chil
         };
     }
 })
-export default function Child({selectedChildData}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Child({
+                                  selectedChildData,
+                                  accessToken
+                              }: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
     const [childWithParents, setChildWithParents] = useState<ChildDataWithParents>(selectedChildData)
     const currentChild: ChildData = fromChildWithParentsToChildData(childWithParents);
@@ -74,132 +81,134 @@ export default function Child({selectedChildData}: InferGetServerSidePropsType<t
     }
 
     return (
-        <div className="container w-3/6 py-10 h-[100vh] overflow-auto">
-            <div className="flex justify-between px-6 pb-6 items-center">
-                <Link href="/children">
-                    <span className="material-icons-outlined">arrow_back</span>
-                </Link>
-                <div>
-                    Child details
+        <AccessTokenContext.Provider value={accessToken}>
+            <div className="container w-3/6 py-10 h-[100vh] overflow-auto">
+                <div className="flex justify-between px-6 pb-6 items-center">
+                    <Link href="/children">
+                        <span className="material-icons-outlined">arrow_back</span>
+                    </Link>
+                    <div>
+                        Child details
+                    </div>
+                    <HoverText>
+                        {
+                            (!currentChild.relativeParents?.length) && (
+                                <div className="flex">
+                                    <AlertTriangle className="text-yellow-600"/>
+                                    Parent not associated yet
+                                </div>)
+                        }
+                    </HoverText>
+                    <div className="flex">
+                        <div className="flex flex-row items-center hover:cursor-pointer px-5"
+                             onClick={(event) => {
+                                 event.preventDefault()
+                                 handleEditClick()
+                             }}>
+                            <Pencil className="mx-1"/>
+                            <span>Edit</span>
+                        </div>
+                        <div
+                            className="flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"
+                            onClick={(event) => {
+                                event.preventDefault()
+                                handleDeleteClick()
+                            }}>
+                            <Trash className="mx-1"/>
+                            <span>Delete</span>
+                        </div>
+                    </div>
                 </div>
-                <HoverText>
-                    {
-                        (!currentChild.relativeParents?.length) && (
-                            <div className="flex">
-                                <AlertTriangle className="text-yellow-600"/>
-                                Parent not associated yet
-                            </div>)
-                    }
-                </HoverText>
-                <div className="flex">
-                    <div className="flex flex-row items-center hover:cursor-pointer px-5"
-                         onClick={(event) => {
-                             event.preventDefault()
-                             handleEditClick()
-                         }}>
-                        <Pencil className="mx-1"/>
-                        <span>Edit</span>
+                <div className="border border-gray-200 rounded p-4">
+                    <div className="mb-6">
+                        <Label>Full Name:</Label>
+                        <div className={`${fieldAppearance} mt-2`}>
+                            {currentChild.givenName} {currentChild.familyName}
+                        </div>
+                    </div>
+                    <div className="mb-6">
+                        <Label>Birth date and place:</Label>
+                        <div className={`${fieldAppearance} mt-2`}>
+                            {format(new Date(currentChild.birthDate), "P")} {currentChild.birthPlace}
+                        </div>
+                    </div>
+                    <div className="mb-6">
+                        <Label>Address:</Label>
+                        <div className={`${fieldAppearance} mt-2`}>
+                            {currentChild.address}
+                        </div>
                     </div>
                     <div
-                        className="flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"
-                        onClick={(event) => {
-                            event.preventDefault()
-                            handleDeleteClick()
-                        }}>
-                        <Trash className="mx-1"/>
-                        <span>Delete</span>
-                    </div>
-                </div>
-            </div>
-            <div className="border border-gray-200 rounded p-4">
-                <div className="mb-6">
-                    <Label>Full Name:</Label>
-                    <div className={`${fieldAppearance} mt-2`}>
-                        {currentChild.givenName} {currentChild.familyName}
-                    </div>
-                </div>
-                <div className="mb-6">
-                    <Label>Birth date and place:</Label>
-                    <div className={`${fieldAppearance} mt-2`}>
-                        {format(new Date(currentChild.birthDate), "P")} {currentChild.birthPlace}
-                    </div>
-                </div>
-                <div className="mb-6">
-                    <Label>Address:</Label>
-                    <div className={`${fieldAppearance} mt-2`}>
-                        {currentChild.address}
-                    </div>
-                </div>
-                <div
-                    className={cn(`mb-6`, isEditModeBorderVisible && "border border-dashed border-gray-400  p-2 rounded")}>
-                    <SaveParentsDataToChild onEdit={onEditClicked}
-                                            isEditParentsModeEnabled={isEditParentsModeEnabled}/>
-                    {isEditParentsModeEnabled ? (
-                            <>
-                                <ParentInEditMode child={currentChild}
-                                                  childWithParents={childWithParents}
-                                                  setChildWithParents={setChildWithParents}
-                                                  setIsEditParentsModeEnabled={setIsEditParentsModeEnabled}/>
-                            </>) :
-                        <div className={`w-full`}>
-                            <Table className="w-full border border-gray-200">
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="text-center">Name</TableHead>
-                                        <TableHead className="text-center">IsEmergencyContact</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>{
-                                    childWithParents.parents && childWithParents.parents?.length !== 0 ? (
-                                        childWithParents.parents.map((parent: ParentDataWithEmergencyContact, index: number) => (
-                                            <TableRow key={index} className="hover:bg-gray-300 hover:cursor-pointer"
-                                                      onClick={() => router.push(`/parents/${parent.parentDto.id}`, `/parents/${parent.parentDto.id}`)}>
-                                                <TableCell className="text-center">
-                                                    {parent.parentDto.givenName + " " + parent.parentDto.familyName}
-                                                </TableCell>
-                                                <TableCell className="text-center">
+                        className={cn(`mb-6`, isEditModeBorderVisible && "border border-dashed border-gray-400  p-2 rounded")}>
+                        <SaveParentsDataToChild onEdit={onEditClicked}
+                                                isEditParentsModeEnabled={isEditParentsModeEnabled}/>
+                        {isEditParentsModeEnabled ? (
+                                <>
+                                    <ParentInEditMode child={currentChild}
+                                                      childWithParents={childWithParents}
+                                                      setChildWithParents={setChildWithParents}
+                                                      setIsEditParentsModeEnabled={setIsEditParentsModeEnabled}/>
+                                </>) :
+                            <div className={`w-full`}>
+                                <Table className="w-full border border-gray-200">
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="text-center">Name</TableHead>
+                                            <TableHead className="text-center">IsEmergencyContact</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>{
+                                        childWithParents.parents && childWithParents.parents?.length !== 0 ? (
+                                            childWithParents.parents.map((parent: ParentDataWithEmergencyContact, index: number) => (
+                                                <TableRow key={index} className="hover:bg-gray-300 hover:cursor-pointer"
+                                                          onClick={() => router.push(`/parents/${parent.parentDto.id}`, `/parents/${parent.parentDto.id}`)}>
+                                                    <TableCell className="text-center">
+                                                        {parent.parentDto.givenName + " " + parent.parentDto.familyName}
+                                                    </TableCell>
+                                                    <TableCell className="text-center">
                                                 <span className="material-icons-outlined">
                                                     <span className="material-icons-outlined">
                                                         {parent.isEmergencyContact ? 'check_box' : 'check_box_outline_blank'}
                                                     </span>
                                                 </span>
-                                                </TableCell>
+                                                    </TableCell>
 
+                                                </TableRow>
+                                            ))) : (
+                                            <TableRow>
+                                                <TableCell className="text-center text-gray-400"
+                                                           colSpan={2}>
+                                                    Nothing added yet
+                                                </TableCell>
                                             </TableRow>
-                                        ))) : (
-                                        <TableRow>
-                                            <TableCell className="text-center text-gray-400"
-                                                       colSpan={2}>
-                                                Nothing added yet
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </div>
-                    }
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        }
+                    </div>
+                    <ShowTable className="mb-6" tableFields={["Name", "Diagnosed at"]}
+                               value={currentChild.diagnosedDiseases}
+                               showDeleteButton={false}/>
+                    <ShowTable tableFields={["Name", "Dose", "Taken since"]}
+                               value={currentChild.regularMedicines}
+                               showDeleteButton={false}/>
                 </div>
-                <ShowTable className="mb-6" tableFields={["Name", "Diagnosed at"]}
-                           value={currentChild.diagnosedDiseases}
-                           showDeleteButton={false}/>
-                <ShowTable tableFields={["Name", "Dose", "Taken since"]}
-                           value={currentChild.regularMedicines}
-                           showDeleteButton={false}/>
+                <Toaster/>
+                <ChildForm existingChild={currentChild ?? undefined}
+                           isOpen={isChildEditModeEnabled}
+                           onChildModified={onChildUpdated}
+                           onOpenChange={setIsChildEditModeEnabled}
+                />
+                <DeleteData entityId={currentChild.id}
+                            entityLabel={`${currentChild.givenName} ${currentChild.familyName}`}
+                            isOpen={isDeleteModeEnabled}
+                            onOpenChange={setIsDeleteModeEnabled}
+                            onSuccess={onChildDeleted}
+                            deleteFunction={deleteChild}
+                            entityType="Child"
+                />
             </div>
-            <Toaster/>
-            <ChildForm existingChild={currentChild ?? undefined}
-                       isOpen={isChildEditModeEnabled}
-                       onChildModified={onChildUpdated}
-                       onOpenChange={setIsChildEditModeEnabled}
-            />
-            <DeleteData entityId={currentChild.id}
-                        entityLabel={`${currentChild.givenName} ${currentChild.familyName}`}
-                        isOpen={isDeleteModeEnabled}
-                        onOpenChange={setIsDeleteModeEnabled}
-                        onSuccess={onChildDeleted}
-                        deleteFunction={deleteChild}
-                        entityType="Child"
-            />
-        </div>
+        </AccessTokenContext.Provider>
     )
 }

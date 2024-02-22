@@ -1,7 +1,7 @@
 import {AutoComplete} from "@/form/AutoComplete";
 import {Button} from "@/components/ui/button";
 import {PlusSquare} from "lucide-react";
-import React, {Dispatch, SetStateAction, useState} from "react";
+import React, {Dispatch, SetStateAction, useContext, useState} from "react";
 import {ParentData, ParentDataWithEmergencyContact} from "@/model/parent-data";
 import {ChildData, ChildDataWithParents, RelativeParent} from "@/model/child-data";
 import {toast} from "@/components/ui/use-toast";
@@ -10,7 +10,7 @@ import ChildsParentsTable from "@/table/child/ChildsParentsTable";
 import getPotentialParents from "@/api/graphql/child/getPotentialParents";
 import ParentForm from "@/form/parent/ParentForm";
 import fromChildWithParentsToChildData from "@/model/fromChildWithParentsToChildData";
-import {useAuth} from "@/utils/auth";
+import AccessTokenContext from "@/context/AccessTokenContext";
 
 interface ParentInEditModeProps {
     child: ChildData
@@ -25,7 +25,7 @@ export default function ParentInEditMode({
                                              setChildWithParents,
                                              setIsEditParentsModeEnabled
                                          }: ParentInEditModeProps) {
-    const {accessToken} = useAuth()
+    const accessToken = useContext(AccessTokenContext)
     const [tempChildWithParents, setTempChildWithParents] = useState<ChildDataWithParents>(childWithParents)
     const [selectedParentDataToAdd, setSelectedParentDataToAdd] = useState<ParentData>()
 

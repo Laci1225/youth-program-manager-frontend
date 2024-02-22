@@ -1,6 +1,6 @@
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 import {Input} from "@/components/ui/input";
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {useForm} from "react-hook-form"
 import * as z from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -18,7 +18,7 @@ import getPotentialChildren from "@/api/graphql/parent/getPotentialChildren";
 import {Button} from "@/components/ui/button";
 import {ChildData} from "@/model/child-data";
 import ChildForm from "@/form/child/ChildForm";
-import {useAuth} from "@/utils/auth";
+import AccessTokenContext from "@/context/AccessTokenContext";
 
 interface ParentFormProps {
     onParentModified: (parent: ParentData) => void;
@@ -36,7 +36,7 @@ function ParentForm({
                         onOpenChange,
                         onChildFormClicked,
                     }: ParentFormProps) {
-    const {accessToken} = useAuth();
+    const accessToken = useContext(AccessTokenContext)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof parentSchema>>({
         resolver: zodResolver(parentSchema),

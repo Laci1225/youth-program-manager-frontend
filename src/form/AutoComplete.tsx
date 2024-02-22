@@ -1,6 +1,6 @@
 import {CommandGroup, CommandItem, CommandList, CommandInput} from "@/components/ui/command"
 import {Command as CommandPrimitive} from "cmdk"
-import React, {useState, useRef, useCallback, type KeyboardEvent, FormEvent, useEffect} from "react"
+import React, {useState, useRef, useCallback, type KeyboardEvent, FormEvent, useEffect, useContext} from "react"
 
 import {cn} from "@/lib/utils"
 import {Check, XIcon} from "lucide-react"
@@ -11,7 +11,7 @@ import {ChildNameData, RelativeParent} from "@/model/child-data";
 import debounce from "@/utils/debounce";
 import {format} from "date-fns";
 import {TicketTypeData} from "@/model/ticket-type-data";
-import {useAuth} from "@/utils/auth";
+import AccessTokenContext from "@/context/AccessTokenContext";
 
 type AutoCompleteProps<T> = {
     emptyMessage: string
@@ -38,7 +38,7 @@ export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeDa
                                                                                         isLoading = false,
                                                                                         getPotential,
                                                                                     }: AutoCompleteProps<T>) => {
-    const {accessToken} = useAuth()
+    const accessToken = useContext(AccessTokenContext)
     const getDisplayName = (item: T): string => {
         if ('familyName' in item && 'givenName' in item) {
             return `${item.familyName} ${item.givenName}`;
