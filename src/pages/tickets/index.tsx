@@ -7,18 +7,17 @@ import {AlertTriangle, Check, PlusSquare} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
 import DeleteData from "@/components/deleteData";
-import SettingsDropdown from "@/components/SettingsDropdown";
+import SettingsDropdown, {DropdownItem} from "@/components/SettingsDropdown";
 import getAllTickets from "@/api/graphql/ticket/getAllTickets";
 import {TicketData} from "@/model/ticket-data";
-import {differenceInDays, format} from "date-fns";
+import {format} from "date-fns";
 import TicketForm from "@/form/ticket/TicketForm";
 import HoverText from "@/components/hoverText";
-import deletedTicket from "@/api/graphql/ticket/deletedTicket";
-import {DropdownMenuItem} from "@/components/ui/dropdown-menu";
-import updateTicket from "@/api/graphql/ticket/updateTicket";
-import fromTicketDataToTicketInputData from "@/model/fromTicketDataToTicketInputData";
+import deleteTicket from "@/api/graphql/ticket/deleteTicket";
 import ConfirmDialog from "@/components/confirmDialog";
 import {toast} from "@/components/ui/use-toast";
+import reportParticipation from "@/api/graphql/ticket/reportParticipation";
+import {calculateDaysDifference} from "@/utils/calculateDaysDifference";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 import AccessTokenContext from "@/context/AccessTokenContext";
 
@@ -35,13 +34,50 @@ export const getServerSideProps = withPageAuthRequired({
     }
 }) satisfies GetServerSideProps<{ ticketsData: TicketData[] }>;
 
-export function calculateDaysDifference(endDate: Date): number {
-    return differenceInDays(new Date(endDate), new Date());
-}
-
 export default function Tickets({ticketsData, accessToken}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-    const router = useRouter()
-    const [tickets, setTickets] = useState<TicketData[]>(ticketsData)
+    const router = useRouter();
+    const [tickets, setTickets] = useState<TicketData[]>(ticketsData);
+    const [editedTicket, setEditedTicket] = useState<TicketData | null>(null);
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [deletedTicketState, setDeletedTicketState] = useState<TicketData>();
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [isReportParticipationClicked, setIsReportParticipationClicked] = useState(false);
+    const [reportedTicket, setReportedTicket] = useState<TicketData>();
+
+    const handleEditClick = (ticket: TicketData | null) => {
+        setIsEditDialogOpen(true);
+        if (ticket) {
+            setEditedTicket({...ticket, child: {...ticket.child, birthDate: new Date(ticket.child.birthDate)}});
+        } else {
+            setEditedTicket(null);
+        }
+    }
+
+    const handleDeleteClick = (ticket: TicketData) => {
+        setIsDeleteDialogOpen(true);
+        setDeletedTicketState(ticket);
+    };
+
+    const handleReportClicked = (ticket: TicketData) => {
+        setIsReportParticipationClicked(true);
+        setReportedTicket(ticket);
+    };
+
+    const handleReport = () => {
+        if (reportedTicket) {
+            reportParticipation(reportedTicket.id, {date: new Date(), reporter: ""}).then((value) => {
+                setTickets((prevTickets) =>
+                    prevTickets.map((tic) => (value.id === tic.id ? value : tic))
+                );
+                toast({
+                    variant: "default",
+                    title: `${reportedTicket.child.givenName} ${reportedTicket.child.familyName}'s ticket data reported successfully`,
+                    description: `${reportedTicket.ticketType.name} reported`,
+                    duration: 2000,
+                });
+            });
+        }
+    };
     const onTicketSaved = (savedTicket: TicketData) => {
         if (editedTicket) {
             const modifiedTickets = tickets.map((ticket) =>
@@ -57,76 +93,71 @@ export default function Tickets({ticketsData, accessToken}: InferGetServerSidePr
         const updatedTickets = tickets.filter(p => p.id !== ticket.id);
         setTickets(updatedTickets);
     }
-    const [editedTicket, setEditedTicket] = useState<TicketData | null>(null)
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-    const [deletedTicketState, setDeletedTicketState] = useState<TicketData>()
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-    function handleEditClick(ticket: TicketData | null) {
-        setIsEditDialogOpen(true)
-        setEditedTicket(ticket)
-    }
+    const renderReportParticipationButton = (ticket: TicketData) => {
+        const items: DropdownItem[] = [];
 
-    function handleDeleteClick(ticket: TicketData) {
-        setIsDeleteDialogOpen(true)
-        setDeletedTicketState(ticket)
-    }
-
-    const [isReportParticipationClicked, setIsReportParticipationClicked] = useState<boolean>(false)
-
-    const [reportedTicket, setReportedTicket] = useState<TicketData>()
-
-    function handleReport() {
-        if (reportedTicket) {
-            const updatedHistoryLog = [
-                ...(reportedTicket.historyLog || []),
-                {date: new Date(), reporter: ""}
-            ];
-            setTickets(prevTickets => {
-                return prevTickets.map(tic => {
-                    if (reportedTicket.id === tic.id) {
-                        return {
-                            ...tic,
-                            historyLog: updatedHistoryLog
-                        };
-                    } else {
-                        return tic;
-                    }
-                });
+        if (ticket.numberOfParticipation - ticket.historyLog.length <= 0) {
+            items.push({
+                icon: <Check/>,
+                label: "Report participation",
+                hoverTextContent: "No more tickets available",
+                className: "cursor-not-allowed",
+                onClick: () => {
+                }
             });
-            updateTicket(reportedTicket.id, fromTicketDataToTicketInputData({
-                ...reportedTicket,
-                historyLog: updatedHistoryLog
-            }), accessToken)
-                .then(value => {
-                    setTickets(prevTickets => {
-                        return prevTickets.map(tic => {
-                            if (value.id === tic.id) {
-                                return {
-                                    ...tic,
-                                    historyLog: updatedHistoryLog
-                                };
-                            } else {
-                                return tic;
-                            }
-                        });
-                    });
-                })
-                .then(() =>
-                    toast({
-                        variant: "default",
-                        title: `${reportedTicket.child.givenName} ${reportedTicket.child.familyName}'s ticket data reported successfully`,
-                        description: `${reportedTicket.ticketType.name} reported`,
-                        duration: 2000
-                    })
-                )
+        } else if (calculateDaysDifference(ticket.expirationDate) <= 0) {
+            items.push({
+                icon: <Check/>,
+                label: "Report participation",
+                hoverTextContent: "Ticket expired",
+                className: "cursor-not-allowed",
+                onClick: () => {
+                }
+            });
+        } else if (calculateDaysDifference(new Date(), ticket.issueDate) < 0) {
+            items.push({
+                icon: <Check/>,
+                label: "Report participation",
+                hoverTextContent: "Ticket in not yet valid",
+                className: "cursor-not-allowed",
+                onClick: () => {
+                }
+            });
+        } else {
+            items.push({
+                icon: <Check/>,
+                label: "Report participation",
+                className: "hover:cursor-pointer bg-green-600 text-white",
+                onClick: () => {
+                    handleReportClicked(ticket)
+                }
+            });
         }
-    }
+        return items;
+    };
 
-
-    function handleReportClicked(ticket: TicketData) {
-        setIsReportParticipationClicked(true)
-        setReportedTicket(ticket)
+    function handleValidFor(ticket: TicketData) {
+        const dayDifference = calculateDaysDifference(ticket.expirationDate)
+        return <HoverText
+            content={format(new Date(ticket.expirationDate), "P")}>
+            {
+                <div className="mt-2">
+                    {
+                        dayDifference > 5 ?
+                            <div>{dayDifference} day(s)</div> :
+                            dayDifference > 0 ?
+                                <div className="inline-flex text-yellow-600">
+                                    {dayDifference} day(s)
+                                    <AlertTriangle className="pl-1"/>
+                                </div> :
+                                <div className="bg-red-700 text-white rounded mx-4 py-1">
+                                    Expired
+                                </div>
+                    }
+                </div>
+            }
+        </HoverText>
     }
 
     return (
@@ -154,7 +185,7 @@ export default function Tickets({ticketsData, accessToken}: InferGetServerSidePr
                     </TableHeader>
                     <TableBody>
                         {
-                            tickets && tickets.length !== 0 ? (
+                            !!tickets.length ? (
                                 tickets.map((ticket) => (
                                     <TableRow key={ticket.id} className="hover:bg-gray-300 hover:cursor-pointer"
                                               onClick={() => router.push(`tickets/${ticket.id}`)}>
@@ -165,87 +196,26 @@ export default function Tickets({ticketsData, accessToken}: InferGetServerSidePr
                                             {ticket.ticketType.name}
                                         </TableCell>
                                         <TableCell className="text-center">
-                                            <HoverText
-                                                content={format(new Date(ticket.expirationDate), "P")}>
-                                                {
-                                                    <div className="mt-2">
-                                                        {calculateDaysDifference(ticket.expirationDate) > 5 ?
-                                                            <div>
-                                                                {
-                                                                    calculateDaysDifference(ticket.expirationDate)
-                                                                } day(s)
-                                                            </div>
-                                                            :
-                                                            calculateDaysDifference(ticket.expirationDate) > 0 ?
-                                                                <div className="inline-flex text-yellow-600">
-                                                                    {
-                                                                        calculateDaysDifference(ticket.expirationDate)
-                                                                    } day(s)
-                                                                    <AlertTriangle className="pl-1"/>
-                                                                </div> :
-                                                                <div
-                                                                    className="bg-red-700 text-white rounded mx-4 py-1">Expired
-                                                                </div>
-                                                        }
-                                                    </div>
-                                                }</HoverText>
+                                            {handleValidFor(ticket)}
                                         </TableCell>
                                         <TableCell className="text-center">
                                         <span
                                             className={`${
-                                                (ticket.numberOfParticipation - (ticket.historyLog?.length || 0)) <= 1
-                                                    ? (ticket.numberOfParticipation - (ticket.historyLog?.length || 0)) <= 0
+                                                (ticket.numberOfParticipation - (ticket.historyLog.length)) <= 1
+                                                    ? (ticket.numberOfParticipation - (ticket.historyLog.length)) <= 0
                                                         ? "text-red-500"
                                                         : "text-yellow-500"
                                                     : ""
                                             }`}
-                                        > {ticket.numberOfParticipation - (ticket.historyLog?.length || 0)} pc(s)
+                                        > {ticket.numberOfParticipation - (ticket.historyLog.length)} pc(s)
                                         </span>
                                         </TableCell>
-
                                         <TableCell className="p-1 text-center">
                                             <SettingsDropdown
                                                 handleEditClick={() => handleEditClick(ticket)}
                                                 handleDeleteClick={() => handleDeleteClick(ticket)}
-                                                additionalItem={
-                                                    !!(ticket.historyLog && ticket.numberOfParticipation - ticket.historyLog.length <= 0) ?
-                                                        <HoverText content="No more tickets avaiable">
-                                                            <DropdownMenuItem
-                                                                onClick={
-                                                                    (event) => {
-                                                                        event.preventDefault()
-                                                                        event.stopPropagation()
-                                                                    }}
-                                                                className="justify-center hover:cursor-pointer p-2 mx-5 my-1
-                                                            bg-gray-400 cursor-not-allowed">
-                                                                Report participation
-                                                            </DropdownMenuItem>
-                                                        </HoverText>
-                                                        : calculateDaysDifference(ticket.expirationDate) <= 0 ?
-                                                            <HoverText content="Ticket expired">
-                                                                <DropdownMenuItem
-                                                                    onClick={
-                                                                        (event) => {
-                                                                            event.preventDefault()
-                                                                            event.stopPropagation()
-                                                                        }}
-                                                                    className="justify-center p-2 mx-5 my-1
-                                                                bg-gray-400 cursor-not-allowed">
-                                                                    Report participation
-                                                                </DropdownMenuItem>
-                                                            </HoverText> :
-                                                            <DropdownMenuItem
-                                                                className="justify-center p-2 mx-5 my-1 bg-green-400"
-                                                                onClick={
-                                                                    (event) => {
-                                                                        event.preventDefault()
-                                                                        event.stopPropagation()
-                                                                        handleReportClicked(ticket)
-                                                                    }}>
-                                                                <Check/> Report participation
-                                                            </DropdownMenuItem>
-
-                                                }
+                                                additionalItems={
+                                                    renderReportParticipationButton(ticket)}
                                             />
                                         </TableCell>
                                     </TableRow>
@@ -267,7 +237,7 @@ export default function Tickets({ticketsData, accessToken}: InferGetServerSidePr
                             isOpen={isDeleteDialogOpen}
                             onOpenChange={setIsDeleteDialogOpen}
                             onSuccess={onTicketDeleted}
-                            deleteFunction={deletedTicket}
+                            deleteFunction={deleteTicket}
                             entityType="Ticket"
                 />
                 <ConfirmDialog

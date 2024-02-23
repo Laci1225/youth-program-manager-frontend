@@ -12,6 +12,7 @@ import debounce from "@/utils/debounce";
 import {format} from "date-fns";
 import {TicketTypeData} from "@/model/ticket-type-data";
 import AccessTokenContext from "@/context/AccessTokenContext";
+import {isStrictDate} from "@/utils/date";
 
 type AutoCompleteProps<T> = {
     emptyMessage: string
@@ -23,7 +24,9 @@ type AutoCompleteProps<T> = {
     className?: string
     alreadyAddedData?: ChildNameData[] | RelativeParent[]
     isAdded: boolean
-    getPotential: (name: string, limit: number, auth: string | undefined) => Promise<T[]>
+    getPotential: (name: string, limit: number, accessToken: string) => Promise<T[]>
+    getLabelForItem: (item: T) => string
+    getDescriptionForItem?: (item: T) => string
 }
 
 export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeData>({
@@ -37,25 +40,18 @@ export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeDa
                                                                                         disabled,
                                                                                         isLoading = false,
                                                                                         getPotential,
+                                                                                        getLabelForItem,
+                                                                                        getDescriptionForItem,
                                                                                     }: AutoCompleteProps<T>) => {
     const accessToken = useContext(AccessTokenContext)
-    const getDisplayName = (item: T): string => {
-        if ('familyName' in item && 'givenName' in item) {
-            return `${item.familyName} ${item.givenName}`;
-        } else if ('name' in item) {
-            return item.name;
-        } else {
-            return '';
-        }
-    };
     const inputRef = useRef<HTMLInputElement>(null)
 
     const [isOpen, setOpen] = useState(false)
-    const [inputValue, setInputValue] = useState<string | undefined>(value ? getDisplayName(value) : undefined)
+    const [inputValue, setInputValue] = useState<string | undefined>(value ? getLabelForItem(value) : undefined)
     const [options, setOptions] = useState<T[]>()
 
     useEffect(() => {
-        setInputValue(value ? getDisplayName(value) : undefined)
+        setInputValue(value ? getLabelForItem(value) : undefined)
         if (isAdded) {
             setInputValue("")
             onValueChange?.(undefined)
@@ -76,6 +72,12 @@ export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeDa
                 console.error("Failed to get potential items:", reason);
             });
     }, [alreadyAddedData]);
+
+    function handleClear() {
+        onValueChange?.(undefined)
+        setInputValue("")
+        setOptions(undefined)
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const debouncedFetchPotential = useCallback(debounce(fetchPotential), [fetchPotential]);
@@ -121,12 +123,12 @@ export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeDa
 
     const handleBlur = useCallback(() => {
         setOpen(false)
-        setInputValue(value ? getDisplayName(value) : undefined)
+        setInputValue(value ? getLabelForItem(value) : undefined)
     }, [value])
 
     const handleSelectOption = useCallback(
         (selectedOption: T) => {
-            setInputValue(selectedOption ? getDisplayName(selectedOption) : undefined)
+            setInputValue(selectedOption ? getLabelForItem(selectedOption) : undefined)
 
             onValueChange?.(selectedOption)
 
@@ -174,7 +176,7 @@ export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeDa
                                             return (
                                                 <CommandItem
                                                     key={option.id}
-                                                    value={getDisplayName(option)}
+                                                    value={getLabelForItem(option)}
                                                     onMouseDown={(event) => {
                                                         event.preventDefault()
                                                         event.stopPropagation()
@@ -183,15 +185,20 @@ export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeDa
                                                     className={cn("flex items-center gap-2 w-full", !isSelected && "pl-8")}
                                                 >
                                                     {isSelected ? <Check className="w-4"/> : null}
-                                                    {option && ('birthDate' in option ? (
-                                                        <div>
-                                                            {getDisplayName(option)} {format(new Date(option.birthDate), "P")}
+                                                    <div className={"flex"}>
+                                                        <div className={"pr-2"}>
+                                                            {getLabelForItem(option)}
                                                         </div>
-                                                    ) : (
-                                                        <div>
-                                                            {getDisplayName(option)}
-                                                        </div>
-                                                    ))}
+                                                        {getDescriptionForItem && (
+                                                            <div>
+                                                                {
+                                                                    !isStrictDate(getDescriptionForItem(option))
+                                                                        ? getDescriptionForItem(option) :
+                                                                        format(new Date(getDescriptionForItem(option)), "P")
+                                                                }
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </CommandItem>
                                             )
                                         })}
@@ -214,11 +221,7 @@ export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeDa
                     type="button"
                     variant="ghost"
                     className="absolute top-1 right-1 text-red-500 p-0 mt-1 mr-1 h-fit"
-                    onClick={() => {
-                        onValueChange?.(undefined)
-                        setInputValue("")
-                        setOptions(undefined)
-                    }}
+                    onClick={handleClear}
                 >
                     <XIcon/>
                 </Button>

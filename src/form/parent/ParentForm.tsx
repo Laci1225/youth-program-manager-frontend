@@ -171,6 +171,8 @@ function ParentForm({
                                                             <AutoComplete
                                                                 className="w-2/3"
                                                                 isLoading={false}
+                                                                getLabelForItem={(item) => `${item.givenName} ${item.familyName}`}
+                                                                getDescriptionForItem={(item) => `${item.birthDate}`}
                                                                 disabled={false}
                                                                 value={field.value}
                                                                 getPotential={getPotentialChildren}

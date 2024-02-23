@@ -147,6 +147,7 @@ export default function ParentInEditMode({
                         className={"w-2/3 mr-3"}
                         getPotential={getPotentialParents}
                         alreadyAddedData={child.relativeParents}
+                        getLabelForItem={(item) => `${item.givenName} ${item.familyName}`}
                         key={0}
                         isAdded={parentAddedSuccessfully}
                         isLoading={false}

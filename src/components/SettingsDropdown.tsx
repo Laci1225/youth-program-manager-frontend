@@ -6,17 +6,27 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Pencil, Trash} from "lucide-react";
 import {ReactNode} from "react";
+import HoverText from "@/components/hoverText";
+import {cn} from "@/lib/utils";
+
+export interface DropdownItem {
+    icon: ReactNode;
+    label: ReactNode;
+    onClick: () => void;
+    hoverTextContent?: ReactNode;
+    className?: string
+}
 
 interface SettingsDropdownProps {
     handleEditClick: () => void
     handleDeleteClick: () => void
-    additionalItem?: ReactNode;
+    additionalItems?: DropdownItem[]
 }
 
 const SettingsDropdown = ({
                               handleEditClick,
                               handleDeleteClick,
-                              additionalItem
+                              additionalItems
                           }: SettingsDropdownProps) => {
     return (
         <DropdownMenu>
@@ -45,8 +55,39 @@ const SettingsDropdown = ({
                     <Trash className="mx-1"/>
                     <span>Delete</span>
                 </DropdownMenuItem>
-                {additionalItem}
+                <DropdownMenuSeparator/>
+                {additionalItems?.map((item, index) => (
+                    !!item.hoverTextContent ? (
+                        <HoverText content={item.hoverTextContent} key={index}>
+                            <DropdownMenuItem
+                                className={cn("justify-center p-2 mx-5 my-1", item.className)}
+                                onClick={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    item.onClick();
+                                }}
+                            >
+                                {item.icon}
+                                {item.label}
+                            </DropdownMenuItem>
+                        </HoverText>
+                    ) : (
+                        <DropdownMenuItem
+                            key={index}
+                            className={cn("justify-center p-2 mx-5 my-1", item.className)}
+                            onClick={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                item.onClick();
+                            }}
+                        >
+                            {item.icon}
+                            {item.label}
+                        </DropdownMenuItem>
+                    )
+                ))}
             </DropdownMenuContent>
+
         </DropdownMenu>
     );
 };
