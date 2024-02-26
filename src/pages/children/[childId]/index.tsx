@@ -27,9 +27,10 @@ import getParentById from "@/api/graphql/parent/getParentById";
 import getAllRoles from "@/api/graphql/getAllRoles";
 import jwt from "jsonwebtoken";
 import PermissionContext from "@/context/permission-context";
+import {DELETE_CHILDREN, READ_CHILDREN, UPDATE_CHILDREN, UPDATE_PARENTS} from "@/constants/auth0-permissions";
 
 export const getServerSideProps = withPageAuthRequired<{
-    selectedChildData: ChildDataWithParents, accessToken: string, isAdmin: boolean, permissions: string[]
+    selectedChildData: ChildDataWithParents, accessToken: string, permissions: string[]
 }, {
     childId: string
 }>({
@@ -41,15 +42,17 @@ export const getServerSideProps = withPageAuthRequired<{
                 childData = await getChildById(context.params.childId, session?.accessToken, serverSideClient);
                 const claims = jwt.decode(session?.accessToken!) as jwt.JwtPayload;
                 const permissions = claims["permissions"] as string[];
-                console.log(jwt.decode(session?.accessToken!))
-                let roles = await getAllRoles(session?.accessToken)
-                let isAdmin = roles[0] === "ADMIN"
-                return {
-                    props: {
-                        selectedChildData: childData,
-                        accessToken: session!.accessToken!,
-                        isAdmin: isAdmin,
-                        permissions: permissions,
+                if (permissions.includes(READ_CHILDREN))
+                    return {
+                        props: {
+                            selectedChildData: childData,
+                            accessToken: session!.accessToken!,
+                            permissions: permissions,
+                        }
+                    }
+                else {
+                    return {
+                        notFound: true
                     }
                 }
             } catch (error) {
@@ -66,14 +69,12 @@ export const getServerSideProps = withPageAuthRequired<{
 export default function Child({
                                   selectedChildData,
                                   accessToken,
-                                  isAdmin,
                                   permissions
                               }: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const {setPermissions} = useContext(PermissionContext)
     const router = useRouter()
     const [childWithParents, setChildWithParents] = useState<ChildDataWithParents>(selectedChildData)
     const currentChild: ChildData = fromChildWithParentsToChildData(childWithParents);
-
     useEffect(() => {
         setPermissions(permissions)
     }, [permissions, setPermissions]);
@@ -123,23 +124,29 @@ export default function Child({
                         }
                     </HoverText>
                     <div className="flex">
-                        <div className="flex flex-row items-center hover:cursor-pointer px-5"
-                             onClick={(event) => {
-                                 event.preventDefault()
-                                 handleEditClick()
-                             }}>
-                            <Pencil className="mx-1"/>
-                            <span>Edit</span>
-                        </div>
-                        <div
-                            className="flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"
-                            onClick={(event) => {
-                                event.preventDefault()
-                                handleDeleteClick()
-                            }}>
-                            <Trash className="mx-1"/>
-                            <span>Delete</span>
-                        </div>
+                        {
+                            permissions.includes(UPDATE_CHILDREN) && (
+                                <div className="flex flex-row items-center hover:cursor-pointer px-5"
+                                     onClick={(event) => {
+                                         event.preventDefault()
+                                         handleEditClick()
+                                     }}>
+                                    <Pencil className="mx-1"/>
+                                    <span>Edit</span>
+                                </div>)
+                        }
+                        {
+                            permissions.includes(DELETE_CHILDREN) && (
+                                <div
+                                    className="flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"
+                                    onClick={(event) => {
+                                        event.preventDefault()
+                                        handleDeleteClick()
+                                    }}>
+                                    <Trash className="mx-1"/>
+                                    <span>Delete</span>
+                                </div>)
+                        }
                     </div>
                 </div>
                 <div className="border border-gray-200 rounded p-4">
@@ -164,7 +171,7 @@ export default function Child({
                     <div
                         className={cn(`mb-6`, isEditModeBorderVisible && "border border-dashed border-gray-400  p-2 rounded")}>
                         {
-                            isAdmin && (
+                            permissions.includes(UPDATE_PARENTS) && (
                                 <SaveParentsDataToChild onEdit={onEditClicked}
                                                         isEditParentsModeEnabled={isEditParentsModeEnabled}/>)
                         }

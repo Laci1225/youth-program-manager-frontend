@@ -6,11 +6,11 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table";
-import React, {useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {Toaster} from "@/components/ui/toaster";
 import ParentForm from "@/form/parent/ParentForm";
 import {serverSideClient} from "@/api/graphql/client";
-import {GetServerSideProps, InferGetServerSidePropsType} from "next";
+import {InferGetServerSidePropsType} from "next";
 import getAllParents from "@/api/graphql/parent/getAllParents";
 import {AlertTriangle, PlusSquare} from "lucide-react";
 import {Button} from "@/components/ui/button";
@@ -23,32 +23,45 @@ import SettingsDropdown from "@/components/SettingsDropdown";
 import AccessTokenContext from "@/context/access-token-context";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 import jwt from "jsonwebtoken";
-import getAllRoles from "@/api/graphql/getAllRoles";
-import Layout from "@/components/layout/Layout";
+import PermissionContext from "@/context/permission-context";
+import {CREATE_PARENTS, DELETE_PARENTS, LIST_PARENTS, UPDATE_PARENTS} from "@/constants/auth0-permissions";
 
 export const getServerSideProps = withPageAuthRequired<{
     parentsData: ParentDataWithChildrenIds[],
-    accessToken: string
+    accessToken: string,
+    permissions: string[]
 }>({
     async getServerSideProps(context) {
         const session = await getSession(context.req, context.res);
         console.log(session?.accessToken)
         const parents = await getAllParents(session?.accessToken, serverSideClient)
-        return {
-            props: {
-                parentsData: parents,
-                accessToken: session!.accessToken!,
+        const claims = jwt.decode(session?.accessToken!) as jwt.JwtPayload;
+        const permissions = claims["permissions"] as string[];
+        if (permissions.includes(LIST_PARENTS))
+            return {
+                props: {
+                    parentsData: parents,
+                    accessToken: session!.accessToken!,
+                    permissions: permissions
+                }
+            };
+        else {
+            return {
+                notFound: true
             }
-        };
+        }
     }
 })
 
 export default function Parents({
                                     parentsData,
                                     accessToken,
+                                    permissions
                                 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-
-
+    const {setPermissions} = useContext(PermissionContext)
+    useEffect(() => {
+        setPermissions(permissions)
+    }, [permissions, setPermissions]);
     const router = useRouter()
     const [parents, setParents] = useState<ParentDataWithChildrenIds[]>(parentsData)
     const onParentSaved = (savedParent: ParentData) => {
@@ -80,20 +93,21 @@ export default function Parents({
         setDeletedParent(parent)
     }
 
-    //todo ez a 3 egy functionbe
-
     return (
         <AccessTokenContext.Provider value={accessToken}>
             <div className="container w-4/6 py-28">
                 <div className="flex justify-between px-6 pb-6">
                     <span className="text-2xl font-bold text-gray-800">Parents List</span>
-                    <Button onClick={(event) => {
-                        event.preventDefault()
-                        handleEditClick(null)
-                    }}>
-                        <PlusSquare/>
-                        <span>Create</span>
-                    </Button>
+                    {
+                        permissions.includes(CREATE_PARENTS) && (
+                            <Button onClick={(event) => {
+                                event.preventDefault()
+                                handleEditClick(null)
+                            }}>
+                                <PlusSquare/>
+                                <span>Create</span>
+                            </Button>)
+                    }
                 </div>
                 <Table>
                     <TableHeader>
@@ -139,10 +153,14 @@ export default function Parents({
                                             </HoverText>
                                         </TableCell>
                                         <TableCell className="p-1 text-center">
-                                            <SettingsDropdown
-                                                handleEditClick={() => handleEditClick(parent)}
-                                                handleDeleteClick={() => handleDeleteClick(parent)}
-                                            />
+                                            {
+                                                permissions.includes(UPDATE_PARENTS) && permissions.includes(DELETE_PARENTS) && (
+                                                    <SettingsDropdown
+                                                        handleEditClick={() => handleEditClick(parent)}
+                                                        handleDeleteClick={() => handleDeleteClick(parent)}
+                                                    />
+                                                )
+                                            }
                                         </TableCell>
                                     </TableRow>
                                 ))) : (

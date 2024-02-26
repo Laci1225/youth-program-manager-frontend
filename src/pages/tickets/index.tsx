@@ -1,5 +1,5 @@
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import React, {useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {Toaster} from "@/components/ui/toaster";
 import {serverSideClient} from "@/api/graphql/client";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
@@ -21,28 +21,49 @@ import {calculateDaysDifference} from "@/utils/calculateDaysDifference";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 import AccessTokenContext from "@/context/access-token-context";
 import getAllRoles from "@/api/graphql/getAllRoles";
+import jwt from "jsonwebtoken";
+import PermissionContext from "@/context/permission-context";
+import {
+    CREATE_TICKET_PARTICIPATIONS,
+    CREATE_TICKETS,
+    DELETE_TICKETS,
+    LIST_TICKETS,
+    UPDATE_TICKETS
+} from "@/constants/auth0-permissions";
 
-export const getServerSideProps = withPageAuthRequired({
+export const getServerSideProps = withPageAuthRequired<{
+    ticketsData: TicketData[], accessToken: string, permissions: string[]
+}>({
     async getServerSideProps(context) {
         const session = await getSession(context.req, context.res);
         const tickets = await getAllTickets(session?.accessToken, serverSideClient)
-        const roles = await getAllRoles(session?.accessToken)
-        const isAdmin = roles[0] === "ADMIN"
-        return {
-            props: {
-                ticketsData: tickets,
-                accessToken: session!.accessToken!,
-                isAdmin: isAdmin
+        const claims = jwt.decode(session?.accessToken!) as jwt.JwtPayload;
+        const permissions = claims["permissions"] as string[];
+        if (permissions.includes(LIST_TICKETS))
+            return {
+                props: {
+                    ticketsData: tickets,
+                    accessToken: session!.accessToken!,
+                    permissions: permissions
+                }
+            };
+        else {
+            return {
+                notFound: true
             }
-        };
+        }
     }
 }) satisfies GetServerSideProps<{ ticketsData: TicketData[] }>;
 
 export default function Tickets({
                                     ticketsData,
                                     accessToken,
-                                    isAdmin
+                                    permissions
                                 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const {setPermissions} = useContext(PermissionContext)
+    useEffect(() => {
+        setPermissions(permissions)
+    }, [permissions, setPermissions]);
     const router = useRouter();
     const [tickets, setTickets] = useState<TicketData[]>(ticketsData);
     const [editedTicket, setEditedTicket] = useState<TicketData | null>(null);
@@ -173,7 +194,7 @@ export default function Tickets({
                 <div className="flex justify-between px-6 pb-6">
                     <span className="text-2xl font-bold text-gray-800">Tickets List</span>
                     {
-                        isAdmin && (
+                        permissions.includes(CREATE_TICKETS) && (
                             <Button onClick={(event) => {
                                 event.preventDefault()
                                 handleEditClick(null)
@@ -223,7 +244,9 @@ export default function Tickets({
                                         </TableCell>
                                         <TableCell className="p-1 text-center">
                                             {
-                                                isAdmin && (
+                                                permissions.includes(UPDATE_TICKETS) && permissions.includes(DELETE_TICKETS)
+                                                && permissions.includes(CREATE_TICKET_PARTICIPATIONS) //todo check if this is necessary
+                                                && (
                                                     <SettingsDropdown
                                                         handleEditClick={() => handleEditClick(ticket)}
                                                         handleDeleteClick={() => handleDeleteClick(ticket)}

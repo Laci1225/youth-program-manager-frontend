@@ -1,5 +1,5 @@
 import {InferGetServerSidePropsType} from "next";
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import Link from "next/link";
 import {Toaster} from "@/components/ui/toaster";
 import {Label} from "@/components/ui/label";
@@ -25,12 +25,20 @@ import {cn} from "@/lib/utils";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 import AccessTokenContext from "@/context/access-token-context";
 import getAllRoles from "@/api/graphql/getAllRoles";
+import jwt from "jsonwebtoken";
+import PermissionContext from "@/context/permission-context";
+import {
+    CREATE_TICKET_PARTICIPATIONS, DELETE_TICKET_PARTICIPATIONS,
+    DELETE_TICKETS, READ_TICKET_PARTICIPATIONS,
+    READ_TICKETS,
+    UPDATE_TICKETS
+} from "@/constants/auth0-permissions";
 
 
 export const getServerSideProps = withPageAuthRequired<{
     selectedTicket: TicketData,
     accessToken: string,
-    isAdmin: boolean
+    permissions: string[]
 }, {
     ticketId: string
 }>({
@@ -39,14 +47,20 @@ export const getServerSideProps = withPageAuthRequired<{
         if (context.params?.ticketId) {
             try {
                 const session = await getSession(context.req, context.res);
-                const roles = await getAllRoles(session?.accessToken)
-                const isAdmin = roles[0] === "ADMIN"
                 ticketData = await getTicketById(context.params.ticketId, session?.accessToken, serverSideClient);
-                return {
-                    props: {
-                        selectedTicket: ticketData,
-                        accessToken: session!.accessToken!,
-                        isAdmin: isAdmin
+                const claims = jwt.decode(session?.accessToken!) as jwt.JwtPayload;
+                const permissions = claims["permissions"] as string[];
+                if (permissions.includes(READ_TICKETS))
+                    return {
+                        props: {
+                            selectedTicket: ticketData,
+                            accessToken: session!.accessToken!,
+                            permissions: permissions
+                        }
+                    }
+                else {
+                    return {
+                        notFound: true
                     }
                 }
             } catch (error) {
@@ -63,8 +77,12 @@ export const getServerSideProps = withPageAuthRequired<{
 export default function Ticket({
                                    selectedTicket,
                                    accessToken,
-                                   isAdmin
+                                   permissions
                                }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const {setPermissions} = useContext(PermissionContext)
+    useEffect(() => {
+        setPermissions(permissions)
+    }, [permissions, setPermissions]);
     const router = useRouter()
     const [ticket, setTicket] = useState<TicketData>(selectedTicket)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -191,23 +209,29 @@ export default function Ticket({
                         Ticket details
                     </div>
                     <div className="flex">
-                        <div className=" flex flex-row items-center hover:cursor-pointer px-5"
-                             onClick={(event) => {
-                                 event.preventDefault()
-                                 handleEditClick()
-                             }}>
-                            <Pencil className="mx-1"/>
-                            <span>Edit</span>
-                        </div>
-                        <div
-                            className="flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"
-                            onClick={(event) => {
-                                event.preventDefault()
-                                handleDeleteClick()
-                            }}>
-                            <Trash className="mx-1"/>
-                            <span>Delete</span>
-                        </div>
+                        {
+                            permissions.includes(UPDATE_TICKETS) && (
+                                <div className=" flex flex-row items-center hover:cursor-pointer px-5"
+                                     onClick={(event) => {
+                                         event.preventDefault()
+                                         handleEditClick()
+                                     }}>
+                                    <Pencil className="mx-1"/>
+                                    <span>Edit</span>
+                                </div>)
+                        }
+                        {
+                            permissions.includes(DELETE_TICKETS) && (
+                                <div
+                                    className="flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"
+                                    onClick={(event) => {
+                                        event.preventDefault()
+                                        handleDeleteClick()
+                                    }}>
+                                    <Trash className="mx-1"/>
+                                    <span>Delete</span>
+                                </div>)
+                        }
                     </div>
                 </div>
                 <div className="border border-gray-200 rounded p-4">
@@ -261,11 +285,12 @@ export default function Ticket({
                     </div>
                     <div className="mb-6 flex justify-between">
                         <Label className="items-center">Report Participation:</Label>
-                        {isAdmin && (
-                            <>
-                                {renderReportParticipationButton(ticket, handleReportParticipation)}
-                            </>
-                        )}
+                        {
+                            permissions.includes(CREATE_TICKET_PARTICIPATIONS) && (
+                                <>
+                                    {renderReportParticipationButton(ticket, handleReportParticipation)}
+                                </>)
+                        }
                     </div>
                     <div className="mb-6 flex-1">
                         <Table className="w-full border border-gray-200">
@@ -277,23 +302,26 @@ export default function Ticket({
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {ticket.historyLog.map((field, index: number) => (
-                                    <TableRow key={index}>
-                                        <TableCell className="text-center">{index + 1}</TableCell>
-                                        <TableCell
-                                            className="text-center">{format(new Date(field.date), "P")}</TableCell>
-                                        {
-                                            isAdmin && (
-                                                <TableCell className="w-6">
-                                                    <Button type="button" className="p-0"
-                                                            variant="ghost"
-                                                            onClick={() => handleRemoveParticipation(index)}>
-                                                        <span className="material-icons-outlined">delete</span>
-                                                    </Button>
-                                                </TableCell>)
-                                        }
-                                    </TableRow>
-                                ))}
+                                {
+                                    permissions.includes(READ_TICKET_PARTICIPATIONS) && (
+                                        ticket.historyLog.map((field, index: number) => (
+                                            <TableRow key={index}>
+                                                <TableCell className="text-center">{index + 1}</TableCell>
+                                                <TableCell
+                                                    className="text-center">{format(new Date(field.date), "P")}</TableCell>
+                                                {
+                                                    permissions.includes(DELETE_TICKET_PARTICIPATIONS) && (
+                                                        <TableCell className="w-6">
+                                                            <Button type="button" className="p-0"
+                                                                    variant="ghost"
+                                                                    onClick={() => handleRemoveParticipation(index)}>
+                                                                <span className="material-icons-outlined">delete</span>
+                                                            </Button>
+                                                        </TableCell>)
+                                                }
+                                            </TableRow>
+                                        )))
+                                }
                             </TableBody>
                         </Table>
                     </div>

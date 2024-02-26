@@ -6,7 +6,7 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table";
-import React, {useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {Toaster} from "@/components/ui/toaster";
 import {serverSideClient} from "@/api/graphql/client";
 import {GetServerSideProps, InferGetServerSidePropsType} from "next";
@@ -24,31 +24,51 @@ import AccessTokenContext from "@/context/access-token-context";
 import {ParentDataWithChildrenIds} from "@/model/parent-data";
 import getAllRoles from "@/api/graphql/getAllRoles";
 import getAllParents from "@/api/graphql/parent/getAllParents";
+import jwt from "jsonwebtoken";
+import PermissionContext from "@/context/permission-context";
+import {
+    CREATE_TICKET_TYPES,
+    CREATE_TICKETS, DELETE_TICKET_TYPES,
+    LIST_TICKET_TYPES,
+    UPDATE_TICKET_TYPES
+} from "@/constants/auth0-permissions";
 
 export const getServerSideProps = withPageAuthRequired<{
     ticketsData: TicketTypeData[],
-    accessToken: string
+    accessToken: string,
+    permissions: string[]
 }>({
     async getServerSideProps(context) {
         const session = await getSession(context.req, context.res);
-        let roles = await getAllRoles(session?.accessToken)
-        let isAdmin = roles[0] === "ADMIN"
-        if (isAdmin) {
-            const tickets = await getAllTicketTypes(session?.accessToken, serverSideClient)
+        const tickets = await getAllTicketTypes(session?.accessToken, serverSideClient)
+        const claims = jwt.decode(session?.accessToken!) as jwt.JwtPayload;
+        const permissions = claims["permissions"] as string[];
+        if (permissions.includes(LIST_TICKET_TYPES))
             return {
                 props: {
                     ticketsData: tickets,
-                    accessToken: session!.accessToken!
+                    accessToken: session!.accessToken!,
+                    permissions: permissions
                 }
             };
+        else {
+            return {
+                notFound: true
+            }
         }
-        return {
-            notFound: true
-        };
+
     }
 })
 
-export default function Tickets({ticketsData, accessToken}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Tickets({
+                                    ticketsData,
+                                    accessToken,
+                                    permissions
+                                }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const {setPermissions} = useContext(PermissionContext)
+    useEffect(() => {
+        setPermissions(permissions)
+    }, [permissions, setPermissions]);
     const router = useRouter()
     const [ticketTypes, setTicketTypes] = useState<TicketTypeData[]>(ticketsData)
     const onTicketTypeSaved = (savedTicketType: TicketTypeData) => {
@@ -86,13 +106,17 @@ export default function Tickets({ticketsData, accessToken}: InferGetServerSidePr
             <div className="container w-4/6 py-28">
                 <div className="flex justify-between px-6 pb-6">
                     <span className="text-2xl font-bold text-gray-800">Ticket types List</span>
-                    <Button onClick={(event) => {
-                        event.preventDefault()
-                        handleEditClick(null)
-                    }}>
-                        <PlusSquare/>
-                        <span>Create</span>
-                    </Button>
+                    {
+                        permissions.includes(CREATE_TICKET_TYPES) && (
+                            <Button onClick={(event) => {
+                                event.preventDefault()
+                                handleEditClick(null)
+                            }}>
+                                <PlusSquare/>
+                                <span>Create</span>
+                            </Button>
+                        )
+                    }
                 </div>
                 <Table>
                     <TableHeader>
@@ -107,7 +131,7 @@ export default function Tickets({ticketsData, accessToken}: InferGetServerSidePr
                     </TableHeader>
                     <TableBody>
                         {
-                            ticketTypes && ticketTypes.length !== 0 ? (
+                            !!ticketTypes ? (
                                 ticketTypes.map((ticketType, index) => (
                                     <TableRow key={ticketType.id}
                                               className={`hover:bg-blue-100 hover:cursor-pointer transition-all ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}
@@ -128,10 +152,13 @@ export default function Tickets({ticketsData, accessToken}: InferGetServerSidePr
                                             {ticketType.standardValidityPeriod} day(s)
                                         </TableCell>
                                         <TableCell className="p-1 text-center">
-                                            <SettingsDropdown
-                                                handleEditClick={() => handleEditClick(ticketType)}
-                                                handleDeleteClick={() => handleDeleteClick(ticketType)}
-                                            />
+                                            {
+                                                permissions.includes(UPDATE_TICKET_TYPES) && permissions.includes(DELETE_TICKET_TYPES) && (
+                                                    <SettingsDropdown
+                                                        handleEditClick={() => handleEditClick(ticketType)}
+                                                        handleDeleteClick={() => handleDeleteClick(ticketType)}
+                                                    />)
+                                            }
                                         </TableCell>
                                     </TableRow>
                                 ))) : (
