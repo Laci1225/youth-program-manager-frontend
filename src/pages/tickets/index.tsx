@@ -19,22 +19,30 @@ import {toast} from "@/components/ui/use-toast";
 import reportParticipation from "@/api/graphql/ticket/reportParticipation";
 import {calculateDaysDifference} from "@/utils/calculateDaysDifference";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
-import AccessTokenContext from "@/context/AccessTokenContext";
+import AccessTokenContext from "@/context/access-token-context";
+import getAllRoles from "@/api/graphql/getAllRoles";
 
 export const getServerSideProps = withPageAuthRequired({
     async getServerSideProps(context) {
         const session = await getSession(context.req, context.res);
         const tickets = await getAllTickets(session?.accessToken, serverSideClient)
+        const roles = await getAllRoles(session?.accessToken)
+        const isAdmin = roles[0] === "ADMIN"
         return {
             props: {
                 ticketsData: tickets,
-                accessToken: session!.accessToken!
+                accessToken: session!.accessToken!,
+                isAdmin: isAdmin
             }
         };
     }
 }) satisfies GetServerSideProps<{ ticketsData: TicketData[] }>;
 
-export default function Tickets({ticketsData, accessToken}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Tickets({
+                                    ticketsData,
+                                    accessToken,
+                                    isAdmin
+                                }: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter();
     const [tickets, setTickets] = useState<TicketData[]>(ticketsData);
     const [editedTicket, setEditedTicket] = useState<TicketData | null>(null);
@@ -43,7 +51,6 @@ export default function Tickets({ticketsData, accessToken}: InferGetServerSidePr
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isReportParticipationClicked, setIsReportParticipationClicked] = useState(false);
     const [reportedTicket, setReportedTicket] = useState<TicketData>();
-
     const handleEditClick = (ticket: TicketData | null) => {
         setIsEditDialogOpen(true);
         if (ticket) {
@@ -65,7 +72,7 @@ export default function Tickets({ticketsData, accessToken}: InferGetServerSidePr
 
     const handleReport = () => {
         if (reportedTicket) {
-            reportParticipation(reportedTicket.id, {date: new Date(), reporter: ""}).then((value) => {
+            reportParticipation(reportedTicket.id, {date: new Date(), reporter: ""}, accessToken).then((value) => {
                 setTickets((prevTickets) =>
                     prevTickets.map((tic) => (value.id === tic.id ? value : tic))
                 );
@@ -164,18 +171,21 @@ export default function Tickets({ticketsData, accessToken}: InferGetServerSidePr
         <AccessTokenContext.Provider value={accessToken}>
             <div className="container w-4/6 py-28">
                 <div className="flex justify-between px-6 pb-6">
-                    <span>Tickets</span>
-                    <Button onClick={(event) => {
-                        event.preventDefault()
-                        handleEditClick(null)
-                    }}>
-                        <PlusSquare/>
-                        <span>Create</span>
-                    </Button>
+                    <span className="text-2xl font-bold text-gray-800">Tickets List</span>
+                    {
+                        isAdmin && (
+                            <Button onClick={(event) => {
+                                event.preventDefault()
+                                handleEditClick(null)
+                            }}>
+                                <PlusSquare/>
+                                <span>Create</span>
+                            </Button>)
+                    }
                 </div>
-                <Table className="border border-gray-700 rounded">
-                    <TableHeader>
-                        <TableRow>
+                <Table>
+                    <TableHeader className={"bg-none"}>
+                        <TableRow className={"hover:bg-none"}>
                             <TableHead className="text-center">Child</TableHead>
                             <TableHead className="text-center">Ticket type</TableHead>
                             <TableHead className="text-center">Valid until</TableHead>
@@ -186,8 +196,9 @@ export default function Tickets({ticketsData, accessToken}: InferGetServerSidePr
                     <TableBody>
                         {
                             !!tickets.length ? (
-                                tickets.map((ticket) => (
-                                    <TableRow key={ticket.id} className="hover:bg-gray-300 hover:cursor-pointer"
+                                tickets.map((ticket, index) => (
+                                    <TableRow key={ticket.id}
+                                              className={`hover:bg-blue-100 hover:cursor-pointer transition-all ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}
                                               onClick={() => router.push(`tickets/${ticket.id}`)}>
                                         <TableCell className="text-center">
                                             {ticket.child.givenName} {ticket.child.familyName}
@@ -211,12 +222,15 @@ export default function Tickets({ticketsData, accessToken}: InferGetServerSidePr
                                         </span>
                                         </TableCell>
                                         <TableCell className="p-1 text-center">
-                                            <SettingsDropdown
-                                                handleEditClick={() => handleEditClick(ticket)}
-                                                handleDeleteClick={() => handleDeleteClick(ticket)}
-                                                additionalItems={
-                                                    renderReportParticipationButton(ticket)}
-                                            />
+                                            {
+                                                isAdmin && (
+                                                    <SettingsDropdown
+                                                        handleEditClick={() => handleEditClick(ticket)}
+                                                        handleDeleteClick={() => handleDeleteClick(ticket)}
+                                                        additionalItems={
+                                                            renderReportParticipationButton(ticket)}
+                                                    />)
+                                            }
                                         </TableCell>
                                     </TableRow>
                                 ))) : (

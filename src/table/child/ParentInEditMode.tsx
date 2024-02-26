@@ -10,7 +10,7 @@ import ChildsParentsTable from "@/table/child/ChildsParentsTable";
 import getPotentialParents from "@/api/graphql/child/getPotentialParents";
 import ParentForm from "@/form/parent/ParentForm";
 import fromChildWithParentsToChildData from "@/model/fromChildWithParentsToChildData";
-import AccessTokenContext from "@/context/AccessTokenContext";
+import AccessTokenContext from "@/context/access-token-context";
 
 interface ParentInEditModeProps {
     child: ChildData

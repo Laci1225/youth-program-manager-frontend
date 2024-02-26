@@ -13,7 +13,7 @@ import {TicketTypeData} from "@/model/ticket-type-data";
 import {ticketTypeSchema} from "@/form/ticket-type/ticketTypeSchema";
 import {Textarea} from "@/components/ui/textarea"
 import updateTicketType from "@/api/graphql/ticketType/updateTicketType";
-import AccessTokenContext from "@/context/AccessTokenContext";
+import AccessTokenContext from "@/context/access-token-context";
 
 
 interface TicketFormProps {

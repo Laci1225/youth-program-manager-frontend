@@ -18,7 +18,7 @@ import getPotentialChildren from "@/api/graphql/parent/getPotentialChildren";
 import {Button} from "@/components/ui/button";
 import {ChildData} from "@/model/child-data";
 import ChildForm from "@/form/child/ChildForm";
-import AccessTokenContext from "@/context/AccessTokenContext";
+import AccessTokenContext from "@/context/access-token-context";
 
 interface ParentFormProps {
     onParentModified: (parent: ParentData) => void;

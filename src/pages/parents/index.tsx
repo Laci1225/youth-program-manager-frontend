@@ -17,28 +17,36 @@ import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
 import deleteParent from "@/api/graphql/parent/deleteParent";
 import DeleteData from "@/components/deleteData";
-import {ParentData, ParentDataWithChildrenIds} from "@/model/parent-data";
+import {ParentData, ParentDataWithChildren, ParentDataWithChildrenIds} from "@/model/parent-data";
 import HoverText from "@/components/hoverText";
 import SettingsDropdown from "@/components/SettingsDropdown";
-import AccessTokenContext from "@/context/AccessTokenContext";
+import AccessTokenContext from "@/context/access-token-context";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
+import jwt from "jsonwebtoken";
+import getAllRoles from "@/api/graphql/getAllRoles";
+import Layout from "@/components/layout/Layout";
 
-export const getServerSideProps = withPageAuthRequired({
+export const getServerSideProps = withPageAuthRequired<{
+    parentsData: ParentDataWithChildrenIds[],
+    accessToken: string
+}>({
     async getServerSideProps(context) {
         const session = await getSession(context.req, context.res);
         console.log(session?.accessToken)
-
         const parents = await getAllParents(session?.accessToken, serverSideClient)
         return {
             props: {
                 parentsData: parents,
-                accessToken: session!.accessToken!
+                accessToken: session!.accessToken!,
             }
         };
     }
-}) satisfies GetServerSideProps<{ parentsData: ParentDataWithChildrenIds[] }>;
+})
 
-export default function Parents({parentsData, accessToken}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Parents({
+                                    parentsData,
+                                    accessToken,
+                                }: InferGetServerSidePropsType<typeof getServerSideProps>) {
 
 
     const router = useRouter()
@@ -72,11 +80,13 @@ export default function Parents({parentsData, accessToken}: InferGetServerSidePr
         setDeletedParent(parent)
     }
 
+    //todo ez a 3 egy functionbe
+
     return (
         <AccessTokenContext.Provider value={accessToken}>
             <div className="container w-4/6 py-28">
                 <div className="flex justify-between px-6 pb-6">
-                    <span>Parents</span>
+                    <span className="text-2xl font-bold text-gray-800">Parents List</span>
                     <Button onClick={(event) => {
                         event.preventDefault()
                         handleEditClick(null)
@@ -85,7 +95,7 @@ export default function Parents({parentsData, accessToken}: InferGetServerSidePr
                         <span>Create</span>
                     </Button>
                 </div>
-                <Table className="border border-gray-700 rounded">
+                <Table>
                     <TableHeader>
                         <TableRow>
                             <TableHead className="text-center">Name</TableHead>
@@ -95,9 +105,10 @@ export default function Parents({parentsData, accessToken}: InferGetServerSidePr
                     </TableHeader>
                     <TableBody>
                         {
-                            parents && parents.length !== 0 ? (
-                                parents.map((parent) => (
-                                    <TableRow key={parent.id} className="hover:bg-gray-300 hover:cursor-pointer"
+                            !!parents ? (
+                                parents.map((parent, index) => (
+                                    <TableRow key={parent.id}
+                                              className={`hover:bg-blue-100 hover:cursor-pointer transition-all ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}
                                               onClick={() => router.push(`parents/${parent.id}`)}>
                                         <TableCell className="text-center">
                                             {parent.givenName} {parent.familyName}

@@ -25,7 +25,7 @@ import {ChildData} from "@/model/child-data";
 import {
     getSession, withPageAuthRequired
 } from "@auth0/nextjs-auth0";
-import AccessTokenContext from "@/context/AccessTokenContext";
+import AccessTokenContext from "@/context/access-token-context";
 
 export const getServerSideProps = withPageAuthRequired<{
     selectedParent: ParentDataWithChildren,
@@ -152,7 +152,7 @@ export default function Parent({selectedParent, accessToken}: InferGetServerSide
                                                  setIsEditChildrenModeEnabled={setIsEditChildrenModeEnabled}/>
                             ) :
                             <div className={`w-full`}>
-                                <Table className="w-full border border-gray-200">
+                                <Table>
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead className="text-center">Name</TableHead>
@@ -160,9 +160,10 @@ export default function Parent({selectedParent, accessToken}: InferGetServerSide
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>{
-                                        parentWithChildren.childDtos && parentWithChildren.childDtos?.length !== 0 ? (
+                                        !!parentWithChildren.childDtos ? (
                                             parentWithChildren.childDtos.map((child: ChildData, index: number) => (
-                                                <TableRow key={index} className="hover:bg-gray-300 hover:cursor-pointer"
+                                                <TableRow key={index}
+                                                          className={`hover:bg-blue-100 hover:cursor-pointer transition-all ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}
                                                           onClick={() => router.push(`/children/${child.id}`, `/children/${child.id}`)}>
                                                     <TableCell className="text-center">
                                                         {child.givenName + " " + child.familyName}

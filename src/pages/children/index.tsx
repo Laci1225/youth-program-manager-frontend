@@ -22,7 +22,7 @@ import DeleteData from "@/components/deleteData";
 import HoverText from "@/components/hoverText";
 import SettingsDropdown from "@/components/SettingsDropdown";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
-import AccessTokenContext from "@/context/AccessTokenContext";
+import AccessTokenContext from "@/context/access-token-context";
 
 export const getServerSideProps = withPageAuthRequired({
     async getServerSideProps(context) {
@@ -73,16 +73,16 @@ export default function Children({childrenData, accessToken}: InferGetServerSide
         <AccessTokenContext.Provider value={accessToken}>
             <div className="container w-4/6 py-28">
                 <div className="flex justify-between px-6 pb-6">
-                    <span>Children</span>
+                    <span className="text-2xl font-bold text-gray-800">Children List</span>
                     <Button onClick={(event) => {
                         event.preventDefault()
                         handleEditClick(null)
                     }}>
-                        <PlusSquare/>
+                        <PlusSquare size={20} className={"mr-1"}/>
                         <span>Create</span>
                     </Button>
                 </div>
-                <Table className="border border-gray-700 rounded">
+                <Table>
                     <TableHeader>
                         <TableRow>
                             <TableHead className="text-center">Name</TableHead>
@@ -94,10 +94,12 @@ export default function Children({childrenData, accessToken}: InferGetServerSide
                     </TableHeader>
                     <TableBody>
                         {
-                            children && children.length !== 0 ? (
-                                children.map((child) => (
-                                    <TableRow key={child.id} className="hover:bg-gray-300 hover:cursor-pointer"
-                                              onClick={() => router.push(`children/${child.id}`)}>
+                            !!children ? (
+                                children.map((child, index) => (
+                                    <TableRow
+                                        key={child.id}
+                                        className={`hover:bg-blue-100 hover:cursor-pointer transition-all ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}
+                                        onClick={() => router.push(`children/${child.id}`)}>
                                         <TableCell className="text-center">
                                             {child.givenName} {child.familyName}
                                         </TableCell>
@@ -131,7 +133,9 @@ export default function Children({childrenData, accessToken}: InferGetServerSide
                                     </TableRow>
                                 ))) : (
                                 <TableRow>
-                                    <TableCell colSpan={5}>Nothing added</TableCell>
+                                    <TableCell colSpan={5} className="text-center text-gray-500">
+                                        Nothing added
+                                    </TableCell>
                                 </TableRow>
                             )}
                     </TableBody>

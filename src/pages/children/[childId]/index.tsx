@@ -1,7 +1,7 @@
 import {InferGetServerSidePropsType} from "next";
 import {ChildData, ChildDataWithParents} from "@/model/child-data";
 import getChildById from "@/api/graphql/child/getChildById";
-import React, {useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import ChildForm from "@/form/child/ChildForm";
 import Link from "next/link";
 import {format} from "date-fns";
@@ -22,23 +22,40 @@ import ParentInEditMode from "@/table/child/ParentInEditMode";
 import {cn} from "@/lib/utils";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
-import AccessTokenContext from "@/context/AccessTokenContext";
+import AccessTokenContext from "@/context/access-token-context";
+import getParentById from "@/api/graphql/parent/getParentById";
+import getAllRoles from "@/api/graphql/getAllRoles";
+import jwt from "jsonwebtoken";
+import PermissionContext from "@/context/permission-context";
 
 export const getServerSideProps = withPageAuthRequired<{
-    selectedChildData: ChildDataWithParents, accessToken: string
+    selectedChildData: ChildDataWithParents, accessToken: string, isAdmin: boolean, permissions: string[]
 }, {
     childId: string
 }>({
     async getServerSideProps(context) {
         let childData;
         if (context.params?.childId) {
-            const session = await getSession(context.req, context.res);
-            childData = await getChildById(context.params.childId, session?.accessToken, serverSideClient);
-            return {
-                props: {
-                    selectedChildData: childData,
-                    accessToken: session!.accessToken!
+            try {
+                const session = await getSession(context.req, context.res);
+                childData = await getChildById(context.params.childId, session?.accessToken, serverSideClient);
+                const claims = jwt.decode(session?.accessToken!) as jwt.JwtPayload;
+                const permissions = claims["permissions"] as string[];
+                console.log(jwt.decode(session?.accessToken!))
+                let roles = await getAllRoles(session?.accessToken)
+                let isAdmin = roles[0] === "ADMIN"
+                return {
+                    props: {
+                        selectedChildData: childData,
+                        accessToken: session!.accessToken!,
+                        isAdmin: isAdmin,
+                        permissions: permissions,
+                    }
                 }
+            } catch (error) {
+                return {
+                    notFound: true
+                };
             }
         }
         return {
@@ -48,12 +65,18 @@ export const getServerSideProps = withPageAuthRequired<{
 })
 export default function Child({
                                   selectedChildData,
-                                  accessToken
+                                  accessToken,
+                                  isAdmin,
+                                  permissions
                               }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const {setPermissions} = useContext(PermissionContext)
     const router = useRouter()
     const [childWithParents, setChildWithParents] = useState<ChildDataWithParents>(selectedChildData)
     const currentChild: ChildData = fromChildWithParentsToChildData(childWithParents);
 
+    useEffect(() => {
+        setPermissions(permissions)
+    }, [permissions, setPermissions]);
     const onChildUpdated = (newChild: ChildData) => {
         setChildWithParents((prevState) => ({...prevState, ...newChild}))
     }
@@ -82,7 +105,7 @@ export default function Child({
 
     return (
         <AccessTokenContext.Provider value={accessToken}>
-            <div className="container w-3/6 py-10 h-[100vh] overflow-auto">
+            <div className="container w-3/6 py-10 h-[85vh] overflow-auto">
                 <div className="flex justify-between px-6 pb-6 items-center">
                     <Link href="/children">
                         <span className="material-icons-outlined">arrow_back</span>
@@ -140,8 +163,11 @@ export default function Child({
                     </div>
                     <div
                         className={cn(`mb-6`, isEditModeBorderVisible && "border border-dashed border-gray-400  p-2 rounded")}>
-                        <SaveParentsDataToChild onEdit={onEditClicked}
-                                                isEditParentsModeEnabled={isEditParentsModeEnabled}/>
+                        {
+                            isAdmin && (
+                                <SaveParentsDataToChild onEdit={onEditClicked}
+                                                        isEditParentsModeEnabled={isEditParentsModeEnabled}/>)
+                        }
                         {isEditParentsModeEnabled ? (
                                 <>
                                     <ParentInEditMode child={currentChild}
@@ -150,7 +176,7 @@ export default function Child({
                                                       setIsEditParentsModeEnabled={setIsEditParentsModeEnabled}/>
                                 </>) :
                             <div className={`w-full`}>
-                                <Table className="w-full border border-gray-200">
+                                <Table>
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead className="text-center">Name</TableHead>
@@ -158,9 +184,10 @@ export default function Child({
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>{
-                                        childWithParents.parents && childWithParents.parents?.length !== 0 ? (
+                                        !!childWithParents.parents ? (
                                             childWithParents.parents.map((parent: ParentDataWithEmergencyContact, index: number) => (
-                                                <TableRow key={index} className="hover:bg-gray-300 hover:cursor-pointer"
+                                                <TableRow key={index}
+                                                          className={`hover:bg-blue-100 hover:cursor-pointer transition-all ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}
                                                           onClick={() => router.push(`/parents/${parent.parentDto.id}`, `/parents/${parent.parentDto.id}`)}>
                                                     <TableCell className="text-center">
                                                         {parent.parentDto.givenName + " " + parent.parentDto.familyName}

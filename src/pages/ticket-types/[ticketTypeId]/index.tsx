@@ -13,7 +13,8 @@ import deletedTicketType from "@/api/graphql/ticketType/deletedTicketType";
 import DeleteData from "@/components/deleteData";
 import {TicketTypeData} from "@/model/ticket-type-data";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
-import AccessTokenContext from "@/context/AccessTokenContext";
+import AccessTokenContext from "@/context/access-token-context";
+import getAllRoles from "@/api/graphql/getAllRoles";
 
 
 export const getServerSideProps = withPageAuthRequired<{
@@ -27,11 +28,15 @@ export const getServerSideProps = withPageAuthRequired<{
         if (context.params?.ticketTypeId) {
             try {
                 const session = await getSession(context.req, context.res);
-                ticketData = await getTicketTypeById(context.params.ticketTypeId, session?.accessToken, serverSideClient);
-                return {
-                    props: {
-                        selectedTicket: ticketData,
-                        accessToken: session!.accessToken!
+                let roles = await getAllRoles(session?.accessToken)
+                let isAdmin = roles[0] === "ADMIN"
+                if (isAdmin) {
+                    ticketData = await getTicketTypeById(context.params.ticketTypeId, session?.accessToken, serverSideClient);
+                    return {
+                        props: {
+                            selectedTicket: ticketData,
+                            accessToken: session!.accessToken!
+                        }
                     }
                 }
             } catch (error) {

@@ -15,11 +15,13 @@ export default async function getTicketById(ticketId: string,
                         id
                         givenName
                         familyName
+                        birthDate
                     }
                     ticketType{
                         id
                         name
                         price
+                        description
                         numberOfParticipation
                         standardValidityPeriod
                     }

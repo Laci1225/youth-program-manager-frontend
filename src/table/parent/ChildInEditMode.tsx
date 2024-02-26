@@ -10,7 +10,7 @@ import updateParent from "@/api/graphql/parent/updateParent";
 import {toast} from "@/components/ui/use-toast";
 import ChildForm from "@/form/child/ChildForm";
 import updateChild from "@/api/graphql/child/updateChild";
-import AccessTokenContext from "@/context/AccessTokenContext";
+import AccessTokenContext from "@/context/access-token-context";
 
 interface ChildInEditModeProps {
     parent: ParentData

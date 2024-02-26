@@ -2,7 +2,10 @@ import {clientSideClient} from "@/api/graphql/client";
 import {ApolloClient, gql, NormalizedCacheObject} from "@apollo/client";
 import {HistoryData, TicketData} from "@/model/ticket-data";
 
-export default async function removeParticipation(ticketId: string, historyData: HistoryData, client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketData> {
+export default async function removeParticipation(ticketId: string,
+                                                  historyData: HistoryData,
+                                                  authToken: string | undefined,
+                                                  client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketData> {
     return client
     .mutate({
         mutation: gql`
@@ -36,5 +39,10 @@ export default async function removeParticipation(ticketId: string, historyData:
             id: ticketId,
             historyData: historyData
         },
+        context: {
+            headers: {
+                Authorization: `Bearer ${authToken}`
+            }
+        }
     }).then(value => value.data.removeParticipation);
 }

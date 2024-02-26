@@ -1,7 +1,7 @@
 import {toast} from "@/components/ui/use-toast";
 import React, {useContext} from "react";
 import ConfirmDialog from "@/components/confirmDialog";
-import AccessTokenContext from "@/context/AccessTokenContext";
+import AccessTokenContext from "@/context/access-token-context";
 
 interface DeleteDataProps<T> {
     entityId?: string,

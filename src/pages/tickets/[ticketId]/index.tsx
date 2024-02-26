@@ -1,5 +1,5 @@
 import {InferGetServerSidePropsType} from "next";
-import React, {useState} from "react";
+import React, {useContext, useState} from "react";
 import Link from "next/link";
 import {Toaster} from "@/components/ui/toaster";
 import {Label} from "@/components/ui/label";
@@ -23,12 +23,14 @@ import removeParticipation from "@/api/graphql/ticket/removeParticipation";
 import {calculateDaysDifference} from "@/utils/calculateDaysDifference";
 import {cn} from "@/lib/utils";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
-import AccessTokenContext from "@/context/AccessTokenContext";
+import AccessTokenContext from "@/context/access-token-context";
+import getAllRoles from "@/api/graphql/getAllRoles";
 
 
 export const getServerSideProps = withPageAuthRequired<{
     selectedTicket: TicketData,
-    accessToken: string
+    accessToken: string,
+    isAdmin: boolean
 }, {
     ticketId: string
 }>({
@@ -37,11 +39,14 @@ export const getServerSideProps = withPageAuthRequired<{
         if (context.params?.ticketId) {
             try {
                 const session = await getSession(context.req, context.res);
+                const roles = await getAllRoles(session?.accessToken)
+                const isAdmin = roles[0] === "ADMIN"
                 ticketData = await getTicketById(context.params.ticketId, session?.accessToken, serverSideClient);
                 return {
                     props: {
                         selectedTicket: ticketData,
-                        accessToken: session!.accessToken!
+                        accessToken: session!.accessToken!,
+                        isAdmin: isAdmin
                     }
                 }
             } catch (error) {
@@ -55,7 +60,11 @@ export const getServerSideProps = withPageAuthRequired<{
         };
     }
 })
-export default function Ticket({selectedTicket, accessToken}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Ticket({
+                                   selectedTicket,
+                                   accessToken,
+                                   isAdmin
+                               }: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const router = useRouter()
     const [ticket, setTicket] = useState<TicketData>(selectedTicket)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -63,7 +72,6 @@ export default function Ticket({selectedTicket, accessToken}: InferGetServerSide
     const [isReportParticipationClicked, setIsReportParticipationClicked] = useState<boolean>(false)
     const [isRemoveParticipationClicked, setIsRemoveParticipationClicked] = useState<boolean>(false)
     const [removeParticipationIndex, setRemoveParticipationIndex] = useState<number>()
-
     const onTicketUpdated = (newTicket: TicketData) => {
         setTicket(newTicket)
     }
@@ -97,7 +105,7 @@ export default function Ticket({selectedTicket, accessToken}: InferGetServerSide
         } = ticket
         const participationToRemove = remainingTicket.historyLog.find((_, i) => i === removeParticipationIndex);
         if (participationToRemove) {
-            removeParticipation(id, participationToRemove)
+            removeParticipation(id, participationToRemove, accessToken)
                 .then(value => {
                     setTicket(value)
                     toast({
@@ -110,7 +118,8 @@ export default function Ticket({selectedTicket, accessToken}: InferGetServerSide
     }
 
     function handleReport() {
-        reportParticipation(ticket.id, {date: new Date(), reporter: ""})
+        reportParticipation(ticket.id, {date: new Date(), reporter: ""}, accessToken
+        )
             .then(value => {
                 setTicket(value)
             }).then(() =>
@@ -173,8 +182,7 @@ export default function Ticket({selectedTicket, accessToken}: InferGetServerSide
 
     return (
         <AccessTokenContext.Provider value={accessToken}>
-
-            <div className="container w-3/6 py-10 h-[100vh] overflow-auto">
+            <div className="container w-3/6 py-10 h-[85vh] overflow-auto">
                 <div className="flex justify-between px-6 pb-6 items-center">
                     <Link href="/tickets">
                         <span className="material-icons-outlined">arrow_back</span>
@@ -253,7 +261,11 @@ export default function Ticket({selectedTicket, accessToken}: InferGetServerSide
                     </div>
                     <div className="mb-6 flex justify-between">
                         <Label className="items-center">Report Participation:</Label>
-                        {renderReportParticipationButton(ticket, handleReportParticipation)}
+                        {isAdmin && (
+                            <>
+                                {renderReportParticipationButton(ticket, handleReportParticipation)}
+                            </>
+                        )}
                     </div>
                     <div className="mb-6 flex-1">
                         <Table className="w-full border border-gray-200">
@@ -270,13 +282,16 @@ export default function Ticket({selectedTicket, accessToken}: InferGetServerSide
                                         <TableCell className="text-center">{index + 1}</TableCell>
                                         <TableCell
                                             className="text-center">{format(new Date(field.date), "P")}</TableCell>
-                                        <TableCell className="w-6">
-                                            <Button type="button" className="p-0"
-                                                    variant="ghost"
-                                                    onClick={() => handleRemoveParticipation(index)}>
-                                                <span className="material-icons-outlined">delete</span>
-                                            </Button>
-                                        </TableCell>
+                                        {
+                                            isAdmin && (
+                                                <TableCell className="w-6">
+                                                    <Button type="button" className="p-0"
+                                                            variant="ghost"
+                                                            onClick={() => handleRemoveParticipation(index)}>
+                                                        <span className="material-icons-outlined">delete</span>
+                                                    </Button>
+                                                </TableCell>)
+                                        }
                                     </TableRow>
                                 ))}
                             </TableBody>
