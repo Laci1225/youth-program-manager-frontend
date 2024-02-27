@@ -112,7 +112,7 @@ export default function Tickets({
                                 event.preventDefault()
                                 handleEditClick(null)
                             }}>
-                                <PlusSquare/>
+                                <PlusSquare size={20} className={"mr-1"}/>
                                 <span>Create</span>
                             </Button>
                         )

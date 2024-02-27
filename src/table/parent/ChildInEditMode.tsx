@@ -35,7 +35,10 @@ export default function ChildInEditMode({
     const [isChildForm, setIsChildForm] = useState(false)
 
     function onChildAdded(newChild: ChildData) {
-        const updatedChildren = tempParentsWithChildren.childDtos ? [...tempParentsWithChildren.childDtos, newChild] : [newChild];
+        const updatedChildren = tempParentsWithChildren.childDtos ? [...tempParentsWithChildren.childDtos, {
+            ...newChild,
+            relativeParents: [{id: parent.id, isEmergencyContact: true}]
+        }] : [{...newChild, relativeParents: [{id: parent.id, isEmergencyContact: true}]}];
         setTempParentsWithChildren({...tempParentsWithChildren, childDtos: updatedChildren})
     }
 

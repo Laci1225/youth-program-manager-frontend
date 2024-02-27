@@ -16,6 +16,7 @@ const uniquePhoneNumbers = z
         message: 'Invalid or duplicate phone number. Please provide valid and unique phone numbers.',
     });
 export const parentSchema = z.object({
+    email: z.string().email('Invalid email address.'),
     familyName: z.string().min(2, 'Name must be at least 2 characters.'),
     givenName: z.string().min(2, 'Name must be at least 2 characters.'),
     phoneNumbers: uniquePhoneNumbers,

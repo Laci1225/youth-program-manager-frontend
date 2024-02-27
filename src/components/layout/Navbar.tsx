@@ -12,10 +12,11 @@ import AccessTokenContext from "@/context/access-token-context";
 import getAllRoles from "@/api/graphql/getAllRoles";
 import {clientSideClient} from "@/api/graphql/client";
 import PermissionContext from "@/context/permission-context";
-import {LIST_PARENTS} from "@/constants/auth0-permissions";
+import {LIST_PARENTS, LIST_TICKET_TYPES} from "@/constants/auth0-permissions";
 
 export default function Navbar() {
     const {user, isLoading, error} = useUser()
+    console.log(user)
     const {permissions} = useContext(PermissionContext)
     if (isLoading) {
         return (
@@ -36,14 +37,23 @@ export default function Navbar() {
                         </Link>
                     </NavigationMenuItem>
                     {
-                        permissions.includes(LIST_PARENTS) && (
+                        permissions.includes(LIST_PARENTS) ? (
+                                <NavigationMenuItem className="mx-2">
+                                    <Link href="/parents" legacyBehavior passHref>
+                                        <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                                            Parents
+                                        </NavigationMenuLink>
+                                    </Link>
+                                </NavigationMenuItem>)
+                            :
                             <NavigationMenuItem className="mx-2">
-                                <Link href="/parents" legacyBehavior passHref>
+                                <Link href={`/parents/me`} legacyBehavior passHref>
                                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                                        Parents
+                                        Me
                                     </NavigationMenuLink>
                                 </Link>
-                            </NavigationMenuItem>)
+                            </NavigationMenuItem>
+
                     }
                     <NavigationMenuItem className="mx-2">
                         <Link href="/tickets" legacyBehavior passHref>
@@ -52,13 +62,16 @@ export default function Navbar() {
                             </NavigationMenuLink>
                         </Link>
                     </NavigationMenuItem>
-                    <NavigationMenuItem className="mx-2">
-                        <Link href="/ticket-types" legacyBehavior passHref>
-                            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                                Ticket types
-                            </NavigationMenuLink>
-                        </Link>
-                    </NavigationMenuItem>
+                    {
+                        permissions.includes(LIST_TICKET_TYPES) && (
+                            <NavigationMenuItem className="mx-2">
+                                <Link href="/ticket-types" legacyBehavior passHref>
+                                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                                        Ticket types
+                                    </NavigationMenuLink>
+                                </Link>
+                            </NavigationMenuItem>)
+                    }
                 </div>
                 <div className={"flex"}>
                     <NavigationMenuItem className="mx-2 flex items-center">

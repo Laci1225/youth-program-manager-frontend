@@ -17,7 +17,7 @@ import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
 import deleteParent from "@/api/graphql/parent/deleteParent";
 import DeleteData from "@/components/deleteData";
-import {ParentData, ParentDataWithChildren, ParentDataWithChildrenIds} from "@/model/parent-data";
+import {ParentData, ParentDataWithChildrenIds} from "@/model/parent-data";
 import HoverText from "@/components/hoverText";
 import SettingsDropdown from "@/components/SettingsDropdown";
 import AccessTokenContext from "@/context/access-token-context";
@@ -104,7 +104,7 @@ export default function Parents({
                                 event.preventDefault()
                                 handleEditClick(null)
                             }}>
-                                <PlusSquare/>
+                                <PlusSquare size={20} className={"mr-1"}/>
                                 <span>Create</span>
                             </Button>)
                     }

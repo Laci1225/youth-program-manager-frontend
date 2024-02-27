@@ -15,6 +15,8 @@ export default async function getPotentialChildren(childName: string,
                     familyName
                     givenName
                     birthDate
+                    birthPlace
+                    address
                 }
             }
         `, fetchPolicy: "no-cache",

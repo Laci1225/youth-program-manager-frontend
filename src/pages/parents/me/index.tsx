@@ -28,54 +28,41 @@ import {
 import AccessTokenContext from "@/context/access-token-context";
 import jwt from "jsonwebtoken";
 import PermissionContext from "@/context/permission-context";
-import {DELETE_PARENTS, READ_PARENTS, UPDATE_CHILDREN, UPDATE_PARENTS} from "@/constants/auth0-permissions";
+import {DELETE_PARENTS, UPDATE_CHILDREN, UPDATE_PARENTS} from "@/constants/auth0-permissions";
+import getMyData from "@/api/graphql/parent/getMyData";
 
 export const getServerSideProps = withPageAuthRequired<{
     selectedParent: ParentDataWithChildren,
     accessToken: string,
     permissions: string[]
-}, {
-    parentId: string
 }>({
     async getServerSideProps(context) {
         let parentData;
-        if (context.params?.parentId) {
-            try {
-                const session = await getSession(context.req, context.res);
-                console.log(session?.accessToken)
-                parentData = await getParentById(context.params.parentId, session?.accessToken, serverSideClient);
-                const claims = jwt.decode(session?.accessToken!) as jwt.JwtPayload;
-                const permissions = claims["permissions"] as string[];
-                if (permissions.includes(READ_PARENTS))
-                    return {
-                        props: {
-                            selectedParent: parentData,
-                            accessToken: session!.accessToken!,
-                            permissions: permissions
-                        }
-                    }
-                else {
-                    return {
-                        notFound: true
-                    }
+        try {
+            const session = await getSession(context.req, context.res);
+            parentData = await getMyData(session?.accessToken, serverSideClient);
+            const claims = jwt.decode(session?.accessToken!) as jwt.JwtPayload;
+            const permissions = claims["permissions"] as string[];
+            return {
+                props: {
+                    selectedParent: parentData,
+                    accessToken: session!.accessToken!,
+                    permissions: permissions
                 }
-            } catch (error) {
-                return {
-                    notFound: true
-                };
             }
+        } catch (error) {
+            return {
+                notFound: true
+            };
         }
-        return {
-            notFound: true
-        };
     }
 })
 
-export default function Parent({
-                                   selectedParent,
-                                   accessToken,
-                                   permissions
-                               }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Me({
+                               selectedParent,
+                               accessToken,
+                               permissions
+                           }: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const {setPermissions} = useContext(PermissionContext)
     useEffect(() => {
         setPermissions(permissions)
@@ -152,12 +139,6 @@ export default function Parent({
                     </div>
                 </div>
                 <div className="border border-gray-200 rounded p-4">
-                    <div className="mb-6">
-                        <Label>Email address:</Label>
-                        <div className={`${fieldAppearance} mt-2`}>
-                            {parent.email}
-                        </div>
-                    </div>
                     <div className="mb-6">
                         <Label>Full Name:</Label>
                         <div className={`${fieldAppearance} mt-2`}>

@@ -7,7 +7,7 @@ import {Check, XIcon} from "lucide-react"
 import {Skeleton} from "@/components/ui/skeleton";
 import {ParentData} from "@/model/parent-data";
 import {Button} from "@/components/ui/button";
-import {ChildNameData, RelativeParent} from "@/model/child-data";
+import {ChildData, ChildNameData, RelativeParent} from "@/model/child-data";
 import debounce from "@/utils/debounce";
 import {format} from "date-fns";
 import {TicketTypeData} from "@/model/ticket-type-data";
@@ -29,20 +29,20 @@ type AutoCompleteProps<T> = {
     getDescriptionForItem?: (item: T) => string
 }
 
-export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeData>({
-                                                                                        alreadyAddedData,
-                                                                                        className,
-                                                                                        isAdded,
-                                                                                        placeholder,
-                                                                                        emptyMessage,
-                                                                                        value,
-                                                                                        onValueChange,
-                                                                                        disabled,
-                                                                                        isLoading = false,
-                                                                                        getPotential,
-                                                                                        getLabelForItem,
-                                                                                        getDescriptionForItem,
-                                                                                    }: AutoCompleteProps<T>) => {
+export const AutoComplete = <T extends ParentData | ChildNameData | ChildData | TicketTypeData>({
+                                                                                                    alreadyAddedData,
+                                                                                                    className,
+                                                                                                    isAdded,
+                                                                                                    placeholder,
+                                                                                                    emptyMessage,
+                                                                                                    value,
+                                                                                                    onValueChange,
+                                                                                                    disabled = false,
+                                                                                                    isLoading = false,
+                                                                                                    getPotential,
+                                                                                                    getLabelForItem,
+                                                                                                    getDescriptionForItem,
+                                                                                                }: AutoCompleteProps<T>) => {
     const accessToken = useContext(AccessTokenContext)
     const inputRef = useRef<HTMLInputElement>(null)
 
