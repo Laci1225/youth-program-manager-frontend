@@ -50,9 +50,6 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
             expirationDate: existingTicket?.expirationDate ? new Date(existingTicket.expirationDate) : undefined,
         },
     })
-    console.log(existingTicket)
-    console.log(existingTicket?.child.birthDate)
-    console.log(existingTicket?.ticketType.description)
 
     function onSubmit(values: z.infer<typeof ticketSchema>) {
         setIsSubmitting(true)
@@ -119,7 +116,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
         })
         calcDateByGivenDate()
     }, [existingTicket])
-    console.log(form.getValues("child"))
+
     const calcDateByGivenDay = (givenDay?: number) => {
         if (givenDay) {
             const issueDate = form.getValues("issueDate");

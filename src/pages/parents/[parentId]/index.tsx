@@ -42,7 +42,6 @@ export const getServerSideProps = withPageAuthRequired<{
         if (context.params?.parentId) {
             try {
                 const session = await getSession(context.req, context.res);
-                console.log(session?.accessToken)
                 parentData = await getParentById(context.params.parentId, session?.accessToken, serverSideClient);
                 const claims = jwt.decode(session?.accessToken!) as jwt.JwtPayload;
                 const permissions = claims["permissions"] as string[];
