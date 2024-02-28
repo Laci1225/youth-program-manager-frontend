@@ -2,7 +2,8 @@ import {clientSideClient} from "@/api/graphql/client";
 import {gql} from "@apollo/client";
 import {ParentCreateDataInput, ParentData} from "@/model/parent-data";
 
-export default function addParent(values: ParentCreateDataInput): Promise<ParentData> {
+export default function addParent(values: ParentCreateDataInput,
+                                  authToken: string | undefined): Promise<ParentData> {
     return clientSideClient
     .mutate({
         mutation: gql`
@@ -23,6 +24,11 @@ export default function addParent(values: ParentCreateDataInput): Promise<Parent
                 phoneNumbers: values.phoneNumbers,
                 address: values?.address,
                 childId: values?.childId || ""
+            },
+        },
+        context: {
+            headers: {
+                Authorization: `Bearer ${authToken}`,
             },
         },
     }).then(value => value.data.addParent)

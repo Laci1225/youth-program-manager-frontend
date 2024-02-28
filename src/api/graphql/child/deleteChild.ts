@@ -2,7 +2,9 @@ import {clientSideClient} from "@/api/graphql/client";
 import {ApolloClient, gql, NormalizedCacheObject} from "@apollo/client";
 import {ChildData} from "@/model/child-data";
 
-export default async function deleteChild(childId: string, client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<ChildData> {
+export default async function deleteChild(childId: string,
+                                          authToken: string | undefined,
+                                          client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<ChildData> {
     let value = await client
     .mutate({
         mutation: gql`
@@ -30,6 +32,11 @@ export default async function deleteChild(childId: string, client: ApolloClient<
         `,
         variables: {
             id: childId,
+        },
+        context: {
+            headers: {
+                Authorization: `Bearer ${authToken}`,
+            },
         },
     });
     return value.data.deleteChild;

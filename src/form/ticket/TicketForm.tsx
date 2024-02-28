@@ -1,6 +1,6 @@
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 import {Input} from "@/components/ui/input";
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {useForm} from "react-hook-form"
 import * as z from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -25,6 +25,7 @@ import {Info} from "lucide-react";
 import HoverText from "@/components/hoverText";
 import {Switch} from "@/components/ui/switch"
 import InputCalendarSwitch from "@/form/ticket/InputCalendarSwitch";
+import AccessTokenContext from "@/context/AccessTokenContext";
 
 
 interface TicketFormProps {
@@ -36,6 +37,7 @@ interface TicketFormProps {
 
 
 function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: TicketFormProps) {
+    const accessToken = useContext(AccessTokenContext)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof ticketSchema>>({
         resolver: zodResolver(ticketSchema),
@@ -56,7 +58,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
             updateTicket(existingTicket.id, {
                 ...remainingValues, ticketTypeId: ticketType.id,
                 childId: child.id
-            })
+            },accessToken)
                 .then((result) => {
                     onTicketModified(result)
                     toast({
@@ -78,7 +80,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
             addTicket({
                 ...values, ticketTypeId: ticketType.id,
                 childId: child.id
-            })
+            }, accessToken)
                 .then((result) => {
                     onTicketModified(result)
                     toast({

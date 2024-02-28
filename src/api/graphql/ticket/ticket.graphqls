@@ -20,6 +20,7 @@ input TicketInput {
     expirationDate: LocalDateTime
     price: Float!
     numberOfParticipation: Int!
+    historyLog: [HistoryDataInput]
 }
 input HistoryDataInput{
     date: LocalDateTime!

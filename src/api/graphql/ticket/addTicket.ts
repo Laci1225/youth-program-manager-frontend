@@ -2,7 +2,8 @@ import {clientSideClient} from "@/api/graphql/client";
 import {gql} from "@apollo/client";
 import {TicketData, TicketDataInput} from "@/model/ticket-data";
 
-export default function addTicket(values: TicketDataInput): Promise<TicketData> {
+export default function addTicket(values: TicketDataInput,
+                                  authToken: string | undefined) : Promise<TicketData>{
     return clientSideClient
     .mutate({
         mutation: gql`
@@ -42,6 +43,11 @@ export default function addTicket(values: TicketDataInput): Promise<TicketData> 
                 expirationDate: values.expirationDate,
                 price: values.price
             }, fetchPolicy: "no-cache"
+        },
+        context: {
+            headers: {
+                Authorization: `Bearer ${authToken}`,
+            },
         },
     }).then(value => value.data.addTicket)
 }

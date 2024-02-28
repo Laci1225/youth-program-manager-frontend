@@ -1,6 +1,6 @@
 import {CommandGroup, CommandItem, CommandList, CommandInput} from "@/components/ui/command"
 import {Command as CommandPrimitive} from "cmdk"
-import React, {useState, useRef, useCallback, type KeyboardEvent, FormEvent, useEffect} from "react"
+import React, {useState, useRef, useCallback, type KeyboardEvent, FormEvent, useEffect, useContext} from "react"
 
 import {cn} from "@/lib/utils"
 import {Check, XIcon} from "lucide-react"
@@ -11,6 +11,7 @@ import {ChildNameData, RelativeParent} from "@/model/child-data";
 import debounce from "@/utils/debounce";
 import {format} from "date-fns";
 import {TicketTypeData} from "@/model/ticket-type-data";
+import AccessTokenContext from "@/context/AccessTokenContext";
 import {isStrictDate} from "@/utils/date";
 
 type AutoCompleteProps<T> = {
@@ -23,7 +24,7 @@ type AutoCompleteProps<T> = {
     className?: string
     alreadyAddedData?: ChildNameData[] | RelativeParent[]
     isAdded: boolean
-    getPotential: (name: string, limit: number) => Promise<T[]>
+    getPotential: (name: string, limit: number, accessToken: string) => Promise<T[]>
     getLabelForItem: (item: T) => string
     getDescriptionForItem?: (item: T) => string
 }
@@ -42,6 +43,7 @@ export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeDa
                                                                                         getLabelForItem,
                                                                                         getDescriptionForItem,
                                                                                     }: AutoCompleteProps<T>) => {
+    const accessToken = useContext(AccessTokenContext)
     const inputRef = useRef<HTMLInputElement>(null)
 
     const [isOpen, setOpen] = useState(false)
@@ -56,9 +58,8 @@ export const AutoComplete = <T extends ParentData | ChildNameData | TicketTypeDa
             setOptions(undefined)
         }
     }, [isAdded, value]);
-
     const fetchPotential = useCallback((name: string) => {
-        getPotential(name, 5)
+        getPotential(name, 5, accessToken)
             .then(items => {
                 const filteredItems = items.filter((item) =>
                     !alreadyAddedData?.some(

@@ -2,7 +2,8 @@ import {clientSideClient} from "@/api/graphql/client";
 import {gql} from "@apollo/client";
 import {ChildDataInput} from "@/model/child-data";
 
-export default function addChild(values: ChildDataInput) {
+export default function addChild(values: ChildDataInput,
+                                 authToken: string | undefined) {
     return clientSideClient
     .mutate({
         mutation: gql`
@@ -52,6 +53,11 @@ export default function addChild(values: ChildDataInput) {
                     dose: medicine.dose,
                     takenSince: medicine?.takenSince,
                 })),
+            },
+        },
+        context: {
+            headers: {
+                Authorization: `Bearer ${authToken}`,
             },
         },
     }).then(value => value.data.addChild)

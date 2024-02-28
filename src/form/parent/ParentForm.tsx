@@ -1,6 +1,6 @@
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form"
 import {Input} from "@/components/ui/input";
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {useForm} from "react-hook-form"
 import * as z from "zod"
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -18,6 +18,7 @@ import getPotentialChildren from "@/api/graphql/parent/getPotentialChildren";
 import {Button} from "@/components/ui/button";
 import {ChildData} from "@/model/child-data";
 import ChildForm from "@/form/child/ChildForm";
+import AccessTokenContext from "@/context/AccessTokenContext";
 
 interface ParentFormProps {
     onParentModified: (parent: ParentData) => void;
@@ -28,8 +29,14 @@ interface ParentFormProps {
 
 }
 
-function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onChildFormClicked}: ParentFormProps) {
-
+function ParentForm({
+                        onParentModified,
+                        existingParent,
+                        isOpen,
+                        onOpenChange,
+                        onChildFormClicked,
+                    }: ParentFormProps) {
+    const accessToken = useContext(AccessTokenContext)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const form = useForm<z.infer<typeof parentSchema>>({
         resolver: zodResolver(parentSchema),
@@ -55,7 +62,7 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
                 id: existingParent.id,
                 childIds: existingParent.childIds
             };
-            updateParent(updateValues)
+            updateParent(updateValues, accessToken)
                 .then((result) => {
                     onParentModified(result)
                     toast({
@@ -78,7 +85,7 @@ function ParentForm({onParentModified, existingParent, isOpen, onOpenChange, onC
                 child,
                 ...parentFields
             } = values;
-            addParent({...parentFields, childId: child?.id})
+            addParent({...parentFields, childId: child?.id}, accessToken)
                 .then((result) => {
                     onParentModified(result)
                     toast({

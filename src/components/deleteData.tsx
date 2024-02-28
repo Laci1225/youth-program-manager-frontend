@@ -1,6 +1,7 @@
 import {toast} from "@/components/ui/use-toast";
-import React from "react";
+import React, {useContext} from "react";
 import ConfirmDialog from "@/components/confirmDialog";
+import AccessTokenContext from "@/context/AccessTokenContext";
 
 interface DeleteDataProps<T> {
     entityId?: string,
@@ -8,7 +9,7 @@ interface DeleteDataProps<T> {
     onSuccess: (deletedData: T) => void,
     isOpen: boolean,
     onOpenChange: (open: boolean) => void,
-    deleteFunction: (id: string) => Promise<T>,
+    deleteFunction: (id: string, auth0: string | undefined) => Promise<T>,
     entityType: string
 }
 
@@ -19,12 +20,14 @@ export default function DeleteData<T>({
                                           onOpenChange,
                                           onSuccess,
                                           deleteFunction,
-                                          entityType
+                                          entityType,
                                       }: DeleteDataProps<T>) {
+
+    const accessToken = useContext(AccessTokenContext);
     const handleDelete = async () => {
         if (entityId) {
             try {
-                const deletedData = await deleteFunction(entityId);
+                const deletedData = await deleteFunction(entityId, accessToken);
                 toast({
                     variant: "default",
                     title: `${entityType} data deleted successfully`,

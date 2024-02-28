@@ -3,7 +3,9 @@ import {clientSideClient} from '@/api/graphql/client';
 import {gql} from '@apollo/client';
 import {ChildData} from '@/model/child-data';
 
-export default async function getAllChildren(client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<ChildData[]> {
+export default async function getAllChildren(authToken: string | undefined,
+                                             client: ApolloClient<NormalizedCacheObject> = clientSideClient,
+): Promise<ChildData[]> {
     let value = await client.query({
         query: gql`
             query {
@@ -31,7 +33,13 @@ export default async function getAllChildren(client: ApolloClient<NormalizedCach
                     hasRegularMedicines
                 }
             }
-        `, fetchPolicy: "no-cache"
+        `,
+        fetchPolicy: "no-cache",
+        context: {
+            headers: {
+                Authorization: `Bearer ${authToken}`,
+            },
+        },
     });
     return await value.data.getAllChildren;
 }

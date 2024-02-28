@@ -2,7 +2,9 @@ import {clientSideClient} from "@/api/graphql/client";
 import {ApolloClient, gql, NormalizedCacheObject} from "@apollo/client";
 import {TicketData} from "@/model/ticket-data";
 
-export default async function getTicketById(ticketId: string, client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketData> {
+export default async function getTicketById(ticketId: string,
+                                            authToken: string | undefined,
+                                            client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketData> {
     return client
     .query({
         query: gql`
@@ -34,6 +36,11 @@ export default async function getTicketById(ticketId: string, client: ApolloClie
         `, fetchPolicy: "no-cache",
         variables: {
             id: ticketId,
+        },
+        context: {
+            headers: {
+                Authorization: `Bearer ${authToken}`,
+            },
         },
     }).then(value => value.data.getTicketById);
 }

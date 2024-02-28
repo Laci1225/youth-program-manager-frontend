@@ -3,13 +3,14 @@ import {AutoComplete} from "@/form/AutoComplete";
 import getPotentialChildren from "@/api/graphql/parent/getPotentialChildren";
 import {Button} from "@/components/ui/button";
 import {PlusSquare} from "lucide-react";
-import React, {Dispatch, SetStateAction, useState} from "react";
+import React, {Dispatch, SetStateAction, useContext, useState} from "react";
 import {ParentData, ParentDataWithChildren} from "@/model/parent-data";
 import {ChildData} from "@/model/child-data";
 import updateParent from "@/api/graphql/parent/updateParent";
 import {toast} from "@/components/ui/use-toast";
 import ChildForm from "@/form/child/ChildForm";
 import updateChild from "@/api/graphql/child/updateChild";
+import AccessTokenContext from "@/context/AccessTokenContext";
 
 interface ChildInEditModeProps {
     parent: ParentData
@@ -25,6 +26,9 @@ export default function ChildInEditMode({
                                             setParentWithChildren,
                                             setIsEditChildrenModeEnabled
                                         }: ChildInEditModeProps) {
+    const accessToken = useContext(AccessTokenContext)
+
+
     const [tempParentsWithChildren, setTempParentsWithChildren] = useState<ParentDataWithChildren>(parentWithChildren)
     const [selectedChildDataToAdd, setSelectedChildDataToAdd] = useState<ChildData>()
 
@@ -48,7 +52,7 @@ export default function ChildInEditMode({
         updateParent({
             ...others,
             childIds: childDtos?.map(child => child.id)
-        })
+        }, accessToken)
             .then(value => {
                 setParentWithChildren(prevState => ({...prevState, ...value}))
                 toast({
@@ -69,7 +73,7 @@ export default function ChildInEditMode({
             })
         if (childDtos) {
             childDtos.map(
-                childDto => updateChild(childDto)
+                childDto => updateChild(childDto, accessToken)
             );
         }
     }
