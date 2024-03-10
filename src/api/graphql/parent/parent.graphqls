@@ -50,7 +50,6 @@ input ParentUpdateDtoInput{
 extend type Query {
     getAllParents: [ParentWithChildrenIds!]!
     getParentById(id: String!): ParentWithChildren!
-    getMyData: ParentWithChildren!
     getPotentialChildren(name: String!): [Child]
 }
 extend type Mutation{

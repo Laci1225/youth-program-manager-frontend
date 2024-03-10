@@ -8,22 +8,17 @@ import {
 import Link from "next/link";
 import {useUser} from "@auth0/nextjs-auth0/client";
 import {useContext} from "react";
-import AccessTokenContext from "@/context/access-token-context";
-import getAllRoles from "@/api/graphql/getAllRoles";
-import {clientSideClient} from "@/api/graphql/client";
 import PermissionContext from "@/context/permission-context";
 import {LIST_PARENTS, LIST_TICKET_TYPES} from "@/constants/auth0-permissions";
 
 export default function Navbar() {
     const {user, isLoading, error} = useUser()
-    console.log(user)
     const {permissions} = useContext(PermissionContext)
     if (isLoading) {
         return (
             <div>Loading...</div>
         );
     }
-    console.log(permissions)
     return (
         <NavigationMenu
             className={`p-2 w-[100%] bg-blue-200 fixed`}>
