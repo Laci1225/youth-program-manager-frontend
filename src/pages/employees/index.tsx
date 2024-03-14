@@ -10,40 +10,35 @@ import React, {useContext, useEffect, useState} from "react";
 import {Toaster} from "@/components/ui/toaster";
 import {serverSideClient} from "@/api/graphql/client";
 import {InferGetServerSidePropsType} from "next";
-import getAllTicketTypes from "@/api/graphql/ticketType/getAllTicketTypes";
 import {PlusSquare} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
 import DeleteData from "@/components/deleteData";
-import TicketTypeForm from "@/form/ticket-type/TicketTypeForm";
 import SettingsDropdown from "@/components/SettingsDropdown";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 import AccessTokenContext from "@/context/access-token-context";
 import jwt from "jsonwebtoken";
 import PermissionContext from "@/context/permission-context";
-import {
-    CREATE_TICKET_TYPES,
-    DELETE_TICKET_TYPES,
-    LIST_TICKET_TYPES,
-    UPDATE_TICKET_TYPES
-} from "@/constants/auth0-permissions";
-import {TicketTypeData} from "@/model/ticket-type-data";
-import deleteTicketType from "@/api/graphql/ticketType/deleteTicketType";
+import {CREATE_EMPLOYEES, DELETE_EMPLOYEES, LIST_EMPLOYEES, UPDATE_EMPLOYEES} from "@/constants/auth0-permissions";
+import getAllEmployee from "@/api/graphql/employee/getAllEmployee";
+import EmployeeForm from "@/form/employee/EmployeeForm";
+import {EmployeeData} from "@/model/employee-data";
+import deleteEmployee from "@/api/graphql/employee/deleteEmployee";
 
 export const getServerSideProps = withPageAuthRequired<{
-    ticketTypeData: TicketTypeData[],
+    employeesData: EmployeeData[],
     accessToken: string,
     permissions: string[]
 }>({
     async getServerSideProps(context) {
         const session = await getSession(context.req, context.res);
-        const ticketTypes = await getAllTicketTypes(session?.accessToken, serverSideClient)
+        const employees = await getAllEmployee(session?.accessToken, serverSideClient)
         const claims = jwt.decode(session?.accessToken!) as jwt.JwtPayload;
         const permissions = claims["permissions"] as string[];
-        if (permissions.includes(LIST_TICKET_TYPES))
+        if (permissions.includes(LIST_EMPLOYEES))
             return {
                 props: {
-                    ticketTypeData: ticketTypes,
+                    employeesData: employees,
                     accessToken: session!.accessToken!,
                     permissions: permissions
                 }
@@ -58,7 +53,7 @@ export const getServerSideProps = withPageAuthRequired<{
 })
 
 export default function Tickets({
-                                    ticketTypeData,
+                                    employeesData,
                                     accessToken,
                                     permissions
                                 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
@@ -67,35 +62,35 @@ export default function Tickets({
         setPermissions(permissions)
     }, [permissions, setPermissions]);
     const router = useRouter()
-    const [ticketTypes, setTicketTypes] = useState<TicketTypeData[]>(ticketTypeData)
-    const onTicketTypeSaved = (savedTicketType: TicketTypeData) => {
-        if (editedTicketType) {
-            const modifiedTickets = ticketTypes.map((ticket) =>
-                ticket.id === savedTicketType.id ? savedTicketType : ticket
+    const [employees, setEmployees] = useState<EmployeeData[]>(employeesData)
+    const onEmployeeSaved = (savedEmployee: EmployeeData) => {
+        if (editedEmployee) {
+            const modifiedTickets = employees.map((employee) =>
+                employee.id === savedEmployee.id ? savedEmployee : employee
             );
-            setTicketTypes(modifiedTickets)
+            setEmployees(modifiedTickets)
         } else {
-            setTicketTypes(prevState => [...prevState, savedTicketType])
+            setEmployees(prevState => [...prevState, savedEmployee])
         }
-        setEditedTicketType(null)
+        setEditedEmployee(null)
     }
-    const onTicketTypeDeleted = (ticket: TicketTypeData) => {
-        const updatedTickets = ticketTypes.filter(p => p.id !== ticket.id);
-        setTicketTypes(updatedTickets);
+    const onEmployeeDeleted = (employee: EmployeeData) => {
+        const updatedTickets = employees.filter(p => p.id !== employee.id);
+        setEmployees(updatedTickets);
     }
-    const [editedTicketType, setEditedTicketType] = useState<TicketTypeData | null>(null)
+    const [editedEmployee, setEditedEmployee] = useState<EmployeeData | null>(null)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-    const [deletedTicket, setDeletedTicket] = useState<TicketTypeData>()
+    const [deletedEmployee, setDeletedEmployee] = useState<EmployeeData>()
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-    function handleEditClick(ticket: TicketTypeData | null) {
+    function handleEditClick(employee: EmployeeData | null) {
         setIsEditDialogOpen(true)
-        setEditedTicketType(ticket)
+        setEditedEmployee(employee)
     }
 
-    function handleDeleteClick(ticket: TicketTypeData) {
+    function handleDeleteClick(employee: EmployeeData) {
         setIsDeleteDialogOpen(true)
-        setDeletedTicket(ticket)
+        setDeletedEmployee(employee)
     }
 
     return (
@@ -104,7 +99,7 @@ export default function Tickets({
                 <div className="flex justify-between px-6 pb-6">
                     <span className="text-2xl font-bold text-gray-800">Ticket types List</span>
                     {
-                        permissions.includes(CREATE_TICKET_TYPES) && (
+                        permissions.includes(CREATE_EMPLOYEES) && (
                             <Button onClick={(event) => {
                                 event.preventDefault()
                                 handleEditClick(null)
@@ -118,42 +113,38 @@ export default function Tickets({
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="text-center w-2/12">Name</TableHead>
-                            <TableHead className="text-center">Description</TableHead>
-                            <TableHead className="text-center w-2/12">Price</TableHead>
-                            <TableHead className="text-center w-1/12"># of participation</TableHead>
-                            <TableHead className="text-center w-2/12">Valid for</TableHead>
+                            <TableHead className="text-center w-2/12">Email</TableHead>
+                            <TableHead className="text-center">Name</TableHead>
+                            <TableHead className="text-center w-2/12">Phone number</TableHead>
+                            <TableHead className="text-center w-1/12">Type</TableHead>
                             <TableHead className="px-5"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {
-                            !!ticketTypes ? (
-                                ticketTypes.map((ticketType, index) => (
-                                    <TableRow key={ticketType.id}
+                            !!employees ? (
+                                employees.map((employeeType, index) => (
+                                    <TableRow key={employeeType.id}
                                               className={`hover:bg-blue-100 hover:cursor-pointer transition-all ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}
-                                              onClick={() => router.push(`ticket-types/${ticketType.id}`)}>
+                                              onClick={() => router.push(`employees/${employeeType.id}`)}>
                                         <TableCell className="text-center">
-                                            {ticketType.name}
+                                            {employeeType.email}
                                         </TableCell>
                                         <TableCell className="text-center">
-                                            {ticketType.description}
+                                            {employeeType.familyName} {employeeType.givenName}
                                         </TableCell>
                                         <TableCell className="text-center">
-                                            {ticketType.price} HUF
+                                            {employeeType.phoneNumber}
                                         </TableCell>
                                         <TableCell className="text-center">
-                                            {ticketType.numberOfParticipation} pc(s)
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            {ticketType.standardValidityPeriod} day(s)
+                                            {employeeType.type}
                                         </TableCell>
                                         <TableCell className="p-1 text-center">
                                             {
-                                                permissions.includes(UPDATE_TICKET_TYPES) && permissions.includes(DELETE_TICKET_TYPES) && (
+                                                permissions.includes(UPDATE_EMPLOYEES) && permissions.includes(DELETE_EMPLOYEES) && (
                                                     <SettingsDropdown
-                                                        handleEditClick={() => handleEditClick(ticketType)}
-                                                        handleDeleteClick={() => handleDeleteClick(ticketType)}
+                                                        handleEditClick={() => handleEditClick(employeeType)}
+                                                        handleDeleteClick={() => handleDeleteClick(employeeType)}
                                                     />)
                                             }
                                         </TableCell>
@@ -166,18 +157,18 @@ export default function Tickets({
                     </TableBody>
                 </Table>
                 <Toaster/>
-                <TicketTypeForm existingTicketType={editedTicketType ?? undefined}
-                                isOpen={isEditDialogOpen}
-                                onTicketTypeModified={onTicketTypeSaved}
-                                onOpenChange={setIsEditDialogOpen}
+                <EmployeeForm existingEmployee={editedEmployee ?? undefined}
+                              isOpen={isEditDialogOpen}
+                              onEmployeeModified={onEmployeeSaved}
+                              onOpenChange={setIsEditDialogOpen}
                 />
-                <DeleteData entityId={deletedTicket?.id}
-                            entityLabel={`${deletedTicket?.name}`}
+                <DeleteData entityId={deletedEmployee?.id}
+                            entityLabel={`${deletedEmployee?.familyName} ${deletedEmployee?.givenName}`}
                             isOpen={isDeleteDialogOpen}
                             onOpenChange={setIsDeleteDialogOpen}
-                            onSuccess={onTicketTypeDeleted}
-                            deleteFunction={deleteTicketType}
-                            entityType="Ticket"
+                            onSuccess={onEmployeeDeleted}
+                            deleteFunction={deleteEmployee}
+                            entityType="Empolyee"
                 />
             </div>
         </AccessTokenContext.Provider>

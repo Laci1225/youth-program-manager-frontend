@@ -17,7 +17,7 @@ import AccessTokenContext from "@/context/access-token-context";
 
 
 interface TicketFormProps {
-    onTicketTypeModified: (ticket: TicketTypeData) => void;
+    onTicketTypeModified: (ticketType: TicketTypeData) => void;
     existingTicketType?: TicketTypeData
     isOpen: boolean
     onOpenChange: (open: boolean) => void;

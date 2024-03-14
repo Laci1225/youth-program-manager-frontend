@@ -20,7 +20,6 @@ import reportParticipation from "@/api/graphql/ticket/reportParticipation";
 import {calculateDaysDifference} from "@/utils/calculateDaysDifference";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 import AccessTokenContext from "@/context/access-token-context";
-import getAllRoles from "@/api/graphql/getAllRoles";
 import jwt from "jsonwebtoken";
 import PermissionContext from "@/context/permission-context";
 import {

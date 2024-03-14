@@ -11,11 +11,13 @@ import LoadingButton from "@/components/loading-button";
 import {AutoComplete} from "@/form/AutoComplete";
 import {Button} from "@/components/ui/button";
 import AccessTokenContext from "@/context/access-token-context";
-import {EmployeeData} from "@/model/employee-data";
+import {EmployeeData, EmployeeType} from "@/model/employee-data";
 import updateEmployee from "@/api/graphql/employee/updateEmployee";
 import addEmployee from "@/api/graphql/employee/addEmployee";
 import {InputPhoneNumbersHandler} from "@/form/parent/InputPhoneNumbersHandler";
 import {employeeSchema} from "@/form/employee/employeeSchema";
+import {Dropdown} from "react-day-picker";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 interface EmployeeFormProps {
     onEmployeeModified: (employee: EmployeeData) => void;
@@ -113,7 +115,7 @@ function EmployeeForm({
                                         name="email"
                                         render={({field}) => (
                                             <FormItem className="flex-1">
-                                                <FormLabel>Family name*</FormLabel>
+                                                <FormLabel>Email*</FormLabel>
                                                 <FormControl>
                                                     <Input placeholder="Email address" {...field} />
                                                 </FormControl>
@@ -154,7 +156,7 @@ function EmployeeForm({
                                         name="phoneNumber"
                                         render={({field}) => (
                                             <FormItem className="flex-1">
-                                                <FormLabel>Phone numbers*</FormLabel>
+                                                <FormLabel>Phone number*</FormLabel>
                                                 <FormControl>
                                                     <Input placeholder={"Scheme: +36200000000"}
                                                            {...field}/>
@@ -168,11 +170,24 @@ function EmployeeForm({
                                         control={form.control}
                                         name="type"
                                         render={({field}) => (
-                                            <FormItem className="flex-1">
-                                                <FormLabel>Address</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Address" {...field} />
-                                                </FormControl>
+                                            <FormItem>
+                                                <FormLabel>Employee type</FormLabel>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue
+                                                                placeholder="Empoyee type"/>
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        <SelectItem
+                                                            value={EmployeeType.ADMINISTRATOR}>{EmployeeType.ADMINISTRATOR}</SelectItem>
+                                                        <SelectItem
+                                                            value={EmployeeType.TEACHER}>{EmployeeType.TEACHER}</SelectItem>
+                                                        <SelectItem
+                                                            value={EmployeeType.RECEPTIONIST}>{EmployeeType.RECEPTIONIST}</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
                                                 <FormMessage/>
                                             </FormItem>
                                         )}

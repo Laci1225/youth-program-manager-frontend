@@ -23,8 +23,6 @@ import {cn} from "@/lib/utils";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 import AccessTokenContext from "@/context/access-token-context";
-import getParentById from "@/api/graphql/parent/getParentById";
-import getAllRoles from "@/api/graphql/getAllRoles";
 import jwt from "jsonwebtoken";
 import PermissionContext from "@/context/permission-context";
 import {DELETE_CHILDREN, READ_CHILDREN, UPDATE_CHILDREN, UPDATE_PARENTS} from "@/constants/auth0-permissions";

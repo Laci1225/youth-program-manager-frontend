@@ -1,8 +1,8 @@
 import {clientSideClient} from "@/api/graphql/client";
 import {ApolloClient, gql, NormalizedCacheObject} from "@apollo/client";
 
-export default function GetEmployee(authToken: string | undefined, client: ApolloClient<NormalizedCacheObject> = clientSideClient) {
-    client.query({
+export default function getAllEmployee(authToken: string | undefined, client: ApolloClient<NormalizedCacheObject> = clientSideClient) {
+    return client.query({
         query: gql`
             query {
                 getAllEmployees {
@@ -21,5 +21,5 @@ export default function GetEmployee(authToken: string | undefined, client: Apoll
                 Authorization: `Bearer ${authToken}`,
             },
         },
-    })
+    }).then(value => value.data.getAllEmployees)
 }

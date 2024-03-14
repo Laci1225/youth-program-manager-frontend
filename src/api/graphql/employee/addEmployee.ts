@@ -1,4 +1,3 @@
-import {ParentCreateDataInput, ParentData} from "@/model/parent-data";
 import {clientSideClient} from "@/api/graphql/client";
 import {gql} from "@apollo/client";
 import {EmployeeDataInput} from "@/model/employee-data";
@@ -21,7 +20,7 @@ export default function addEmployee(values: EmployeeDataInput,
                 }
             `,
             variables: {
-                parent: {
+                employee: {
                     email: values.email,
                     familyName: values.familyName,
                     givenName: values.givenName,

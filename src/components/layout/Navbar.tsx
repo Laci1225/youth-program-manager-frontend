@@ -9,7 +9,7 @@ import Link from "next/link";
 import {useUser} from "@auth0/nextjs-auth0/client";
 import {useContext} from "react";
 import PermissionContext from "@/context/permission-context";
-import {LIST_PARENTS, LIST_TICKET_TYPES} from "@/constants/auth0-permissions";
+import {LIST_EMPLOYEES, LIST_PARENTS, LIST_TICKET_TYPES} from "@/constants/auth0-permissions";
 
 export default function Navbar() {
     const {user, isLoading, error} = useUser()
@@ -63,6 +63,16 @@ export default function Navbar() {
                                 <Link href="/ticket-types" legacyBehavior passHref>
                                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                                         Ticket types
+                                    </NavigationMenuLink>
+                                </Link>
+                            </NavigationMenuItem>)
+                    }
+                    {
+                        permissions.includes(LIST_EMPLOYEES) && (
+                            <NavigationMenuItem className="mx-2">
+                                <Link href="/employees" legacyBehavior passHref>
+                                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                                        Employees
                                     </NavigationMenuLink>
                                 </Link>
                             </NavigationMenuItem>)

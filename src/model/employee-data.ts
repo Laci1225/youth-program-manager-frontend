@@ -1,7 +1,7 @@
 export enum EmployeeType {
-    TEACHER,
-    ADMINISTRATOR,
-    RECEPTIONIST,
+    TEACHER = "TEACHER",
+    ADMINISTRATOR = "ADMINISTRATOR",
+    RECEPTIONIST = "RECEPTIONIST",
 }
 
 export interface EmployeeData {

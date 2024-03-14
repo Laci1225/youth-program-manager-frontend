@@ -7,7 +7,7 @@ import {fieldAppearance} from "@/components/fieldAppearance";
 import {Pencil, Trash} from "lucide-react";
 import {useRouter} from "next/router";
 import {serverSideClient} from "@/api/graphql/client";
-import deletedTicketType from "@/api/graphql/ticketType/deletedTicketType";
+import deletedTicketType from "@/api/graphql/ticketType/deleteTicketType";
 import DeleteData from "@/components/deleteData";
 import getTicketById from "@/api/graphql/ticket/getTicketById";
 import {TicketData} from "@/model/ticket-data";
@@ -24,7 +24,6 @@ import {calculateDaysDifference} from "@/utils/calculateDaysDifference";
 import {cn} from "@/lib/utils";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 import AccessTokenContext from "@/context/access-token-context";
-import getAllRoles from "@/api/graphql/getAllRoles";
 import jwt from "jsonwebtoken";
 import PermissionContext from "@/context/permission-context";
 import {
