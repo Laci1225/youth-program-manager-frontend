@@ -48,7 +48,7 @@ function EmployeeForm({
     function onSubmit(values: z.infer<typeof employeeSchema>) {
         setIsSubmitting(true)
         if (existingEmployee) {
-            updateEmployee(values, accessToken)
+            updateEmployee({...values, id: existingEmployee.id}, accessToken)
                 .then((result) => {
                     onEmployeeModified(result)
                     toast({
@@ -172,7 +172,8 @@ function EmployeeForm({
                                         render={({field}) => (
                                             <FormItem>
                                                 <FormLabel>Employee type</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <Select disabled={!!existingEmployee} onValueChange={field.onChange}
+                                                        defaultValue={field.value}>
                                                     <FormControl>
                                                         <SelectTrigger>
                                                             <SelectValue

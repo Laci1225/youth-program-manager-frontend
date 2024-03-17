@@ -52,11 +52,11 @@ export const getServerSideProps = withPageAuthRequired<{
     }
 })
 
-export default function Tickets({
-                                    employeesData,
-                                    accessToken,
-                                    permissions
-                                }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Employees({
+                                      employeesData,
+                                      accessToken,
+                                      permissions
+                                  }: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const {setPermissions} = useContext(PermissionContext)
     useEffect(() => {
         setPermissions(permissions)
@@ -65,18 +65,18 @@ export default function Tickets({
     const [employees, setEmployees] = useState<EmployeeData[]>(employeesData)
     const onEmployeeSaved = (savedEmployee: EmployeeData) => {
         if (editedEmployee) {
-            const modifiedTickets = employees.map((employee) =>
+            const modifiedEmployees = employees.map((employee) =>
                 employee.id === savedEmployee.id ? savedEmployee : employee
             );
-            setEmployees(modifiedTickets)
+            setEmployees(modifiedEmployees)
         } else {
             setEmployees(prevState => [...prevState, savedEmployee])
         }
         setEditedEmployee(null)
     }
     const onEmployeeDeleted = (employee: EmployeeData) => {
-        const updatedTickets = employees.filter(p => p.id !== employee.id);
-        setEmployees(updatedTickets);
+        const updatedEmployees = employees.filter(p => p.id !== employee.id);
+        setEmployees(updatedEmployees);
     }
     const [editedEmployee, setEditedEmployee] = useState<EmployeeData | null>(null)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -97,14 +97,14 @@ export default function Tickets({
         <AccessTokenContext.Provider value={accessToken}>
             <div className="container w-4/6 py-28">
                 <div className="flex justify-between px-6 pb-6">
-                    <span className="text-2xl font-bold text-gray-800">Ticket types List</span>
+                    <span className="text-2xl font-bold text-gray-800">Employee List</span>
                     {
                         permissions.includes(CREATE_EMPLOYEES) && (
                             <Button onClick={(event) => {
                                 event.preventDefault()
                                 handleEditClick(null)
                             }}>
-                                <PlusSquare size={20} className={"mr-1"}/>
+                                <PlusSquare size={20} className="mr-1"/>
                                 <span>Create</span>
                             </Button>
                         )

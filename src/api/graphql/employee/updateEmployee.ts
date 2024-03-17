@@ -1,8 +1,8 @@
-import {EmployeeData, EmployeeDataInput} from "@/model/employee-data";
+import {EmployeeData, EmployeeDataInput, EmployeeUpdateDataInput} from "@/model/employee-data";
 import {ApolloClient, gql, NormalizedCacheObject} from "@apollo/client";
 import {clientSideClient} from "@/api/graphql/client";
 
-export default function updateEmployee(employeeData: EmployeeDataInput,
+export default function updateEmployee(employeeData: EmployeeUpdateDataInput,
                                        authToken: string | undefined,
                                        client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<EmployeeData> {
     return client.mutate({

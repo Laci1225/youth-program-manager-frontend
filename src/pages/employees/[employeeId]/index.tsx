@@ -62,11 +62,11 @@ export const getServerSideProps = withPageAuthRequired<{
         };
     }
 })
-export default function Ticket({
-                                   selectedEmployee,
-                                   accessToken,
-                                   permissions
-                               }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Employee({
+                                     selectedEmployee,
+                                     accessToken,
+                                     permissions
+                                 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
     const {setPermissions} = useContext(PermissionContext)
     useEffect(() => {
         setPermissions(permissions)
@@ -75,10 +75,10 @@ export default function Ticket({
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const router = useRouter()
-    const onTicketUpdated = (newEmployee: EmployeeData) => {
+    const onEmployeeUpdated = (newEmployee: EmployeeData) => {
         setEmployee(newEmployee)
     }
-    const onTicketDeleted = () => {
+    const onEmployeeDeleted = () => {
         router.push("/employees")
     }
 
@@ -98,7 +98,7 @@ export default function Ticket({
                         <span className="material-icons-outlined">arrow_back</span>
                     </Link>
                     <div>
-                        Ticket details
+                        Employee details
                     </div>
                     <div className="flex">
                         {
@@ -158,16 +158,16 @@ export default function Ticket({
                 <Toaster/>
                 <EmployeeForm existingEmployee={employee ?? undefined}
                               isOpen={isEditDialogOpen}
-                              onEmployeeModified={onTicketUpdated}
+                              onEmployeeModified={onEmployeeUpdated}
                               onOpenChange={setIsEditDialogOpen}
                 />
                 <DeleteData entityId={employee.id}
                             entityLabel={`${employee.familyName} ${employee.givenName}`}
                             isOpen={isDeleteDialogOpen}
                             onOpenChange={setIsDeleteDialogOpen}
-                            onSuccess={onTicketDeleted}
+                            onSuccess={onEmployeeDeleted}
                             deleteFunction={deleteEmployee}
-                            entityType="Ticket"
+                            entityType="Employee"
                 />
             </div>
         </AccessTokenContext.Provider>
