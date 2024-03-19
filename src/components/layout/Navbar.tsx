@@ -32,24 +32,22 @@ export default function Navbar() {
                         </Link>
                     </NavigationMenuItem>
                     {
-                        permissions.includes(LIST_PARENTS) ? (
-                                <NavigationMenuItem className="mx-2">
-                                    <Link href="/parents" legacyBehavior passHref>
-                                        <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                                            Parents
-                                        </NavigationMenuLink>
-                                    </Link>
-                                </NavigationMenuItem>)
-                            :
+                        permissions.includes(LIST_PARENTS) && (
                             <NavigationMenuItem className="mx-2">
-                                <Link href={`/parents/me`} legacyBehavior passHref>
+                                <Link href="/parents" legacyBehavior passHref>
                                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                                        Me
+                                        Parents
                                     </NavigationMenuLink>
                                 </Link>
-                            </NavigationMenuItem>
-
+                            </NavigationMenuItem>)
                     }
+                    <NavigationMenuItem className="mx-2">
+                        <Link href={`/me`} legacyBehavior passHref>
+                            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                                Me
+                            </NavigationMenuLink>
+                        </Link>
+                    </NavigationMenuItem>
                     <NavigationMenuItem className="mx-2">
                         <Link href="/tickets" legacyBehavior passHref>
                             <NavigationMenuLink className={navigationMenuTriggerStyle()}>

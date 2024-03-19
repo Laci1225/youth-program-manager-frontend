@@ -6,6 +6,7 @@ import {TicketData} from "@/model/ticket-data";
 export default async function getAllTickets(authToken: string | undefined,
                                             client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketData[]> {
     let value = await client.query({
+        //todo updatenél csak az adat
         query: gql`
             query {
                 getAllTickets {
