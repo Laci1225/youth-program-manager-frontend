@@ -25,6 +25,8 @@ import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 import jwt from "jsonwebtoken";
 import PermissionContext from "@/context/permission-context";
 import {CREATE_PARENTS, DELETE_PARENTS, LIST_PARENTS, UPDATE_PARENTS} from "@/constants/auth0-permissions";
+import getPermissions from "@/utils/getPermissions";
+import {cn} from "@/lib/utils";
 
 export const getServerSideProps = withPageAuthRequired<{
     parentsData: ParentDataWithChildrenIds[],
@@ -33,19 +35,17 @@ export const getServerSideProps = withPageAuthRequired<{
 }>({
     async getServerSideProps(context) {
         const session = await getSession(context.req, context.res);
-        console.log(session?.accessToken)
-        const parents = await getAllParents(session?.accessToken, serverSideClient)
-        const claims = jwt.decode(session?.accessToken!) as jwt.JwtPayload;
-        const permissions = claims["permissions"] as string[];
-        if (permissions.includes(LIST_PARENTS))
+        const permissions = await getPermissions(session);
+        if (permissions.includes(LIST_PARENTS)) {
+            const parents = await getAllParents(session?.accessToken, serverSideClient)
             return {
                 props: {
                     parentsData: parents,
                     accessToken: session!.accessToken!,
                     permissions: permissions
                 }
-            };
-        else {
+            }
+        } else {
             return {
                 notFound: true
             }
@@ -122,7 +122,7 @@ export default function Parents({
                             !!parents ? (
                                 parents.map((parent, index) => (
                                     <TableRow key={parent.id}
-                                              className={`hover:bg-blue-100 hover:cursor-pointer transition-all ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}
+                                              className={cn(`hover:bg-blue-100 hover:cursor-pointer transition-all`, index % 2 === 0 ? 'bg-gray-100' : 'bg-white')}
                                               onClick={() => router.push(`parents/${parent.id}`)}>
                                         <TableCell className="text-center">
                                             {parent.givenName} {parent.familyName}
@@ -154,12 +154,12 @@ export default function Parents({
                                         </TableCell>
                                         <TableCell className="p-1 text-center">
                                             {
-                                                permissions.includes(UPDATE_PARENTS) && permissions.includes(DELETE_PARENTS) && (
-                                                    <SettingsDropdown
-                                                        handleEditClick={() => handleEditClick(parent)}
-                                                        handleDeleteClick={() => handleDeleteClick(parent)}
-                                                    />
-                                                )
+                                                <SettingsDropdown
+                                                    handleEditClick={() => handleEditClick(parent)}
+                                                    handleDeleteClick={() => handleDeleteClick(parent)}
+                                                    editPermission={UPDATE_PARENTS}
+                                                    deletePermission={DELETE_PARENTS}
+                                                />
                                             }
                                         </TableCell>
                                     </TableRow>

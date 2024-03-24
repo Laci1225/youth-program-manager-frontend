@@ -21,17 +21,16 @@ import deletedTicketType from "@/api/graphql/ticketType/deletedTicketType";
 import SettingsDropdown from "@/components/SettingsDropdown";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 import AccessTokenContext from "@/context/access-token-context";
-import {ParentDataWithChildrenIds} from "@/model/parent-data";
-import getAllRoles from "@/api/graphql/getAllRoles";
-import getAllParents from "@/api/graphql/parent/getAllParents";
 import jwt from "jsonwebtoken";
 import PermissionContext from "@/context/permission-context";
 import {
     CREATE_TICKET_TYPES,
-    CREATE_TICKETS, DELETE_TICKET_TYPES,
+    DELETE_TICKET_TYPES,
     LIST_TICKET_TYPES,
     UPDATE_TICKET_TYPES
 } from "@/constants/auth0-permissions";
+import getPermissions from "@/utils/getPermissions";
+import {cn} from "@/lib/utils";
 
 export const getServerSideProps = withPageAuthRequired<{
     ticketsData: TicketTypeData[],
@@ -40,18 +39,17 @@ export const getServerSideProps = withPageAuthRequired<{
 }>({
     async getServerSideProps(context) {
         const session = await getSession(context.req, context.res);
-        const tickets = await getAllTicketTypes(session?.accessToken, serverSideClient)
-        const claims = jwt.decode(session?.accessToken!) as jwt.JwtPayload;
-        const permissions = claims["permissions"] as string[];
-        if (permissions.includes(LIST_TICKET_TYPES))
+        const permissions = await getPermissions(session);
+        if (permissions.includes(LIST_TICKET_TYPES)) {
+            const tickets = await getAllTicketTypes(session?.accessToken, serverSideClient)
             return {
                 props: {
                     ticketsData: tickets,
                     accessToken: session!.accessToken!,
                     permissions: permissions
                 }
-            };
-        else {
+            }
+        } else {
             return {
                 notFound: true
             }
@@ -134,7 +132,7 @@ export default function Tickets({
                             !!ticketTypes ? (
                                 ticketTypes.map((ticketType, index) => (
                                     <TableRow key={ticketType.id}
-                                              className={`hover:bg-blue-100 hover:cursor-pointer transition-all ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}
+                                              className={cn(`hover:bg-blue-100 hover:cursor-pointer transition-all`, index % 2 === 0 ? 'bg-gray-100' : 'bg-white')}
                                               onClick={() => router.push(`ticket-types/${ticketType.id}`)}>
                                         <TableCell className="text-center">
                                             {ticketType.name}
@@ -153,11 +151,12 @@ export default function Tickets({
                                         </TableCell>
                                         <TableCell className="p-1 text-center">
                                             {
-                                                permissions.includes(UPDATE_TICKET_TYPES) && permissions.includes(DELETE_TICKET_TYPES) && (
-                                                    <SettingsDropdown
-                                                        handleEditClick={() => handleEditClick(ticketType)}
-                                                        handleDeleteClick={() => handleDeleteClick(ticketType)}
-                                                    />)
+                                                <SettingsDropdown
+                                                    handleEditClick={() => handleEditClick(ticketType)}
+                                                    handleDeleteClick={() => handleDeleteClick(ticketType)}
+                                                    editPermission={UPDATE_TICKET_TYPES}
+                                                    deletePermission={DELETE_TICKET_TYPES}
+                                                />
                                             }
                                         </TableCell>
                                     </TableRow>

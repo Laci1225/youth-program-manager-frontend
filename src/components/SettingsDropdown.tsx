@@ -20,13 +20,19 @@ export interface DropdownItem {
 interface SettingsDropdownProps {
     handleEditClick: () => void
     handleDeleteClick: () => void
+    editPermission: string
+    deletePermission: string
     additionalItems?: DropdownItem[]
+    additionalItemsPermission?: string
 }
 
 const SettingsDropdown = ({
                               handleEditClick,
                               handleDeleteClick,
-                              additionalItems
+                              editPermission,
+                              deletePermission,
+                              additionalItems,
+                              additionalItemsPermission
                           }: SettingsDropdownProps) => {
     return (
         <DropdownMenu>
@@ -37,6 +43,7 @@ const SettingsDropdown = ({
                 <DropdownMenuSeparator/>
                 <DropdownMenuItem
                     className="justify-center hover:cursor-pointer p-2 mx-5 my-1"
+                    disabled={!editPermission}
                     onClick={(event) => {
                         event.preventDefault()
                         event.stopPropagation()
@@ -47,6 +54,7 @@ const SettingsDropdown = ({
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     className="justify-center hover:cursor-pointer p-2 mx-5 bg-red-600 text-white my-1"
+                    disabled={!deletePermission}
                     onClick={event => {
                         event.preventDefault()
                         event.stopPropagation()
@@ -61,6 +69,7 @@ const SettingsDropdown = ({
                         <HoverText content={item.hoverTextContent} key={index}>
                             <DropdownMenuItem
                                 className={cn("justify-center p-2 mx-5 my-1", item.className)}
+                                disabled={!additionalItemsPermission}
                                 onClick={(event) => {
                                     event.preventDefault();
                                     event.stopPropagation();
@@ -75,6 +84,7 @@ const SettingsDropdown = ({
                         <DropdownMenuItem
                             key={index}
                             className={cn("justify-center p-2 mx-5 my-1", item.className)}
+                            disabled={!additionalItemsPermission}
                             onClick={(event) => {
                                 event.preventDefault();
                                 event.stopPropagation();

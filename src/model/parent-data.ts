@@ -2,7 +2,7 @@ import {ChildData} from "@/model/child-data";
 
 export interface ParentData {
     id: string,
-    email?: string, //todo make it compulsory
+    email: string,
     givenName: string,
     familyName: string,
     phoneNumbers: string[],
@@ -12,7 +12,7 @@ export interface ParentData {
 
 export interface ParentDataWithChildrenIds {
     id: string
-    email?: string, //todo make it compulsory
+    email: string,
     givenName: string,
     familyName: string,
     phoneNumbers: string[],
@@ -22,7 +22,7 @@ export interface ParentDataWithChildrenIds {
 
 export interface ParentDataWithChildren {
     id: string
-    email?: string, //todo make it compulsory
+    email: string,
     givenName: string,
     familyName: string,
     phoneNumbers: string[],
@@ -36,7 +36,7 @@ export interface ParentDataWithEmergencyContact {
 }
 
 export interface ParentCreateDataInput {
-    email?: string, //todo make it compulsory
+    email: string,
     givenName: string,
     familyName: string,
     phoneNumbers: string[],
@@ -46,7 +46,7 @@ export interface ParentCreateDataInput {
 
 export interface ParentUpdateDataInput {
     id: string,
-    email?: string, //todo make it compulsory
+    email: string,
     givenName: string,
     familyName: string,
     phoneNumbers: string[],

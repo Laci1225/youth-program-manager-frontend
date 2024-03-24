@@ -24,7 +24,6 @@ import {calculateDaysDifference} from "@/utils/calculateDaysDifference";
 import {cn} from "@/lib/utils";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 import AccessTokenContext from "@/context/access-token-context";
-import getAllRoles from "@/api/graphql/getAllRoles";
 import jwt from "jsonwebtoken";
 import PermissionContext from "@/context/permission-context";
 import {
@@ -33,6 +32,7 @@ import {
     READ_TICKETS,
     UPDATE_TICKETS
 } from "@/constants/auth0-permissions";
+import getPermissions from "@/utils/getPermissions";
 
 
 export const getServerSideProps = withPageAuthRequired<{
@@ -43,14 +43,12 @@ export const getServerSideProps = withPageAuthRequired<{
     ticketId: string
 }>({
     async getServerSideProps(context) {
-        let ticketData;
         if (context.params?.ticketId) {
             try {
                 const session = await getSession(context.req, context.res);
-                ticketData = await getTicketById(context.params.ticketId, session?.accessToken, serverSideClient);
-                const claims = jwt.decode(session?.accessToken!) as jwt.JwtPayload;
-                const permissions = claims["permissions"] as string[];
-                if (permissions.includes(READ_TICKETS))
+                const permissions = await getPermissions(session);
+                if (permissions.includes(READ_TICKETS)) {
+                    const ticketData = await getTicketById(context.params.ticketId, session?.accessToken, serverSideClient);
                     return {
                         props: {
                             selectedTicket: ticketData,
@@ -58,7 +56,7 @@ export const getServerSideProps = withPageAuthRequired<{
                             permissions: permissions
                         }
                     }
-                else {
+                } else {
                     return {
                         notFound: true
                     }
@@ -211,7 +209,7 @@ export default function Ticket({
                     <div className="flex">
                         {
                             permissions.includes(UPDATE_TICKETS) && (
-                                <div className=" flex flex-row items-center hover:cursor-pointer px-5"
+                                <div className="flex flex-row items-center hover:cursor-pointer px-5"
                                      onClick={(event) => {
                                          event.preventDefault()
                                          handleEditClick()

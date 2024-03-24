@@ -14,10 +14,10 @@ import DeleteData from "@/components/deleteData";
 import {TicketTypeData} from "@/model/ticket-type-data";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 import AccessTokenContext from "@/context/access-token-context";
-import getAllRoles from "@/api/graphql/getAllRoles";
 import jwt from "jsonwebtoken";
 import PermissionContext from "@/context/permission-context";
 import {DELETE_TICKET_TYPES, READ_TICKET_TYPES, UPDATE_TICKET_TYPES} from "@/constants/auth0-permissions";
+import getPermissions from "@/utils/getPermissions";
 
 
 export const getServerSideProps = withPageAuthRequired<{
@@ -28,14 +28,12 @@ export const getServerSideProps = withPageAuthRequired<{
     ticketTypeId: string
 }>({
     async getServerSideProps(context) {
-        let ticketData;
         if (context.params?.ticketTypeId) {
             try {
                 const session = await getSession(context.req, context.res);
-                ticketData = await getTicketTypeById(context.params.ticketTypeId, session?.accessToken, serverSideClient);
-                const claims = jwt.decode(session?.accessToken!) as jwt.JwtPayload;
-                const permissions = claims["permissions"] as string[];
-                if (permissions.includes(READ_TICKET_TYPES))
+                const permissions = await getPermissions(session);
+                if (permissions.includes(READ_TICKET_TYPES)) {
+                    const ticketData = await getTicketTypeById(context.params.ticketTypeId, session?.accessToken, serverSideClient);
                     return {
                         props: {
                             selectedTicket: ticketData,
@@ -43,7 +41,7 @@ export const getServerSideProps = withPageAuthRequired<{
                             permissions: permissions
                         }
                     }
-                else {
+                } else {
                     return {
                         notFound: true
                     }
