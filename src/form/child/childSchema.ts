@@ -35,6 +35,7 @@ export const childSchema = z.object({
     relativeParent:
         z.object({
                 id: z.string(),
+                email: z.string().email('Invalid email address.'),
                 familyName: z.string(),
                 givenName: z.string(),
                 phoneNumbers: z.array(z.string()),

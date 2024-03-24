@@ -13,7 +13,7 @@ import {TicketTypeData} from "@/model/ticket-type-data";
 import {ticketTypeSchema} from "@/form/ticket-type/ticketTypeSchema";
 import {Textarea} from "@/components/ui/textarea"
 import updateTicketType from "@/api/graphql/ticketType/updateTicketType";
-import AccessTokenContext from "@/context/AccessTokenContext";
+import AccessTokenContext from "@/context/access-token-context";
 
 
 interface TicketFormProps {
@@ -40,7 +40,7 @@ function TicketTypeForm({onTicketTypeModified, existingTicketType, isOpen, onOpe
     function onSubmit(values: z.infer<typeof ticketTypeSchema>) {
         setIsSubmitting(true)
         if (existingTicketType) {
-            updateTicketType(existingTicketType.id, values,accessToken)
+            updateTicketType(existingTicketType.id, values, accessToken)
                 .then((result) => {
                     onTicketTypeModified(result)
                     toast({

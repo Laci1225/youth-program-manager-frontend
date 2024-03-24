@@ -1,5 +1,5 @@
 import {InferGetServerSidePropsType} from "next";
-import React, {useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import Link from "next/link";
 import {Toaster} from "@/components/ui/toaster";
 import {Label} from "@/components/ui/label";
@@ -23,25 +23,42 @@ import removeParticipation from "@/api/graphql/ticket/removeParticipation";
 import {calculateDaysDifference} from "@/utils/calculateDaysDifference";
 import {cn} from "@/lib/utils";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
-import AccessTokenContext from "@/context/AccessTokenContext";
+import AccessTokenContext from "@/context/access-token-context";
+import jwt from "jsonwebtoken";
+import PermissionContext from "@/context/permission-context";
+import {
+    CREATE_TICKET_PARTICIPATIONS, DELETE_TICKET_PARTICIPATIONS,
+    DELETE_TICKETS, READ_TICKET_PARTICIPATIONS,
+    READ_TICKETS,
+    UPDATE_TICKETS
+} from "@/constants/auth0-permissions";
+import getPermissions from "@/utils/getPermissions";
 
 
 export const getServerSideProps = withPageAuthRequired<{
     selectedTicket: TicketData,
-    accessToken: string
+    accessToken: string,
+    permissions: string[]
 }, {
     ticketId: string
 }>({
     async getServerSideProps(context) {
-        let ticketData;
         if (context.params?.ticketId) {
             try {
                 const session = await getSession(context.req, context.res);
-                ticketData = await getTicketById(context.params.ticketId, session?.accessToken, serverSideClient);
-                return {
-                    props: {
-                        selectedTicket: ticketData,
-                        accessToken: session!.accessToken!
+                const permissions = await getPermissions(session);
+                if (permissions.includes(READ_TICKETS)) {
+                    const ticketData = await getTicketById(context.params.ticketId, session?.accessToken, serverSideClient);
+                    return {
+                        props: {
+                            selectedTicket: ticketData,
+                            accessToken: session!.accessToken!,
+                            permissions: permissions
+                        }
+                    }
+                } else {
+                    return {
+                        notFound: true
                     }
                 }
             } catch (error) {
@@ -55,7 +72,15 @@ export const getServerSideProps = withPageAuthRequired<{
         };
     }
 })
-export default function Ticket({selectedTicket, accessToken}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Ticket({
+                                   selectedTicket,
+                                   accessToken,
+                                   permissions
+                               }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const {setPermissions} = useContext(PermissionContext)
+    useEffect(() => {
+        setPermissions(permissions)
+    }, [permissions, setPermissions]);
     const router = useRouter()
     const [ticket, setTicket] = useState<TicketData>(selectedTicket)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -63,7 +88,6 @@ export default function Ticket({selectedTicket, accessToken}: InferGetServerSide
     const [isReportParticipationClicked, setIsReportParticipationClicked] = useState<boolean>(false)
     const [isRemoveParticipationClicked, setIsRemoveParticipationClicked] = useState<boolean>(false)
     const [removeParticipationIndex, setRemoveParticipationIndex] = useState<number>()
-
     const onTicketUpdated = (newTicket: TicketData) => {
         setTicket(newTicket)
     }
@@ -97,7 +121,7 @@ export default function Ticket({selectedTicket, accessToken}: InferGetServerSide
         } = ticket
         const participationToRemove = remainingTicket.historyLog.find((_, i) => i === removeParticipationIndex);
         if (participationToRemove) {
-            removeParticipation(id, participationToRemove)
+            removeParticipation(id, participationToRemove, accessToken)
                 .then(value => {
                     setTicket(value)
                     toast({
@@ -110,7 +134,8 @@ export default function Ticket({selectedTicket, accessToken}: InferGetServerSide
     }
 
     function handleReport() {
-        reportParticipation(ticket.id, {date: new Date(), reporter: ""})
+        reportParticipation(ticket.id, {date: new Date(), reporter: ""}, accessToken
+        )
             .then(value => {
                 setTicket(value)
             }).then(() =>
@@ -127,8 +152,7 @@ export default function Ticket({selectedTicket, accessToken}: InferGetServerSide
     function handleValidFor() {
         const dayDifference = differenceInDays(new Date(ticket.expirationDate), new Date())
         return (
-            <div className={`${fieldAppearance}  
-                    ${dayDifference <= 5 && "bg-red-700 text-white"} mt-2`}>
+            <div className={cn(`${fieldAppearance} mt-2`, dayDifference <= 5 && "bg-red-700 text-white")}>
                 {dayDifference > 0 ? (
                         <>{
                             dayDifference
@@ -156,7 +180,7 @@ export default function Ticket({selectedTicket, accessToken}: InferGetServerSide
                     {hoverButton}
                 </HoverText>
             );
-        } else if (calculateDaysDifference(new Date(), ticket.issueDate) <= 0) {
+        } else if (calculateDaysDifference(new Date(), ticket.issueDate) < 0) {
             return (
                 <HoverText content="Ticket is not yet valid">
                     {hoverButton}
@@ -173,8 +197,7 @@ export default function Ticket({selectedTicket, accessToken}: InferGetServerSide
 
     return (
         <AccessTokenContext.Provider value={accessToken}>
-
-            <div className="container w-3/6 py-10 h-[100vh] overflow-auto">
+            <div className="container w-3/6 py-10 h-[85vh] overflow-auto">
                 <div className="flex justify-between px-6 pb-6 items-center">
                     <Link href="/tickets">
                         <span className="material-icons-outlined">arrow_back</span>
@@ -183,23 +206,29 @@ export default function Ticket({selectedTicket, accessToken}: InferGetServerSide
                         Ticket details
                     </div>
                     <div className="flex">
-                        <div className=" flex flex-row items-center hover:cursor-pointer px-5"
-                             onClick={(event) => {
-                                 event.preventDefault()
-                                 handleEditClick()
-                             }}>
-                            <Pencil className="mx-1"/>
-                            <span>Edit</span>
-                        </div>
-                        <div
-                            className="flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"
-                            onClick={(event) => {
-                                event.preventDefault()
-                                handleDeleteClick()
-                            }}>
-                            <Trash className="mx-1"/>
-                            <span>Delete</span>
-                        </div>
+                        {
+                            permissions.includes(UPDATE_TICKETS) && (
+                                <div className="flex flex-row items-center hover:cursor-pointer px-5"
+                                     onClick={(event) => {
+                                         event.preventDefault()
+                                         handleEditClick()
+                                     }}>
+                                    <Pencil className="mx-1"/>
+                                    <span>Edit</span>
+                                </div>)
+                        }
+                        {
+                            permissions.includes(DELETE_TICKETS) && (
+                                <div
+                                    className="flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"
+                                    onClick={(event) => {
+                                        event.preventDefault()
+                                        handleDeleteClick()
+                                    }}>
+                                    <Trash className="mx-1"/>
+                                    <span>Delete</span>
+                                </div>)
+                        }
                     </div>
                 </div>
                 <div className="border border-gray-200 rounded p-4">
@@ -240,7 +269,7 @@ export default function Ticket({selectedTicket, accessToken}: InferGetServerSide
                         <div className="mb-6 flex-1">
                             <Label>Issue date :</Label>
                             <div
-                                className={cn(`${fieldAppearance} mt-2`, calculateDaysDifference(new Date(), ticket.issueDate) <= 0 && "bg-orange-300")}>
+                                className={cn(`${fieldAppearance} mt-2`, calculateDaysDifference(new Date(), ticket.issueDate) < 0 && "bg-orange-300")}>
                                 {format(new Date(ticket.issueDate), "P")}
                             </div>
                         </div>
@@ -253,7 +282,12 @@ export default function Ticket({selectedTicket, accessToken}: InferGetServerSide
                     </div>
                     <div className="mb-6 flex justify-between">
                         <Label className="items-center">Report Participation:</Label>
-                        {renderReportParticipationButton(ticket, handleReportParticipation)}
+                        {
+                            permissions.includes(CREATE_TICKET_PARTICIPATIONS) && (
+                                <>
+                                    {renderReportParticipationButton(ticket, handleReportParticipation)}
+                                </>)
+                        }
                     </div>
                     <div className="mb-6 flex-1">
                         <Table className="w-full border border-gray-200">
@@ -265,20 +299,26 @@ export default function Ticket({selectedTicket, accessToken}: InferGetServerSide
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {ticket.historyLog.map((field, index: number) => (
-                                    <TableRow key={index}>
-                                        <TableCell className="text-center">{index + 1}</TableCell>
-                                        <TableCell
-                                            className="text-center">{format(new Date(field.date), "P")}</TableCell>
-                                        <TableCell className="w-6">
-                                            <Button type="button" className="p-0"
-                                                    variant="ghost"
-                                                    onClick={() => handleRemoveParticipation(index)}>
-                                                <span className="material-icons-outlined">delete</span>
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                {
+                                    permissions.includes(READ_TICKET_PARTICIPATIONS) && (
+                                        ticket.historyLog.map((field, index: number) => (
+                                            <TableRow key={index}>
+                                                <TableCell className="text-center">{index + 1}</TableCell>
+                                                <TableCell
+                                                    className="text-center">{format(new Date(field.date), "P")}</TableCell>
+                                                {
+                                                    permissions.includes(DELETE_TICKET_PARTICIPATIONS) && (
+                                                        <TableCell className="w-6">
+                                                            <Button type="button" className="p-0"
+                                                                    variant="ghost"
+                                                                    onClick={() => handleRemoveParticipation(index)}>
+                                                                <span className="material-icons-outlined">delete</span>
+                                                            </Button>
+                                                        </TableCell>)
+                                                }
+                                            </TableRow>
+                                        )))
+                                }
                             </TableBody>
                         </Table>
                     </div>

@@ -14,18 +14,15 @@ import getPotentialChildren from "@/api/graphql/parent/getPotentialChildren";
 import {TicketData} from "@/model/ticket-data";
 import updateTicket from "@/api/graphql/ticket/updateTicket";
 import addTicket from "@/api/graphql/ticket/addTicket";
-import getPotentialTicketTypes from "@/api/graphql/ticket/getPotentialTicketTyoes";
+import getPotentialTicketTypes from "@/api/graphql/ticket/getPotentialTicketTypes";
 import {addDays, differenceInDays} from "date-fns";
 import ChildForm from "@/form/child/ChildForm";
 import {ChildData} from "@/model/child-data";
 import {TicketTypeData} from "@/model/ticket-type-data";
 import TicketTypeForm from "@/form/ticket-type/TicketTypeForm";
 import {AutoComplete} from "@/form/AutoComplete";
-import {Info} from "lucide-react";
-import HoverText from "@/components/hoverText";
-import {Switch} from "@/components/ui/switch"
 import InputCalendarSwitch from "@/form/ticket/InputCalendarSwitch";
-import AccessTokenContext from "@/context/AccessTokenContext";
+import AccessTokenContext from "@/context/access-token-context";
 
 
 interface TicketFormProps {
@@ -42,7 +39,10 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
     const form = useForm<z.infer<typeof ticketSchema>>({
         resolver: zodResolver(ticketSchema),
         defaultValues: {
-            child: existingTicket?.child,
+            child: {
+                ...existingTicket?.child,
+                birthDate: existingTicket?.child.birthDate ? new Date(existingTicket.child.birthDate) : undefined
+            },
             ticketType: existingTicket?.ticketType,
             price: existingTicket?.price,
             numberOfParticipation: existingTicket?.numberOfParticipation,
@@ -58,7 +58,7 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
             updateTicket(existingTicket.id, {
                 ...remainingValues, ticketTypeId: ticketType.id,
                 childId: child.id
-            },accessToken)
+            }, accessToken)
                 .then((result) => {
                     onTicketModified(result)
                     toast({
@@ -104,7 +104,10 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
 
     useEffect(() => {
         form.reset({
-            child: existingTicket?.child,
+            child: {
+                ...existingTicket?.child,
+                birthDate: existingTicket?.child.birthDate ? new Date(existingTicket.child.birthDate) : undefined
+            },
             ticketType: existingTicket?.ticketType,
             price: existingTicket?.price,
             numberOfParticipation: existingTicket?.numberOfParticipation,
@@ -171,10 +174,9 @@ function TicketForm({onTicketModified, existingTicket, isOpen, onOpenChange}: Ti
 
     return (
         <>
-
             <Dialog open={isOpen} onOpenChange={onOpenChange}>
                 <DialogContent
-                    className={`sm:max-w-[700px] ${form.getValues("ticketType") ? "h-[90vh]" : "h-[50vh]"} shadow-muted-foreground`}>
+                    className={`sm:max-w-[700px] ${form.getValues("ticketType") ? "h-[70h]" : "h-[50vh]"} shadow-muted-foreground`}>
                     <DialogHeader>
                         <DialogTitle>{existingTicket ? "Update" : "Create"} a ticket</DialogTitle>
                     </DialogHeader>

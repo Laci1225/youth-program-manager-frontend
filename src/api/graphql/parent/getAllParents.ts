@@ -10,6 +10,7 @@ export default async function getAllParents(authToken: string | undefined,
             query {
                 getAllParents {
                     id
+                    email
                     familyName
                     givenName
                     phoneNumbers

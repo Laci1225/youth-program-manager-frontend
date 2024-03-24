@@ -10,7 +10,7 @@ import ChildsParentsTable from "@/table/child/ChildsParentsTable";
 import getPotentialParents from "@/api/graphql/child/getPotentialParents";
 import ParentForm from "@/form/parent/ParentForm";
 import fromChildWithParentsToChildData from "@/model/fromChildWithParentsToChildData";
-import AccessTokenContext from "@/context/AccessTokenContext";
+import AccessTokenContext from "@/context/access-token-context";
 
 interface ParentInEditModeProps {
     child: ChildData
@@ -106,10 +106,10 @@ export default function ParentInEditMode({
 
     return (
         <>
-            <div className={"flex justify-between mb-5"}>
+            <div className="flex justify-between mb-5">
                 <Button
-                    type={"button"}
-                    variant={"ghost"}
+                    type="button"
+                    variant="ghost"
                     onClick={onCancel}
                 >
                     <span>Cancel</span>
@@ -141,10 +141,10 @@ export default function ParentInEditMode({
             <ChildsParentsTable child={child}
                                 childWithParents={tempChildWithParents}
                                 setChildWithParents={setTempChildWithParents}/>
-            <div className={"flex justify-between mb-5 mt-3"}>
-                <div className={"flex w-4/5"}>
+            <div className="flex justify-between mb-5 mt-3">
+                <div className="flex w-4/5">
                     <AutoComplete
-                        className={"w-2/3 mr-3"}
+                        className="w-2/3 mr-3"
                         getPotential={getPotentialParents}
                         alreadyAddedData={child.relativeParents}
                         getLabelForItem={(item) => `${item.givenName} ${item.familyName}`}
@@ -157,8 +157,8 @@ export default function ParentInEditMode({
                                 setSelectedRelativeParentToAdd({id: value.id, isEmergencyContact: true})
                             setSelectedParentDataToAdd(value)
                         }}
-                        placeholder={"Select parents..."}
-                        emptyMessage={"No parent found"}
+                        placeholder="Select parents..."
+                        emptyMessage="No parent found"
                     />
                     <Button
                         disabled={!selectedParentDataToAdd}

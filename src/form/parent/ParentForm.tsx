@@ -18,7 +18,7 @@ import getPotentialChildren from "@/api/graphql/parent/getPotentialChildren";
 import {Button} from "@/components/ui/button";
 import {ChildData} from "@/model/child-data";
 import ChildForm from "@/form/child/ChildForm";
-import AccessTokenContext from "@/context/AccessTokenContext";
+import AccessTokenContext from "@/context/access-token-context";
 
 interface ParentFormProps {
     onParentModified: (parent: ParentData) => void;
@@ -41,6 +41,7 @@ function ParentForm({
     const form = useForm<z.infer<typeof parentSchema>>({
         resolver: zodResolver(parentSchema),
         defaultValues: {
+            email: existingParent?.email,
             familyName: existingParent?.familyName,
             givenName: existingParent?.givenName,
             phoneNumbers: existingParent?.phoneNumbers,
@@ -108,6 +109,7 @@ function ParentForm({
 
     useEffect(() => {
         form.reset({
+            email: existingParent?.email ?? "",
             familyName: existingParent?.familyName ?? "",
             givenName: existingParent?.givenName ?? "",
             phoneNumbers: existingParent?.phoneNumbers ?? undefined,
@@ -131,6 +133,19 @@ function ParentForm({
                               className="flex justify-center flex-col space-y-4 mx-4">
                             <ScrollArea className="h-[70vh]">
                                 <div className="mx-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="email"
+                                        render={({field}) => (
+                                            <FormItem className="flex-1">
+                                                <FormLabel>Email*</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Email address" {...field} />
+                                                </FormControl>
+                                                <FormMessage/>
+                                            </FormItem>
+                                        )}
+                                    />
                                     <div className="flex">
                                         <FormField
                                             control={form.control}

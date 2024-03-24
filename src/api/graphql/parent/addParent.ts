@@ -10,6 +10,7 @@ export default function addParent(values: ParentCreateDataInput,
             mutation AddParent($parent: ParentCreateDtoInput!) {
                 addParent(parent: $parent) {
                     id
+                    email
                     familyName
                     givenName
                     phoneNumbers
@@ -19,6 +20,7 @@ export default function addParent(values: ParentCreateDataInput,
         `,
         variables: {
             parent: {
+                email: values.email,
                 familyName: values.familyName,
                 givenName: values.givenName,
                 phoneNumbers: values.phoneNumbers,

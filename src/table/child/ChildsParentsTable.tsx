@@ -17,10 +17,10 @@ export default function ChildsParentsTable({child, childWithParents, setChildWit
     }
 
     return (
-        <Table className={"w-full border border-gray-200"}>
+        <Table className="w-full border border-gray-200">
             <TableHeader>
                 <TableRow>
-                    <TableHead className={"text-left"}>Name</TableHead>
+                    <TableHead className="text-left">Name</TableHead>
                     <TableHead className="text-center">isEmergencyContact</TableHead>
                     <TableHead className="w-5"></TableHead>
                 </TableRow>
@@ -29,13 +29,13 @@ export default function ChildsParentsTable({child, childWithParents, setChildWit
                 childWithParents.parents && childWithParents.parents.length !== 0 ? (
                     childWithParents.parents.map((parent, index) => (
                         <TableRow key={index}>
-                            <TableCell className={"text-left"}>
+                            <TableCell className="text-left">
                                 {parent.parentDto.givenName} {parent.parentDto.familyName}
                             </TableCell>
-                            <TableCell className={"text-center"}>
+                            <TableCell className="text-center">
                                 <Button
-                                    type={"button"}
-                                    variant={"ghost"}
+                                    type="button"
+                                    variant="ghost"
                                     onClick={() => {
                                         const updatedParents = child.relativeParents?.map(relative => {
                                             if (relative.id === parent.parentDto.id) {
@@ -67,15 +67,14 @@ export default function ChildsParentsTable({child, childWithParents, setChildWit
                                         }
                                     }}
                                 >
-                                                        <span className={"material-icons-outlined"}>
-                                                            {parent.isEmergencyContact ? 'check_box' : 'check_box_outline_blank'}
-                                                        </span>
+                                    <span className="material-icons-outlined">
+                                        {parent.isEmergencyContact ? 'check_box' : 'check_box_outline_blank'}
+                                    </span>
                                 </Button>
                             </TableCell>
-
-                            <TableCell className={"text-center"}>
-                                <Button type={"button"} className="p-0"
-                                        variant={"ghost"}
+                            <TableCell className="text-center">
+                                <Button type="button" className="p-0"
+                                        variant="ghost"
                                         onClick={() => {
                                             deleteParentData(parent);
                                         }}>
@@ -85,7 +84,7 @@ export default function ChildsParentsTable({child, childWithParents, setChildWit
                         </TableRow>
                     ))) : (
                     <TableRow>
-                        <TableCell className={"text-center text-gray-400"} colSpan={3}>
+                        <TableCell className="text-center text-gray-400" colSpan={3}>
                             Nothing added yet
                         </TableCell>
                     </TableRow>

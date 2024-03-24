@@ -11,6 +11,7 @@ export default async function getParentById(parentId: string,
             query GetParentById($id: String!){
                 getParentById(id : $id){
                     id
+                    email
                     familyName
                     givenName
                     phoneNumbers

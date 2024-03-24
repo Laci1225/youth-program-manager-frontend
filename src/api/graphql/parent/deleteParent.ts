@@ -11,6 +11,7 @@ export default async function deleteParent(parentId: string,
             mutation DeleteParent($id: String!) {
                 deleteParent(id : $id){
                     id
+                    email
                     familyName
                     givenName
                     phoneNumbers

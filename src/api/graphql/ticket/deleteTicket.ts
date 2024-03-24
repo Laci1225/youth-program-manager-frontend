@@ -2,9 +2,9 @@ import {clientSideClient} from "@/api/graphql/client";
 import {ApolloClient, gql, NormalizedCacheObject} from "@apollo/client";
 import {TicketData} from "@/model/ticket-data";
 
-export default async function deletedTicket(ticketId: string,
-                                            authToken: string | undefined,
-                                            client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketData> {
+export default async function deleteTicket(ticketId: string,
+                                           authToken: string | undefined,
+                                           client: ApolloClient<NormalizedCacheObject> = clientSideClient): Promise<TicketData> {
     let value = await client
     .mutate({
         mutation: gql`
