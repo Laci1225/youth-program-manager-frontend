@@ -104,7 +104,7 @@ export default function Parents({
                                 event.preventDefault()
                                 handleEditClick(null)
                             }}>
-                                <PlusSquare size={20} className={"mr-1"}/>
+                                <PlusSquare size={20} className="mr-1"/>
                                 <span>Create</span>
                             </Button>)
                     }
@@ -124,6 +124,9 @@ export default function Parents({
                                     <TableRow key={parent.id}
                                               className={cn(`hover:bg-blue-100 hover:cursor-pointer transition-all`, index % 2 === 0 ? 'bg-gray-100' : 'bg-white')}
                                               onClick={() => router.push(`parents/${parent.id}`)}>
+                                        <TableCell className="text-center">
+                                            {parent.email}
+                                        </TableCell>
                                         <TableCell className="text-center">
                                             {parent.givenName} {parent.familyName}
                                         </TableCell>

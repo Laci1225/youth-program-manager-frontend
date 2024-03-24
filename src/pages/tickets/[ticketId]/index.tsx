@@ -152,8 +152,7 @@ export default function Ticket({
     function handleValidFor() {
         const dayDifference = differenceInDays(new Date(ticket.expirationDate), new Date())
         return (
-            <div className={`${fieldAppearance}  
-                    ${dayDifference <= 5 && "bg-red-700 text-white"} mt-2`}>
+            <div className={cn(`${fieldAppearance} mt-2`, dayDifference <= 5 && "bg-red-700 text-white")}>
                 {dayDifference > 0 ? (
                         <>{
                             dayDifference
@@ -181,7 +180,7 @@ export default function Ticket({
                     {hoverButton}
                 </HoverText>
             );
-        } else if (calculateDaysDifference(new Date(), ticket.issueDate) <= 0) {
+        } else if (calculateDaysDifference(new Date(), ticket.issueDate) < 0) {
             return (
                 <HoverText content="Ticket is not yet valid">
                     {hoverButton}
@@ -270,7 +269,7 @@ export default function Ticket({
                         <div className="mb-6 flex-1">
                             <Label>Issue date :</Label>
                             <div
-                                className={cn(`${fieldAppearance} mt-2`, calculateDaysDifference(new Date(), ticket.issueDate) <= 0 && "bg-orange-300")}>
+                                className={cn(`${fieldAppearance} mt-2`, calculateDaysDifference(new Date(), ticket.issueDate) < 0 && "bg-orange-300")}>
                                 {format(new Date(ticket.issueDate), "P")}
                             </div>
                         </div>

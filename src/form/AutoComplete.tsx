@@ -185,8 +185,8 @@ export const AutoComplete = <T extends ParentData | ChildNameData | ChildData | 
                                                     className={cn("flex items-center gap-2 w-full", !isSelected && "pl-8")}
                                                 >
                                                     {isSelected ? <Check className="w-4"/> : null}
-                                                    <div className={"flex"}>
-                                                        <div className={"pr-2"}>
+                                                    <div className="flex">
+                                                        <div className="pr-2">
                                                             {getLabelForItem(option)}
                                                         </div>
                                                         {getDescriptionForItem && (

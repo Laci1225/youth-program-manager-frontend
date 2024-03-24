@@ -22,8 +22,8 @@ export default function Navbar() {
     return (
         <NavigationMenu
             className={`p-2 w-[100%] bg-blue-200 fixed`}>
-            <NavigationMenuList className={"flex w-[98vw] justify-between"}>
-                <div className={"flex"}>
+            <NavigationMenuList className="flex w-[98vw] justify-between">
+                <div className="flex">
                     <NavigationMenuItem className="mx-2">
                         <Link href="/children" legacyBehavior passHref>
                             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
@@ -68,13 +68,13 @@ export default function Navbar() {
                             </NavigationMenuItem>)
                     }
                 </div>
-                <div className={"flex"}>
+                <div className="flex">
                     <NavigationMenuItem className="mx-2 flex items-center">
                         {user?.name}
                     </NavigationMenuItem>
 
                     {user ? (
-                        <NavigationMenuItem className={"mx-2"} aria-disabled>
+                        <NavigationMenuItem className="mx-2" aria-disabled>
                             <Link href="/api/auth/logout" legacyBehavior passHref>
                                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                                     Logout
@@ -82,7 +82,7 @@ export default function Navbar() {
                             </Link>
                         </NavigationMenuItem>
                     ) : (
-                        <NavigationMenuItem className={"mx-2"} aria-disabled>
+                        <NavigationMenuItem className="mx-2" aria-disabled>
                             <Link href="/api/auth/login" legacyBehavior passHref>
                                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                                     Login

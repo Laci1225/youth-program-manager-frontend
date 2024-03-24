@@ -199,14 +199,14 @@ export default function Tickets({
                                 event.preventDefault()
                                 handleEditClick(null)
                             }}>
-                                <PlusSquare size={20} className={"mr-1"}/>
+                                <PlusSquare size={20} className="mr-1"/>
                                 <span>Create</span>
                             </Button>)
                     }
                 </div>
                 <Table>
-                    <TableHeader className={"bg-none"}>
-                        <TableRow className={"hover:bg-none"}>
+                    <TableHeader className="bg-none">
+                        <TableRow className="hover:bg-none">
                             <TableHead className="text-center">Child</TableHead>
                             <TableHead className="text-center">Ticket type</TableHead>
                             <TableHead className="text-center">Valid until</TableHead>
