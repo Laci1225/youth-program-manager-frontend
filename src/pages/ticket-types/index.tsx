@@ -70,8 +70,8 @@ export default function Tickets({
     const [ticketTypes, setTicketTypes] = useState<TicketTypeData[]>(ticketTypeData)
     const onTicketTypeSaved = (savedTicketType: TicketTypeData) => {
         if (editedTicketType) {
-            const modifiedTickets = ticketTypes.map((ticket) =>
-                ticket.id === savedTicketType.id ? savedTicketType : ticket
+            const modifiedTickets = ticketTypes.map((ticketType) =>
+                ticketType.id === savedTicketType.id ? savedTicketType : ticketType
             );
             setTicketTypes(modifiedTickets)
         } else {
@@ -79,8 +79,8 @@ export default function Tickets({
         }
         setEditedTicketType(null)
     }
-    const onTicketTypeDeleted = (ticket: TicketTypeData) => {
-        const updatedTickets = ticketTypes.filter(p => p.id !== ticket.id);
+    const onTicketTypeDeleted = (ticketType: TicketTypeData) => {
+        const updatedTickets = ticketTypes.filter(p => p.id !== ticketType.id);
         setTicketTypes(updatedTickets);
     }
     const [editedTicketType, setEditedTicketType] = useState<TicketTypeData | null>(null)
@@ -88,14 +88,14 @@ export default function Tickets({
     const [deletedTicket, setDeletedTicket] = useState<TicketTypeData>()
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-    function handleEditClick(ticket: TicketTypeData | null) {
+    function handleEditClick(ticketType: TicketTypeData | null) {
         setIsEditDialogOpen(true)
-        setEditedTicketType(ticket)
+        setEditedTicketType(ticketType)
     }
 
-    function handleDeleteClick(ticket: TicketTypeData) {
+    function handleDeleteClick(ticketType: TicketTypeData) {
         setIsDeleteDialogOpen(true)
-        setDeletedTicket(ticket)
+        setDeletedTicket(ticketType)
     }
 
     return (

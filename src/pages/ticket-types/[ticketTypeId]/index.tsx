@@ -65,12 +65,12 @@ export default function Ticket({
     useEffect(() => {
         setPermissions(permissions)
     }, [permissions, setPermissions]);
-    const [ticket, setTicket] = useState<TicketTypeData>(selectedTicketType)
+    const [ticketType, setTicketType] = useState<TicketTypeData>(selectedTicketType)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const router = useRouter()
     const onTicketUpdated = (newTicket: TicketTypeData) => {
-        setTicket(newTicket)
+        setTicketType(newTicket)
     }
     const onTicketDeleted = () => {
         router.push("/ticket-types")
@@ -125,44 +125,44 @@ export default function Ticket({
                     <div className="mb-6">
                         <Label>Full Name:</Label>
                         <div className={`${fieldAppearance} mt-2`}>
-                            {ticket.name}
+                            {ticketType.name}
                         </div>
                     </div>
                     <div className="mb-6">
                         <Label>Description:</Label>
                         <div className={`${fieldAppearance} mt-2 h-fit`}>
-                            {ticket.description}
+                            {ticketType.description}
                         </div>
                     </div>
                     <div className="flex flex-wrap items-center ">
                         <div className="mb-6 flex-1">
                             <Label>Price:</Label>
                             <div className={`${fieldAppearance} mt-2`}>
-                                {ticket.price} HUF
+                                {ticketType.price} HUF
                             </div>
                         </div>
                         <div className="mb-6 flex-1">
                             <Label>Number of participation:</Label>
                             <div className={`${fieldAppearance} mt-2`}>
-                                {ticket.numberOfParticipation} pc(s)
+                                {ticketType.numberOfParticipation} pc(s)
                             </div>
                         </div>
                         <div className="mb-6 flex-1">
                             <Label>Standard validation period :</Label>
                             <div className={`${fieldAppearance} mt-2`}>
-                                {ticket.standardValidityPeriod} day(s)
+                                {ticketType.standardValidityPeriod} day(s)
                             </div>
                         </div>
                     </div>
                 </div>
                 <Toaster/>
-                <TicketTypeForm existingTicketType={ticket ?? undefined}
+                <TicketTypeForm existingTicketType={ticketType ?? undefined}
                                 isOpen={isEditDialogOpen}
                                 onTicketTypeModified={onTicketUpdated}
                                 onOpenChange={setIsEditDialogOpen}
                 />
-                <DeleteData entityId={ticket.id}
-                            entityLabel={`${ticket.name}`}
+                <DeleteData entityId={ticketType.id}
+                            entityLabel={`${ticketType.name}`}
                             isOpen={isDeleteDialogOpen}
                             onOpenChange={setIsDeleteDialogOpen}
                             onSuccess={onTicketDeleted}
