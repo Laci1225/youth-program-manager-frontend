@@ -11,6 +11,7 @@ export default async function updateParent(parentData: ParentUpdateDataInput,
             mutation UpdateParent($parent: ParentUpdateDtoInput!) {
                 updateParent(parent: $parent){
                     id
+                    email
                     familyName
                     givenName
                     phoneNumbers

@@ -1,5 +1,5 @@
 import {InferGetServerSidePropsType} from "next";
-import React, {useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import Link from "next/link";
 import {Toaster} from "@/components/ui/toaster";
 import {Label} from "@/components/ui/label";
@@ -25,25 +25,36 @@ import {ChildData} from "@/model/child-data";
 import {
     getSession, withPageAuthRequired
 } from "@auth0/nextjs-auth0";
-import AccessTokenContext from "@/context/AccessTokenContext";
+import AccessTokenContext from "@/context/access-token-context";
+import jwt from "jsonwebtoken";
+import PermissionContext from "@/context/permission-context";
+import {DELETE_PARENTS, READ_PARENTS, UPDATE_CHILDREN, UPDATE_PARENTS} from "@/constants/auth0-permissions";
+import getPermissions from "@/utils/getPermissions";
 
 export const getServerSideProps = withPageAuthRequired<{
     selectedParent: ParentDataWithChildren,
-    accessToken: string
+    accessToken: string,
+    permissions: string[]
 }, {
     parentId: string
 }>({
     async getServerSideProps(context) {
-        console.log(context)
-        let parentData;
         if (context.params?.parentId) {
             try {
                 const session = await getSession(context.req, context.res);
-                parentData = await getParentById(context.params.parentId, session?.accessToken, serverSideClient);
-                return {
-                    props: {
-                        selectedParent: parentData,
-                        accessToken: session!.accessToken!
+                const permissions = await getPermissions(session);
+                if (permissions.includes(READ_PARENTS)) {
+                    const parentData = await getParentById(context.params.parentId, session?.accessToken, serverSideClient);
+                    return {
+                        props: {
+                            selectedParent: parentData,
+                            accessToken: session!.accessToken!,
+                            permissions: permissions
+                        }
+                    }
+                } else {
+                    return {
+                        notFound: true
                     }
                 }
             } catch (error) {
@@ -58,7 +69,15 @@ export const getServerSideProps = withPageAuthRequired<{
     }
 })
 
-export default function Parent({selectedParent, accessToken}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Parent({
+                                   selectedParent,
+                                   accessToken,
+                                   permissions
+                               }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const {setPermissions} = useContext(PermissionContext)
+    useEffect(() => {
+        setPermissions(permissions)
+    }, [permissions, setPermissions]);
     const [parentWithChildren, setParentWithChildren] = useState<ParentDataWithChildren>(selectedParent)
     const parent: ParentData = fromParentWithChildrenToParent(parentWithChildren)
     const [isParentEditDialogOpen, setIsParentEditDialogOpen] = useState(false)
@@ -105,26 +124,38 @@ export default function Parent({selectedParent, accessToken}: InferGetServerSide
                         }
                     </HoverText>
                     <div className="flex">
-                        <div className=" flex flex-row items-center hover:cursor-pointer px-5"
-                             onClick={(event) => {
-                                 event.preventDefault()
-                                 handleEditClick()
-                             }}>
-                            <Pencil className="mx-1"/>
-                            <span>Edit</span>
-                        </div>
-                        <div
-                            className="flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"
-                            onClick={(event) => {
-                                event.preventDefault()
-                                handleDeleteClick()
-                            }}>
-                            <Trash className="mx-1"/>
-                            <span>Delete</span>
-                        </div>
+                        {
+                            permissions.includes(UPDATE_PARENTS) && (
+                                <div className="flex flex-row items-center hover:cursor-pointer px-5"
+                                     onClick={(event) => {
+                                         event.preventDefault()
+                                         handleEditClick()
+                                     }}>
+                                    <Pencil className="mx-1"/>
+                                    <span>Edit</span>
+                                </div>)
+                        }
+                        {
+                            permissions.includes(DELETE_PARENTS) && (
+                                <div
+                                    className="flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"
+                                    onClick={(event) => {
+                                        event.preventDefault()
+                                        handleDeleteClick()
+                                    }}>
+                                    <Trash className="mx-1"/>
+                                    <span>Delete</span>
+                                </div>)
+                        }
                     </div>
                 </div>
                 <div className="border border-gray-200 rounded p-4">
+                    <div className="mb-6">
+                        <Label>Email address:</Label>
+                        <div className={`${fieldAppearance} mt-2`}>
+                            {parent.email}
+                        </div>
+                    </div>
                     <div className="mb-6">
                         <Label>Full Name:</Label>
                         <div className={`${fieldAppearance} mt-2`}>
@@ -142,9 +173,12 @@ export default function Parent({selectedParent, accessToken}: InferGetServerSide
                         </>
                     </div>
                     <div
-                        className={cn(`mb-6`, isEditChildrenModeEnabled && "border border-dashed border-gray-400  p-2 rounded")}>
-                        <SaveChildrenDataToParent onEdit={onEditClicked}
-                                                  isEditChildrenModeEnabled={isEditChildrenModeEnabled}/>
+                        className={cn(`mb-6`, isEditChildrenModeEnabled && "border border-dashed border-gray-400 p-2 rounded")}>
+                        {
+                            permissions.includes(UPDATE_CHILDREN) && (
+                                <SaveChildrenDataToParent onEdit={onEditClicked}
+                                                          isEditChildrenModeEnabled={isEditChildrenModeEnabled}/>)
+                        }
                         {isEditChildrenModeEnabled ? (
                                 <ChildInEditMode parent={parent}
                                                  parentWithChildren={parentWithChildren}
@@ -152,7 +186,7 @@ export default function Parent({selectedParent, accessToken}: InferGetServerSide
                                                  setIsEditChildrenModeEnabled={setIsEditChildrenModeEnabled}/>
                             ) :
                             <div className={`w-full`}>
-                                <Table className="w-full border border-gray-200">
+                                <Table>
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead className="text-center">Name</TableHead>
@@ -160,9 +194,10 @@ export default function Parent({selectedParent, accessToken}: InferGetServerSide
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>{
-                                        parentWithChildren.childDtos && parentWithChildren.childDtos?.length !== 0 ? (
+                                        !!parentWithChildren.childDtos ? (
                                             parentWithChildren.childDtos.map((child: ChildData, index: number) => (
-                                                <TableRow key={index} className="hover:bg-gray-300 hover:cursor-pointer"
+                                                <TableRow key={index}
+                                                          className={`hover:bg-blue-100 hover:cursor-pointer transition-all ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}
                                                           onClick={() => router.push(`/children/${child.id}`, `/children/${child.id}`)}>
                                                     <TableCell className="text-center">
                                                         {child.givenName + " " + child.familyName}

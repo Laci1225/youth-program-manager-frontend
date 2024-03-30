@@ -21,10 +21,10 @@ export default function ParentsChildrenTable({
     }
 
     return (
-        <Table className={"w-full border border-gray-200"}>
+        <Table className="w-full border border-gray-200">
             <TableHeader>
                 <TableRow>
-                    <TableHead className={"text-left"}>Name</TableHead>
+                    <TableHead className="text-left">Name</TableHead>
                     <TableHead className="text-center">isEmergencyContact</TableHead>
                     <TableHead className="w-5"></TableHead>
                 </TableRow>
@@ -33,13 +33,13 @@ export default function ParentsChildrenTable({
                 parentWithChildren.childDtos && parentWithChildren.childDtos.length !== 0 ? (
                     parentWithChildren.childDtos.map((child, index) => (
                         <TableRow key={index}>
-                            <TableCell className={"text-left"}>
+                            <TableCell className="text-left">
                                 {child.givenName} {child.familyName}
                             </TableCell>
-                            <TableCell className={"text-center"}>
+                            <TableCell className="text-center">
                                 <Button
-                                    type={"button"}
-                                    variant={"ghost"}
+                                    type="button"
+                                    variant="ghost"
                                     onClick={() => {
                                         const updatedChildren = child.relativeParents?.map(relative => {
                                             if (relative.id === parent.id) {
@@ -68,15 +68,15 @@ export default function ParentsChildrenTable({
                                         }
                                     }}
                                 >
-                                    <span className={"material-icons-outlined"}>
+                                    <span className="material-icons-outlined">
                                         {child.relativeParents?.find(parent => parent?.id === parentWithChildren.id)?.isEmergencyContact
                                             ? 'check_box' : 'check_box_outline_blank'}
                                     </span>
                                 </Button>
                             </TableCell>
-                            <TableCell className={"text-center"}>
-                                <Button type={"button"} className="p-0"
-                                        variant={"ghost"}
+                            <TableCell className="text-center">
+                                <Button type="button" className="p-0"
+                                        variant="ghost"
                                         onClick={() => {
                                             deleteChildData(child);
                                         }}>
@@ -86,7 +86,7 @@ export default function ParentsChildrenTable({
                         </TableRow>
                     ))) : (
                     <TableRow>
-                        <TableCell className={"text-center text-gray-400"} colSpan={3}>
+                        <TableCell className="text-center text-gray-400" colSpan={3}>
                             Nothing added yet
                         </TableCell>
                     </TableRow>

@@ -10,7 +10,7 @@ import updateParent from "@/api/graphql/parent/updateParent";
 import {toast} from "@/components/ui/use-toast";
 import ChildForm from "@/form/child/ChildForm";
 import updateChild from "@/api/graphql/child/updateChild";
-import AccessTokenContext from "@/context/AccessTokenContext";
+import AccessTokenContext from "@/context/access-token-context";
 
 interface ChildInEditModeProps {
     parent: ParentData
@@ -35,7 +35,10 @@ export default function ChildInEditMode({
     const [isChildForm, setIsChildForm] = useState(false)
 
     function onChildAdded(newChild: ChildData) {
-        const updatedChildren = tempParentsWithChildren.childDtos ? [...tempParentsWithChildren.childDtos, newChild] : [newChild];
+        const updatedChildren = tempParentsWithChildren.childDtos ? [...tempParentsWithChildren.childDtos, {
+            ...newChild,
+            relativeParents: [{id: parent.id, isEmergencyContact: true}]
+        }] : [{...newChild, relativeParents: [{id: parent.id, isEmergencyContact: true}]}];
         setTempParentsWithChildren({...tempParentsWithChildren, childDtos: updatedChildren})
     }
 
@@ -80,10 +83,10 @@ export default function ChildInEditMode({
 
     return (
         <>
-            <div className={"flex justify-between mb-5"}>
+            <div className="flex justify-between mb-5">
                 <Button
-                    type={"button"}
-                    variant={"ghost"}
+                    type="button"
+                    variant="ghost"
                     onClick={onCancel}
                 >
                     <span>Cancel</span>
@@ -110,10 +113,10 @@ export default function ChildInEditMode({
             <ParentsChildrenTable parent={parent}
                                   parentWithChildren={tempParentsWithChildren}
                                   setParentWithChildren={setTempParentsWithChildren}/>
-            <div className={"flex justify-between mb-5 mt-3"}>
-                <div className={"flex w-4/5"}>
+            <div className="flex justify-between mb-5 mt-3">
+                <div className="flex w-4/5">
                     <AutoComplete
-                        className={"w-2/3 mr-3"}
+                        className="w-2/3 mr-3"
                         getPotential={getPotentialChildren}
                         key={0}
                         getLabelForItem={(item) => `${item.givenName} ${item.familyName}`}
@@ -123,8 +126,8 @@ export default function ChildInEditMode({
                         onValueChange={(value) => {
                             setSelectedChildDataToAdd(value)
                         }}
-                        placeholder={"Select children..."}
-                        emptyMessage={"No child found"}
+                        placeholder="Select children..."
+                        emptyMessage="No child found"
                     />
                     <Button
                         onClick={() => {

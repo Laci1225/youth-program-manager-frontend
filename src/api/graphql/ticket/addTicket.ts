@@ -3,7 +3,7 @@ import {gql} from "@apollo/client";
 import {TicketData, TicketDataInput} from "@/model/ticket-data";
 
 export default function addTicket(values: TicketDataInput,
-                                  authToken: string | undefined) : Promise<TicketData>{
+                                  authToken: string | undefined): Promise<TicketData> {
     return clientSideClient
     .mutate({
         mutation: gql`

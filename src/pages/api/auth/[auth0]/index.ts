@@ -6,7 +6,7 @@ export default handleAuth({
         try {
             await handleLogin(req, res, {
                 authorizationParams: {
-                    audience: process.env.AUTH0_ISSUER_BASE_URL,
+                    audience: process.env.AUTH0_AUDIENCE,
                 },
             });
         } catch (error: any) {
