@@ -27,6 +27,8 @@ import jwt from "jsonwebtoken";
 import PermissionContext from "@/context/permission-context";
 import {CREATE_CHILDREN, DELETE_CHILDREN, LIST_CHILDREN, UPDATE_CHILDREN} from "@/constants/auth0-permissions";
 import {ParentDataWithChildrenIds} from "@/model/parent-data";
+import getPermissions from "@/utils/getPermissions";
+import {cn} from "@/lib/utils";
 
 export const getServerSideProps = withPageAuthRequired<{
     childrenData: ChildData[],
@@ -35,10 +37,9 @@ export const getServerSideProps = withPageAuthRequired<{
 }>({
     async getServerSideProps(context) {
         const session = await getSession(context.req, context.res);
-        const children = await getAllChildren(session?.accessToken, serverSideClient);
-        const claims = jwt.decode(session?.accessToken!) as jwt.JwtPayload;
-        const permissions = claims["permissions"] as string[];
-        if (permissions.includes(LIST_CHILDREN))
+        const permissions = await getPermissions(session);
+        if (permissions.includes(LIST_CHILDREN)) {
+            const children = await getAllChildren(session?.accessToken, serverSideClient);
             return {
                 props: {
                     childrenData: children,
@@ -46,7 +47,7 @@ export const getServerSideProps = withPageAuthRequired<{
                     permissions: permissions
                 },
             }
-        else {
+        } else {
             return {
                 notFound: true
             }
@@ -105,7 +106,7 @@ export default function Children({
                                 event.preventDefault()
                                 handleEditClick(null)
                             }}>
-                                <PlusSquare size={20} className={"mr-1"}/>
+                                <PlusSquare size={20} className="mr-1"/>
                                 <span>Create</span>
                             </Button>
                         </div>)
@@ -126,7 +127,7 @@ export default function Children({
                                 children.map((child, index) => (
                                     <TableRow
                                         key={child.id}
-                                        className={`hover:bg-blue-100 hover:cursor-pointer transition-all ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}
+                                        className={cn(`hover:bg-blue-100 hover:cursor-pointer transition-all`, index % 2 === 0 ? 'bg-gray-100' : 'bg-white')}
                                         onClick={() => router.push(`children/${child.id}`)}>
                                         <TableCell className="text-center">
                                             {child.givenName} {child.familyName}
@@ -154,12 +155,12 @@ export default function Children({
                                         </TableCell>
                                         <TableCell className="p-1 text-center">
                                             {
-                                                permissions.includes(UPDATE_CHILDREN) && permissions.includes(DELETE_CHILDREN) && (
-                                                    <SettingsDropdown
-                                                        handleEditClick={() => handleEditClick(child)}
-                                                        handleDeleteClick={() => handleDeleteClick(child)}
-                                                    />
-                                                )
+                                                <SettingsDropdown
+                                                    handleEditClick={() => handleEditClick(child)}
+                                                    handleDeleteClick={() => handleDeleteClick(child)}
+                                                    editPermission={UPDATE_CHILDREN}
+                                                    deletePermission={DELETE_CHILDREN}
+                                                />
                                             }
                                         </TableCell>
                                     </TableRow>

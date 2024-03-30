@@ -1,12 +1,13 @@
 import {clientSideClient} from "@/api/graphql/client";
-import {gql} from "@apollo/client";
+import {ApolloClient, gql, NormalizedCacheObject} from "@apollo/client";
 import {HistoryData, TicketData} from "@/model/ticket-data";
 
 export default async function removeParticipation(ticketId: string,
                                                   historyData: HistoryData,
                                                   authToken: string | undefined,
+                                                  client: ApolloClient<NormalizedCacheObject> = clientSideClient,
 ): Promise<TicketData> {
-    return clientSideClient
+    return client
     .mutate({
         mutation: gql`
             mutation RemoveParticipation($id: String!, $historyData: HistoryDataInput!){

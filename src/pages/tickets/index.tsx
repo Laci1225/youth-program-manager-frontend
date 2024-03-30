@@ -29,24 +29,25 @@ import {
     LIST_TICKETS,
     UPDATE_TICKETS
 } from "@/constants/auth0-permissions";
+import getPermissions from "@/utils/getPermissions";
+import {cn} from "@/lib/utils";
 
 export const getServerSideProps = withPageAuthRequired<{
     ticketsData: TicketData[], accessToken: string, permissions: string[]
 }>({
     async getServerSideProps(context) {
         const session = await getSession(context.req, context.res);
-        const tickets = await getAllTickets(session?.accessToken, serverSideClient)
-        const claims = jwt.decode(session?.accessToken!) as jwt.JwtPayload;
-        const permissions = claims["permissions"] as string[];
-        if (permissions.includes(LIST_TICKETS))
+        const permissions = await getPermissions(session);
+        if (permissions.includes(LIST_TICKETS)) {
+            const tickets = await getAllTickets(session?.accessToken, serverSideClient)
             return {
                 props: {
                     ticketsData: tickets,
                     accessToken: session!.accessToken!,
                     permissions: permissions
                 }
-            };
-        else {
+            }
+        } else {
             return {
                 notFound: true
             }
@@ -198,14 +199,14 @@ export default function Tickets({
                                 event.preventDefault()
                                 handleEditClick(null)
                             }}>
-                                <PlusSquare size={20} className={"mr-1"}/>
+                                <PlusSquare size={20} className="mr-1"/>
                                 <span>Create</span>
                             </Button>)
                     }
                 </div>
                 <Table>
-                    <TableHeader className={"bg-none"}>
-                        <TableRow className={"hover:bg-none"}>
+                    <TableHeader className="bg-none">
+                        <TableRow className="hover:bg-none">
                             <TableHead className="text-center">Child</TableHead>
                             <TableHead className="text-center">Ticket type</TableHead>
                             <TableHead className="text-center">Valid until</TableHead>
@@ -218,7 +219,7 @@ export default function Tickets({
                             !!tickets.length ? (
                                 tickets.map((ticket, index) => (
                                     <TableRow key={ticket.id}
-                                              className={`hover:bg-blue-100 hover:cursor-pointer transition-all ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}
+                                              className={cn(`hover:bg-blue-100 hover:cursor-pointer transition-all`, index % 2 === 0 ? 'bg-gray-100' : 'bg-white')}
                                               onClick={() => router.push(`tickets/${ticket.id}`)}>
                                         <TableCell className="text-center">
                                             {ticket.child.givenName} {ticket.child.familyName}
@@ -243,15 +244,15 @@ export default function Tickets({
                                         </TableCell>
                                         <TableCell className="p-1 text-center">
                                             {
-                                                permissions.includes(UPDATE_TICKETS) && permissions.includes(DELETE_TICKETS)
-                                                && permissions.includes(CREATE_TICKET_PARTICIPATIONS) //todo check if this is necessary
-                                                && (
-                                                    <SettingsDropdown
-                                                        handleEditClick={() => handleEditClick(ticket)}
-                                                        handleDeleteClick={() => handleDeleteClick(ticket)}
-                                                        additionalItems={
-                                                            renderReportParticipationButton(ticket)}
-                                                    />)
+                                                <SettingsDropdown
+                                                    handleEditClick={() => handleEditClick(ticket)}
+                                                    handleDeleteClick={() => handleDeleteClick(ticket)}
+                                                    editPermission={UPDATE_TICKETS}
+                                                    deletePermission={DELETE_TICKETS}
+                                                    additionalItems={
+                                                        renderReportParticipationButton(ticket)}
+                                                    additionalItemsPermission={CREATE_TICKET_PARTICIPATIONS}
+                                                />
                                             }
                                         </TableCell>
                                     </TableRow>

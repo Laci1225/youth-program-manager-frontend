@@ -15,10 +15,10 @@ export default function SaveChildrenDataToParent({
         <>
             {
                 !isEditChildrenModeEnabled &&
-                <div className={"flex justify-between mb-5"}>
+                <div className="flex justify-between mb-5">
                     <Button
-                        type={"button"}
-                        variant={"ghost"}
+                        type="button"
+                        variant="ghost"
                         onClick={onEdit}
                     >
                         <>

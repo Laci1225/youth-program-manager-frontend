@@ -1,6 +1,6 @@
 type Parent {
     id: ID!
-    email: String #todo: add email validation and make it compulsory
+    email: String!
     familyName: String!
     givenName: String!
     phoneNumbers:[String!]!
@@ -8,7 +8,7 @@ type Parent {
 }
 type ParentWithChildren{
     id: ID!
-    email: String #todo: add email validation and make it compulsory
+    email: String!
     familyName: String!
     givenName: String!
     phoneNumbers:[String!]!
@@ -17,7 +17,7 @@ type ParentWithChildren{
 }
 type ParentWithChildrenIds{
     id: ID!
-    email: String #todo: add email validation and make it compulsory
+    email: String!
     familyName: String!
     givenName: String!
     phoneNumbers:[String!]!
@@ -30,7 +30,7 @@ type ParentWithEmergencyContact{
     isEmergencyContact: Boolean
 }
 input ParentCreateDtoInput {
-    email: String #todo: add email validation and make it compulsory
+    email: String!
     familyName: String!
     givenName: String!
     phoneNumbers:[String!]!
@@ -39,7 +39,7 @@ input ParentCreateDtoInput {
 }
 input ParentUpdateDtoInput{
     id: ID!
-    email: String #todo: add email validation and make it compulsory
+    email: String!
     familyName: String!
     givenName: String!
     phoneNumbers:[String!]!

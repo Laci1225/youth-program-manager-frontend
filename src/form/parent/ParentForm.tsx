@@ -138,7 +138,7 @@ function ParentForm({
                                         name="email"
                                         render={({field}) => (
                                             <FormItem className="flex-1">
-                                                <FormLabel>Family name*</FormLabel>
+                                                <FormLabel>Email*</FormLabel>
                                                 <FormControl>
                                                     <Input placeholder="Email address" {...field} />
                                                 </FormControl>

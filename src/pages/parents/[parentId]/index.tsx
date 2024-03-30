@@ -29,6 +29,7 @@ import AccessTokenContext from "@/context/access-token-context";
 import jwt from "jsonwebtoken";
 import PermissionContext from "@/context/permission-context";
 import {DELETE_PARENTS, READ_PARENTS, UPDATE_CHILDREN, UPDATE_PARENTS} from "@/constants/auth0-permissions";
+import getPermissions from "@/utils/getPermissions";
 
 export const getServerSideProps = withPageAuthRequired<{
     selectedParent: ParentDataWithChildren,
@@ -38,14 +39,12 @@ export const getServerSideProps = withPageAuthRequired<{
     parentId: string
 }>({
     async getServerSideProps(context) {
-        let parentData;
         if (context.params?.parentId) {
             try {
                 const session = await getSession(context.req, context.res);
-                parentData = await getParentById(context.params.parentId, session?.accessToken, serverSideClient);
-                const claims = jwt.decode(session?.accessToken!) as jwt.JwtPayload;
-                const permissions = claims["permissions"] as string[];
-                if (permissions.includes(READ_PARENTS))
+                const permissions = await getPermissions(session);
+                if (permissions.includes(READ_PARENTS)) {
+                    const parentData = await getParentById(context.params.parentId, session?.accessToken, serverSideClient);
                     return {
                         props: {
                             selectedParent: parentData,
@@ -53,7 +52,7 @@ export const getServerSideProps = withPageAuthRequired<{
                             permissions: permissions
                         }
                     }
-                else {
+                } else {
                     return {
                         notFound: true
                     }
@@ -127,7 +126,7 @@ export default function Parent({
                     <div className="flex">
                         {
                             permissions.includes(UPDATE_PARENTS) && (
-                                <div className=" flex flex-row items-center hover:cursor-pointer px-5"
+                                <div className="flex flex-row items-center hover:cursor-pointer px-5"
                                      onClick={(event) => {
                                          event.preventDefault()
                                          handleEditClick()
@@ -174,7 +173,7 @@ export default function Parent({
                         </>
                     </div>
                     <div
-                        className={cn(`mb-6`, isEditChildrenModeEnabled && "border border-dashed border-gray-400  p-2 rounded")}>
+                        className={cn(`mb-6`, isEditChildrenModeEnabled && "border border-dashed border-gray-400 p-2 rounded")}>
                         {
                             permissions.includes(UPDATE_CHILDREN) && (
                                 <SaveChildrenDataToParent onEdit={onEditClicked}

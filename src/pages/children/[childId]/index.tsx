@@ -26,6 +26,7 @@ import AccessTokenContext from "@/context/access-token-context";
 import jwt from "jsonwebtoken";
 import PermissionContext from "@/context/permission-context";
 import {DELETE_CHILDREN, READ_CHILDREN, UPDATE_CHILDREN, UPDATE_PARENTS} from "@/constants/auth0-permissions";
+import getPermissions from "@/utils/getPermissions";
 
 export const getServerSideProps = withPageAuthRequired<{
     selectedChildData: ChildDataWithParents, accessToken: string, permissions: string[]
@@ -33,14 +34,12 @@ export const getServerSideProps = withPageAuthRequired<{
     childId: string
 }>({
     async getServerSideProps(context) {
-        let childData;
         if (context.params?.childId) {
             try {
                 const session = await getSession(context.req, context.res);
-                childData = await getChildById(context.params.childId, session?.accessToken, serverSideClient);
-                const claims = jwt.decode(session?.accessToken!) as jwt.JwtPayload;
-                const permissions = claims["permissions"] as string[];
-                if (permissions.includes(READ_CHILDREN))
+                const permissions = await getPermissions(session);
+                if (permissions.includes(READ_CHILDREN)) {
+                    const childData = await getChildById(context.params.childId, session?.accessToken, serverSideClient);
                     return {
                         props: {
                             selectedChildData: childData,
@@ -48,7 +47,7 @@ export const getServerSideProps = withPageAuthRequired<{
                             permissions: permissions,
                         }
                     }
-                else {
+                } else {
                     return {
                         notFound: true
                     }
@@ -192,7 +191,7 @@ export default function Child({
                                         !!childWithParents.parents ? (
                                             childWithParents.parents.map((parent: ParentDataWithEmergencyContact, index: number) => (
                                                 <TableRow key={index}
-                                                          className={`hover:bg-blue-100 hover:cursor-pointer transition-all ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}
+                                                          className={cn(`hover:bg-blue-100 hover:cursor-pointer transition-all`, index % 2 === 0 ? 'bg-gray-100' : 'bg-white')}
                                                           onClick={() => router.push(`/parents/${parent.parentDto.id}`, `/parents/${parent.parentDto.id}`)}>
                                                     <TableCell className="text-center">
                                                         {parent.parentDto.givenName + " " + parent.parentDto.familyName}
