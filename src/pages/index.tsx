@@ -16,6 +16,7 @@ import EmployeeDetails from "@/components/employee-details";
 
 export const getServerSideProps = (async (context) => {
     const session = await getSession(context.req, context.res);
+    console.log(session?.accessToken!)
     if (session) {
         const claims = jwt.decode(session?.accessToken!) as jwt.JwtPayload;
         const userData = await getCurrentUser(session?.accessToken!);

@@ -140,13 +140,12 @@ export default function Employees({
                                             {employeeType.type}
                                         </TableCell>
                                         <TableCell className="p-1 text-center">
-                                            {
-                                                permissions.includes(UPDATE_EMPLOYEES) && permissions.includes(DELETE_EMPLOYEES) && (
-                                                    <SettingsDropdown
-                                                        handleEditClick={() => handleEditClick(employeeType)}
-                                                        handleDeleteClick={() => handleDeleteClick(employeeType)}
-                                                    />)
-                                            }
+                                            <SettingsDropdown
+                                                handleEditClick={() => handleEditClick(employeeType)}
+                                                handleDeleteClick={() => handleDeleteClick(employeeType)}
+                                                editPermission={UPDATE_EMPLOYEES}
+                                                deletePermission={DELETE_EMPLOYEES}
+                                            />
                                         </TableCell>
                                     </TableRow>
                                 ))) : (

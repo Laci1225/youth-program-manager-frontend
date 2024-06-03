@@ -122,7 +122,7 @@ export default function Child({
                     </HoverText>
                     <div className="flex">
                         {
-                            permissions.includes(UPDATE_CHILDREN) && (
+                            permissions.includes(UPDATE_CHILDREN + "a") && (
                                 <div className="flex flex-row items-center hover:cursor-pointer px-5"
                                      onClick={(event) => {
                                          event.preventDefault()
@@ -133,7 +133,7 @@ export default function Child({
                                 </div>)
                         }
                         {
-                            permissions.includes(DELETE_CHILDREN) && (
+                            permissions.includes(DELETE_CHILDREN + "a") && (
                                 <div
                                     className="flex flex-row items-center hover:cursor-pointer rounded p-2 mx-5 bg-red-600 text-white"
                                     onClick={(event) => {

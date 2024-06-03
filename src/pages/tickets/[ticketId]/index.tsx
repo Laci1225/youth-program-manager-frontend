@@ -188,7 +188,7 @@ export default function Ticket({
             );
         } else {
             return (
-                <Button onClick={handleReportParticipation} className="h-7 text-[10px] font-bold">
+                <Button onClick={handleReportParticipation} className="h-7 text-[15px] font-bold">
                     Report participation
                 </Button>
             );

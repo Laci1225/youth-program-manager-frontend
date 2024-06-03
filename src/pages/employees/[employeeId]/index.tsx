@@ -129,26 +129,26 @@ export default function Employee({
                 </div>
                 <div className="border border-gray-200 rounded p-4">
                     <div className="mb-6">
-                        <Label>Full Name:</Label>
+                        <Label>Email</Label>
                         <div className={`${fieldAppearance} mt-2`}>
                             {employee.email}
                         </div>
                     </div>
                     <div className="mb-6">
-                        <Label>Description:</Label>
+                        <Label>Name:</Label>
                         <div className={`${fieldAppearance} mt-2 h-fit`}>
                             {employee.familyName} {employee.givenName}
                         </div>
                     </div>
                     <div className="flex flex-wrap items-center ">
                         <div className="mb-6 flex-1">
-                            <Label>Price:</Label>
+                            <Label>Phone number:</Label>
                             <div className={`${fieldAppearance} mt-2`}>
                                 {employee.phoneNumber}
                             </div>
                         </div>
                         <div className="mb-6 flex-1">
-                            <Label>Number of participation:</Label>
+                            <Label>Type:</Label>
                             <div className={`${fieldAppearance} mt-2`}>
                                 {employee.type}
                             </div>

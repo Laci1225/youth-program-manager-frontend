@@ -94,7 +94,7 @@ function TicketTypeForm({onTicketTypeModified, existingTicketType, isOpen, onOpe
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[800px] h-[90vh] shadow-muted-foreground">
                 <DialogHeader>
-                    <DialogTitle>{existingTicketType ? "Update" : "Create"} a ticket</DialogTitle>
+                    <DialogTitle>{existingTicketType ? "Update" : "Create"} a ticket type</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit, (errors) => console.log(errors))}

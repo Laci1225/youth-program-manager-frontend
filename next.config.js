@@ -5,7 +5,7 @@ const nextConfig = {
         return [
             {
                 source: '/graphql',
-                destination: 'http://localhost:8080/graphql',
+                destination: 'https://walrus-app-9qlw7.ondigitalocean.app/graphql',
             },
         ];
     },
