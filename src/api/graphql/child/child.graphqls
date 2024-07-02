@@ -77,9 +77,9 @@ input ChildUpdateInput {
     regularMedicines: [MedicineInput!]
 }
 input RelativeParentsInput {
-    id: ID!
-    isEmergencyContact: Boolean!
-}
+    id: ID
+    isEmergencyContact: Boolean
+} # todo temporary solution not to make them required
 
 type Query {
     getAllChildren: [Child!]!

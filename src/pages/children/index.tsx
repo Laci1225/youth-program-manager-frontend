@@ -23,10 +23,8 @@ import HoverText from "@/components/hoverText";
 import SettingsDropdown from "@/components/SettingsDropdown";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 import AccessTokenContext from "@/context/access-token-context";
-import jwt from "jsonwebtoken";
 import PermissionContext from "@/context/permission-context";
 import {CREATE_CHILDREN, DELETE_CHILDREN, LIST_CHILDREN, UPDATE_CHILDREN} from "@/constants/auth0-permissions";
-import {ParentDataWithChildrenIds} from "@/model/parent-data";
 import getPermissions from "@/utils/getPermissions";
 import {cn} from "@/lib/utils";
 
@@ -38,7 +36,11 @@ export const getServerSideProps = withPageAuthRequired<{
     async getServerSideProps(context) {
         const session = await getSession(context.req, context.res);
         const permissions = await getPermissions(session);
-        if (permissions.includes(LIST_CHILDREN)) {
+        if (session?.accessTokenExpiresAt && session.accessTokenExpiresAt < Date.now() / 1000) {
+            context.res.writeHead(302, { Location: '/api/auth/logout' }).end();
+            return { props: {} as any };
+        } //todo to every page
+        if (permissions.includes(LIST_CHILDREN)){
             const children = await getAllChildren(session?.accessToken, serverSideClient);
             return {
                 props: {
