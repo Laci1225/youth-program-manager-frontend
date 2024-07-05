@@ -24,7 +24,6 @@ import {calculateDaysDifference} from "@/utils/calculateDaysDifference";
 import {cn} from "@/lib/utils";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 import AccessTokenContext from "@/context/access-token-context";
-import jwt from "jsonwebtoken";
 import PermissionContext from "@/context/permission-context";
 import {
     CREATE_TICKET_PARTICIPATIONS, DELETE_TICKET_PARTICIPATIONS,
@@ -234,9 +233,16 @@ export default function Ticket({
                 <div className="border border-gray-200 rounded p-4">
                     <div className="mb-6">
                         <Label>Full Name:</Label>
+                        <div className={"flex"}>
                         <div className={`${fieldAppearance} mt-2 cursor-pointer`}
                              onClick={() => router.push(`/children/${ticket.child.id}`, `/children/${ticket.child.id}`)}>
                             {ticket.child.givenName} {ticket.child.familyName}
+                        </div>
+                        <Button onClick={
+                            ()=>router.push("/pay")
+                        }>
+                            Pay now
+                        </Button>
                         </div>
                     </div>
                     <div className="mb-6">
