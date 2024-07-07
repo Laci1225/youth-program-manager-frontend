@@ -1,0 +1,42 @@
+enum EmployeeType {
+    TEACHER
+    ADMINISTRATOR
+    RECEPTIONIST
+}
+
+type Employee {
+    id: ID!
+    email: String
+    familyName: String!
+    givenName: String!
+    phoneNumber:String!
+    type:EmployeeType!
+}
+input EmployeeInput {
+    email: String
+    familyName: String!
+    givenName: String!
+    phoneNumber:String!
+    type:EmployeeType!
+}
+
+input EmployeeUpdateInput {
+    id: ID!
+    email: String
+    familyName: String!
+    givenName: String!
+    phoneNumber:String!
+    type:EmployeeType!
+}
+
+extend type Query {
+    getAllEmployees: [Employee!]!
+    getEmployeeById(id: String!): Employee!
+    getEmployeeByType(type: EmployeeType!): [Employee!]!
+}
+extend type Mutation{
+    addEmployee(employee: EmployeeInput!): Employee!
+    updateEmployee(employee: EmployeeUpdateInput!): Employee!
+    deleteEmployee(id: String!): Employee!
+}
+

@@ -23,10 +23,8 @@ import HoverText from "@/components/hoverText";
 import SettingsDropdown from "@/components/SettingsDropdown";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 import AccessTokenContext from "@/context/access-token-context";
-import jwt from "jsonwebtoken";
 import PermissionContext from "@/context/permission-context";
 import {CREATE_CHILDREN, DELETE_CHILDREN, LIST_CHILDREN, UPDATE_CHILDREN} from "@/constants/auth0-permissions";
-import {ParentDataWithChildrenIds} from "@/model/parent-data";
 import getPermissions from "@/utils/getPermissions";
 import {cn} from "@/lib/utils";
 
@@ -38,7 +36,11 @@ export const getServerSideProps = withPageAuthRequired<{
     async getServerSideProps(context) {
         const session = await getSession(context.req, context.res);
         const permissions = await getPermissions(session);
-        if (permissions.includes(LIST_CHILDREN)) {
+        if (session?.accessTokenExpiresAt && session.accessTokenExpiresAt < Date.now() / 1000) {
+            context.res.writeHead(302, { Location: '/api/auth/logout' }).end();
+            return { props: {} as any };
+        } //todo to every page
+        if (permissions.includes(LIST_CHILDREN)){
             const children = await getAllChildren(session?.accessToken, serverSideClient);
             return {
                 props: {
@@ -97,7 +99,7 @@ export default function Children({
 
     return (
         <AccessTokenContext.Provider value={accessToken}>
-            <div className="container w-4/6 py-28">
+            <div className="container px-1 sm:w-full lg:w-4/6 lg:px-4 lg:py-10">
                 {
                     permissions.includes(CREATE_CHILDREN) && (
                         <div className="flex justify-between px-6 pb-6">
@@ -113,12 +115,13 @@ export default function Children({
                 }
                 <Table>
                     <TableHeader>
-                        <TableRow>
-                            <TableHead className="text-center">Name</TableHead>
-                            <TableHead className="text-center">Birth Date</TableHead>
-                            <TableHead className="text-center">Has diagnosed diseases</TableHead>
-                            <TableHead className="text-center">Takes any medicines</TableHead>
-                            <TableHead className="px-5"></TableHead>
+                        <TableRow className={"flex max-md:h-16"}>
+                            <TableHead className="text-center w-1/5 p-1 lg:p-4">Name</TableHead>
+                            <TableHead className="text-center w-1/5 p-1 lg:p-4">Birth Date</TableHead>
+                            <TableHead className="text-center w-1/5 p-1 lg:p-4">Has diagnosed diseases</TableHead>
+                            <TableHead className="text-center w-1/5 p-1 lg:p-4">Takes any medicines</TableHead>
+                            <TableHead className="w-[10%] p-1 lg:p-4"></TableHead>
+                            <TableHead className="w-[10%] p-1 lg:p-4"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -127,25 +130,25 @@ export default function Children({
                                 children.map((child, index) => (
                                     <TableRow
                                         key={child.id}
-                                        className={cn(`hover:bg-blue-100 hover:cursor-pointer transition-all`, index % 2 === 0 ? 'bg-gray-100' : 'bg-white')}
+                                        className={cn(`flex hover:bg-blue-100 hover:cursor-pointer transition-all`, index % 2 === 0 ? 'bg-gray-100' : 'bg-white')}
                                         onClick={() => router.push(`children/${child.id}`)}>
-                                        <TableCell className="text-center">
+                                        <TableCell className="text-center content-center w-1/5 p-1 lg:p-4">
                                             {child.givenName} {child.familyName}
                                         </TableCell>
-                                        <TableCell className="text-center">
+                                        <TableCell className="text-center content-center w-1/5 p-1 lg:p-4">
                                             {format(new Date(child.birthDate), "P")}
                                         </TableCell>
-                                        <TableCell className="text-center">
+                                        <TableCell className="text-center content-center w-1/5 p-1 lg:p-4">
                                             {child.hasDiagnosedDiseases ?
                                                 <span className="material-icons-outlined">check_box</span> :
                                                 <span
                                                     className="material-icons-outlined">check_box_outline_blank</span>}
                                         </TableCell>
-                                        <TableCell className="text-center">{child.hasRegularMedicines ?
+                                        <TableCell className="text-center content-center w-1/5 p-1 lg:p-4">{child.hasRegularMedicines ?
                                             <span className="material-icons-outlined">check_box</span> :
                                             <span className="material-icons-outlined">check_box_outline_blank</span>}
                                         </TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell className="text-right content-center w-[10%] p-1 lg:p-4">
                                             <HoverText content="Parent not associated yet">
                                                 {
                                                     (!child.relativeParents?.length) && (
@@ -153,7 +156,7 @@ export default function Children({
                                                 }
                                             </HoverText>
                                         </TableCell>
-                                        <TableCell className="p-1 text-center">
+                                        <TableCell className="text-center content-center w-[10%] p-1 lg:p-4">
                                             {
                                                 <SettingsDropdown
                                                     handleEditClick={() => handleEditClick(child)}

@@ -14,6 +14,7 @@ export default async function getPotentialParents(
             query GetPotentialParents($name: String!) {
                 getPotentialParents(name: $name) {
                     id
+                    email
                     familyName
                     givenName
                     phoneNumbers

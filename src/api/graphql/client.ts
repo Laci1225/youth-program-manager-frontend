@@ -9,7 +9,7 @@ export const clientSideClient = new ApolloClient({
     }),
 });
 export const serverSideClient = new ApolloClient({
-    uri: 'http://localhost:8080/graphql',
+    uri: 'https://walrus-app-9qlw7.ondigitalocean.app/graphql',
     cache: new InMemoryCache({
         addTypename: false,
         resultCaching: false,

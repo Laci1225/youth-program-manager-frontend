@@ -21,4 +21,9 @@ export const DELETE_TICKET_TYPES = "delete:ticket-types";
 export const CREATE_TICKET_PARTICIPATIONS = "create:ticket-participations";
 export const READ_TICKET_PARTICIPATIONS = "read:ticket-participations";
 export const DELETE_TICKET_PARTICIPATIONS = "delete:ticket-participations";
+export const CREATE_EMPLOYEES = "create:employees";
+export const READ_EMPLOYEES = "read:employees";
+export const LIST_EMPLOYEES = "list:employees";
+export const UPDATE_EMPLOYEES = "update:employees";
+export const DELETE_EMPLOYEES = "delete:employees";
 

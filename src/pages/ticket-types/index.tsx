@@ -9,19 +9,16 @@ import {
 import React, {useContext, useEffect, useState} from "react";
 import {Toaster} from "@/components/ui/toaster";
 import {serverSideClient} from "@/api/graphql/client";
-import {GetServerSideProps, InferGetServerSidePropsType} from "next";
+import {InferGetServerSidePropsType} from "next";
 import getAllTicketTypes from "@/api/graphql/ticketType/getAllTicketTypes";
 import {PlusSquare} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/router";
 import DeleteData from "@/components/deleteData";
-import {TicketTypeData} from "@/model/ticket-type-data";
 import TicketTypeForm from "@/form/ticket-type/TicketTypeForm";
-import deletedTicketType from "@/api/graphql/ticketType/deletedTicketType";
 import SettingsDropdown from "@/components/SettingsDropdown";
 import {getSession, withPageAuthRequired} from "@auth0/nextjs-auth0";
 import AccessTokenContext from "@/context/access-token-context";
-import jwt from "jsonwebtoken";
 import PermissionContext from "@/context/permission-context";
 import {
     CREATE_TICKET_TYPES,
@@ -31,9 +28,11 @@ import {
 } from "@/constants/auth0-permissions";
 import getPermissions from "@/utils/getPermissions";
 import {cn} from "@/lib/utils";
+import {TicketTypeData} from "@/model/ticket-type-data";
+import deleteTicketType from "@/api/graphql/ticketType/deleteTicketType";
 
 export const getServerSideProps = withPageAuthRequired<{
-    ticketsData: TicketTypeData[],
+    ticketTypeData: TicketTypeData[],
     accessToken: string,
     permissions: string[]
 }>({
@@ -41,10 +40,10 @@ export const getServerSideProps = withPageAuthRequired<{
         const session = await getSession(context.req, context.res);
         const permissions = await getPermissions(session);
         if (permissions.includes(LIST_TICKET_TYPES)) {
-            const tickets = await getAllTicketTypes(session?.accessToken, serverSideClient)
+            const ticketTypes = await getAllTicketTypes(session?.accessToken, serverSideClient)
             return {
                 props: {
-                    ticketsData: tickets,
+                    ticketTypeData: ticketTypes,
                     accessToken: session!.accessToken!,
                     permissions: permissions
                 }
@@ -59,7 +58,7 @@ export const getServerSideProps = withPageAuthRequired<{
 })
 
 export default function Tickets({
-                                    ticketsData,
+                                    ticketTypeData,
                                     accessToken,
                                     permissions
                                 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
@@ -68,11 +67,11 @@ export default function Tickets({
         setPermissions(permissions)
     }, [permissions, setPermissions]);
     const router = useRouter()
-    const [ticketTypes, setTicketTypes] = useState<TicketTypeData[]>(ticketsData)
+    const [ticketTypes, setTicketTypes] = useState<TicketTypeData[]>(ticketTypeData)
     const onTicketTypeSaved = (savedTicketType: TicketTypeData) => {
         if (editedTicketType) {
-            const modifiedTickets = ticketTypes.map((ticket) =>
-                ticket.id === savedTicketType.id ? savedTicketType : ticket
+            const modifiedTickets = ticketTypes.map((ticketType) =>
+                ticketType.id === savedTicketType.id ? savedTicketType : ticketType
             );
             setTicketTypes(modifiedTickets)
         } else {
@@ -80,8 +79,8 @@ export default function Tickets({
         }
         setEditedTicketType(null)
     }
-    const onTicketTypeDeleted = (ticket: TicketTypeData) => {
-        const updatedTickets = ticketTypes.filter(p => p.id !== ticket.id);
+    const onTicketTypeDeleted = (ticketType: TicketTypeData) => {
+        const updatedTickets = ticketTypes.filter(p => p.id !== ticketType.id);
         setTicketTypes(updatedTickets);
     }
     const [editedTicketType, setEditedTicketType] = useState<TicketTypeData | null>(null)
@@ -89,14 +88,14 @@ export default function Tickets({
     const [deletedTicket, setDeletedTicket] = useState<TicketTypeData>()
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-    function handleEditClick(ticket: TicketTypeData | null) {
+    function handleEditClick(ticketType: TicketTypeData | null) {
         setIsEditDialogOpen(true)
-        setEditedTicketType(ticket)
+        setEditedTicketType(ticketType)
     }
 
-    function handleDeleteClick(ticket: TicketTypeData) {
+    function handleDeleteClick(ticketType: TicketTypeData) {
         setIsDeleteDialogOpen(true)
-        setDeletedTicket(ticket)
+        setDeletedTicket(ticketType)
     }
 
     return (
@@ -178,7 +177,7 @@ export default function Tickets({
                             isOpen={isDeleteDialogOpen}
                             onOpenChange={setIsDeleteDialogOpen}
                             onSuccess={onTicketTypeDeleted}
-                            deleteFunction={deletedTicketType}
+                            deleteFunction={deleteTicketType}
                             entityType="Ticket"
                 />
             </div>
